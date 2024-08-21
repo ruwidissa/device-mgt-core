@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
+import io.entgra.device.mgt.core.application.mgt.common.ReleaseVersionInfo;
 import io.entgra.device.mgt.core.application.mgt.common.exception.FileDownloaderServiceException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.dao.*;
@@ -4498,6 +4499,27 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String msg = "Error deleting app artifacts of tenant of Id: " + tenantId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve {@link ReleaseVersionInfo} for a given package name
+     * @param uuid UUID of the application release
+     * @return List of {@link ReleaseVersionInfo}
+     * @throws ApplicationManagementException throws when error encountered while retrieving data
+     */
+    @Override
+    public List<ReleaseVersionInfo> getApplicationReleaseVersions(String uuid) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return applicationDAO.getApplicationReleaseVersions(uuid, tenantId);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting available application releases for uuid : " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 }
