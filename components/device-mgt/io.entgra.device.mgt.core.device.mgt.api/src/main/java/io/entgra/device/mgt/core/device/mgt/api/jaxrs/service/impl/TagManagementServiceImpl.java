@@ -126,7 +126,7 @@ public class TagManagementServiceImpl implements TagManagementService {
                 log.debug(msg, e);
             }
             return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.ErrorResponseBuilder().
-                    setMessage(msg).build()).build();
+                    setMessage(e.getMessage()).build()).build();
         }
     }
 

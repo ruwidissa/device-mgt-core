@@ -151,7 +151,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("since") String since,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("requireDeviceInfo") boolean requireDeviceInfo,
-            @QueryParam("tags") List<String> tags,
+            @QueryParam("tag") List<String> tags,
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit) {
         try {

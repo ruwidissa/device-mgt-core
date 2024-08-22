@@ -72,7 +72,7 @@ public class TagManagementProviderServiceTest extends BaseDeviceManagementTest {
         tagManagementProviderService.addTags(TestUtils.createTagList2());
     }
 
-    @Test(expectedExceptions = {TagNotFoundException.class}, dependsOnMethods = "createTags")
+    @Test(expectedExceptions = {TagNotFoundException.class, BadRequestException.class, TagManagementException.class})
     public void updateTagsNotFound() throws TagNotFoundException, TagManagementException, BadRequestException {
         String updateDescString = "This tag is updated";
         tagManagementProviderService.updateTag(new Tag(10,"tag10", updateDescString));

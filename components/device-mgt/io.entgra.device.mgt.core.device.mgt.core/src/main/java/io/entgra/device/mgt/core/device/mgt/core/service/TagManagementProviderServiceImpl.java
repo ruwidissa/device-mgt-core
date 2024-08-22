@@ -172,6 +172,12 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
                 log.error(msg);
                 throw new TagNotFoundException(msg);
             }
+            Tag tagWithName = tagDAO.getTagByName(tag.getName(), tenantId);
+            if (tagWithName != null && tagWithName.getId() != tag.getId()) {
+                String msg = "Tag with name: " + tag.getName() + " already exists.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
             tagDAO.updateTag(tag, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TagManagementDAOException | TransactionManagementException e) {

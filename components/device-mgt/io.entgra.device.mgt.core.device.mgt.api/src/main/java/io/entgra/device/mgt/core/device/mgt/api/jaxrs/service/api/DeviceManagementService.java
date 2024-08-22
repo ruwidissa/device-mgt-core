@@ -338,10 +338,10 @@ public interface DeviceManagementService {
             @QueryParam("requireDeviceInfo")
                     boolean requireDeviceInfo,
             @ApiParam(
-                    name = "tags",
+                    name = "tag",
                     value = "Describes the tags associated with the enrolment",
                     required = false)
-            @QueryParam("tags")
+            @QueryParam("tag")
                     List<String> tags,
             @ApiParam(
                     name = "offset",
