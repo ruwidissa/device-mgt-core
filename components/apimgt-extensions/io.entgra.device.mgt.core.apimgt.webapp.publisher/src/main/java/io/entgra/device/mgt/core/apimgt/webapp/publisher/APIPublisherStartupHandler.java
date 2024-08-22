@@ -33,6 +33,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermis
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
 
     @Override
     public void completedServerStartup() {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         APIPublisherDataHolder.getInstance().setServerStarted(true);
         currentAPIsStack = APIPublisherDataHolder.getInstance().getUnpublishedApis();
         Thread t = new Thread(() -> {
@@ -107,7 +109,14 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                 log.error("failed to update scope role mapping.", e);
             }
 
-            updateScopeMetadataEntryWithDefaultScopes();
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                updateScopeMetadataEntryWithDefaultScopes();
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+
             log.info("Successfully published : [" + publishedAPIs + "]. " +
                     "and failed : [" + failedAPIsStack + "] " +
                     "Total successful count : [" + publishedAPIs.size() + "]. " +
@@ -126,7 +135,7 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
         log.info("Starting API publishing procedure");
     }
 
-    /**
+/**
      * Publish apis provided by the API stack, if failed while publishing, then failed API will be added to
      * the failed API stack
      *

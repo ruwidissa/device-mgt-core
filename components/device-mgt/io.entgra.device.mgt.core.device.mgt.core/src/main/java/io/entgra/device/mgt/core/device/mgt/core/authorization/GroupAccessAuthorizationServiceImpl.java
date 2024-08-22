@@ -73,21 +73,24 @@ public class GroupAccessAuthorizationServiceImpl implements GroupAccessAuthoriza
                 UserRealm userRealm = DeviceManagementDataHolder.getInstance().getRealmService()
                         .getTenantUserRealm(getTenantId());
                 String[] userRoles = userRealm.getUserStoreManager().getRoleListOfUser(username);
-                boolean isAuthorized = true;
+                boolean isAuthorized;
                 for (String groupPermission : groupPermissions) {
+                    isAuthorized = false;
                     for (String role : userRoles) {
-                        if (!userRealm.getAuthorizationManager().
+                        if (userRealm.getAuthorizationManager().
                                 isRoleAuthorized(role, groupPermission, CarbonConstants.UI_PERMISSION_ACTION)) {
-                            isAuthorized = false;
+                            isAuthorized = true;
                             break;
                         }
                     }
+                    if (!isAuthorized) {
+                        return false;
+                    }
                 }
-                return isAuthorized;
+                return true;
             } catch (UserStoreException e) {
                 throw new GroupAccessAuthorizationException("Unable to authorize the access to group : " +
-                        groupId + " for the user : " +
-                        username, e);
+                        groupId + " for the user : " + username, e);
             }
         }
     }
