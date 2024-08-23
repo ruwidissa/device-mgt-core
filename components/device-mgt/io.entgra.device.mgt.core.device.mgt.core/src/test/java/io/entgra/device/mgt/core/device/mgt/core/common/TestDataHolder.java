@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.Notification;
+import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.Tag;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 
 import java.util.ArrayList;
@@ -34,11 +35,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Calendar;
+import java.util.Arrays;
 
 public class TestDataHolder {
 
     public final static String TEST_DEVICE_TYPE = "TEST-DEVICE-TYPE";
     public final static Integer SUPER_TENANT_ID = -1234;
+    public final static Integer ALTERNATE_TENANT_ID = 1234;
+    public final static Integer ALTERNATE_TENANT_ID_1 = 1235;
     public final static String SUPER_TENANT_DOMAIN = "carbon.super";
     public final static String initialDeviceIdentifier = "12345";
     public final static String initialDeviceName = "TEST-DEVICE";
@@ -46,6 +50,7 @@ public class TestDataHolder {
     public static final String OPERATION_CONFIG = "TEST-OPERATION-";
     public static Device initialTestDevice;
     public static DeviceType initialTestDeviceType;
+    public static List<String> TAGS = Arrays.asList("tag1", "tag2", "tag3");
 
     public static Date getTimeBefore(int minutes) {
         Calendar calendar = Calendar.getInstance();
@@ -56,7 +61,7 @@ public class TestDataHolder {
     public static Device generateDummyDeviceData(String deviceType) {
         Device device = new Device();
         device.setEnrolmentInfo(generateEnrollmentInfo(new Date().getTime(), new Date().getTime(), OWNER, EnrolmentInfo
-                .OwnerShip.BYOD, EnrolmentInfo.Status.ACTIVE));
+                .OwnerShip.BYOD, EnrolmentInfo.Status.ACTIVE, TAGS));
         device.setDescription("Test Description");
         device.setDeviceIdentifier(initialDeviceIdentifier);
         device.setType(deviceType);
@@ -65,14 +70,24 @@ public class TestDataHolder {
 
     public static EnrolmentInfo generateEnrollmentInfo(long dateOfEnrollment, long dateOfLastUpdate,
                                                        String owner, EnrolmentInfo.OwnerShip ownership,
-                                                       EnrolmentInfo.Status status) {
+                                                       EnrolmentInfo.Status status, List<String> tags) {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
         enrolmentInfo.setDateOfEnrolment(dateOfEnrollment);
         enrolmentInfo.setDateOfLastUpdate(dateOfLastUpdate);
         enrolmentInfo.setOwner(owner);
         enrolmentInfo.setOwnership(ownership);
         enrolmentInfo.setStatus(status);
+        enrolmentInfo.setTags(tags);
         return enrolmentInfo;
+    }
+
+    public static List<Tag> getTagList() {
+        List<Tag> tagList = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            Tag tag = new Tag("tag" + i, "This is tag" + i);
+            tagList.add(tag);
+        }
+        return tagList;
     }
 
     public static DeviceInfo generateDummyDeviceInfo() {
@@ -141,8 +156,12 @@ public class TestDataHolder {
 
     public static Device generateDummyDeviceData(DeviceIdentifier deviceIdentifier) {
         Device device = new Device();
+        List<String> tags = new ArrayList<>();
+        tags.add("tag1");
+        tags.add("tag2");
+        tags.add("tag3");
         device.setEnrolmentInfo(generateEnrollmentInfo(new Date().getTime(), new Date().getTime(), OWNER, EnrolmentInfo
-                .OwnerShip.BYOD, EnrolmentInfo.Status.ACTIVE));
+                .OwnerShip.BYOD, EnrolmentInfo.Status.ACTIVE, tags));
         device.setDescription("Test Description");
         device.setDeviceIdentifier(deviceIdentifier.getId());
         device.setType(deviceIdentifier.getType());

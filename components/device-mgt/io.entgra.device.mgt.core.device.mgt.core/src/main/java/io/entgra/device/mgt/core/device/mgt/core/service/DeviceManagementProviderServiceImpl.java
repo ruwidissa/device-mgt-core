@@ -22,7 +22,15 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ConflictException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceTypeDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.EnrollmentDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.ApplicationDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceStatusDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TenantDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.TagDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
@@ -119,13 +127,6 @@ import io.entgra.device.mgt.core.device.mgt.core.cache.impl.DeviceCacheManagerIm
 import io.entgra.device.mgt.core.device.mgt.core.common.Constants;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
-import io.entgra.device.mgt.core.device.mgt.core.dao.ApplicationDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceStatusDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceTypeDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.EnrollmentDAO;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
@@ -185,6 +186,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private MetadataDAO metadataDAO;
     private final DeviceStatusDAO deviceStatusDAO;
     private final TenantDAO tenantDao;
+    private final TagDAO tagDAO;
     int count = 0;
 
     public DeviceManagementProviderServiceImpl() {
@@ -197,6 +199,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
         this.deviceStatusDAO = DeviceManagementDAOFactory.getDeviceStatusDAO();
         this.tenantDao = DeviceManagementDAOFactory.getTenantDAO();
+        this.tagDAO = DeviceManagementDAOFactory.getTagDAO();
 
         /* Registering a listener to retrieve events when some device management service plugin is installed after
          * the component is done getting initialized */

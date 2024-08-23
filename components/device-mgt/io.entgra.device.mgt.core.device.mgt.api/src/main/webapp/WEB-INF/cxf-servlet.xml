@@ -51,6 +51,7 @@
             <ref bean="metadataService"/>
             <ref bean="whitelabelService"/>
             <ref bean="deviceStatusFilterService"/>
+            <ref bean="tagManagementService"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jsonProvider"/>
@@ -103,6 +104,7 @@
     <bean id="metadataService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.MetadataServiceImpl"/>
     <bean id="whitelabelService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.WhiteLabelServiceImpl"/>
     <bean id="deviceStatusFilterService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.DeviceStatusFilterServiceImpl"/>
+    <bean id="tagManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.TagManagementServiceImpl"/>
 
     <!--<bean id="errorHandler" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.common.ErrorHandler"/>-->
     <cxf:bus>

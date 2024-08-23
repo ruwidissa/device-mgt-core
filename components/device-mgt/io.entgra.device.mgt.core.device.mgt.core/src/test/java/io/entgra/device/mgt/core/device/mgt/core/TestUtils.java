@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core;
 
+import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.Tag;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
@@ -100,6 +101,45 @@ public class TestUtils {
         return group;
     }
 
+    public static Tag getTag1() {
+        return new Tag(1,"tag1", "This is tag1");
+    }
+
+    public static Tag getTag2() {
+        return new Tag( 2, "tag2", "This is tag2");
+    }
+
+    public static Tag getTag1Dao() {
+        return new Tag("tag1", "This is tag1");
+    }
+
+    public static Tag getTag2Dao() {
+        return new Tag( "tag2", "This is tag2");
+    }
+
+    public static Tag getTag3() {
+        return new Tag("tag3", "This is tag3");
+    }
+
+    public static List<Tag> createTagList1() {
+        List<Tag> tagList = new ArrayList<>();
+        tagList.add(new Tag(null, "This is tag1"));
+        return tagList;
+    }
+
+    public static List<Tag> createTagList2() {
+        List<Tag> tagList = new ArrayList<>();
+        tagList.add(getTag1());
+        tagList.add(getTag2());
+        return tagList;
+    }
+
+    public static List<Tag> createTagList3() {
+        List<Tag> tagList = new ArrayList<>();
+        tagList.add(getTag1Dao());
+        tagList.add(getTag2Dao());
+        return tagList;
+    }
 
     public static GroupPaginationRequest createPaginationRequest(){
         GroupPaginationRequest request = new GroupPaginationRequest(0, 5);

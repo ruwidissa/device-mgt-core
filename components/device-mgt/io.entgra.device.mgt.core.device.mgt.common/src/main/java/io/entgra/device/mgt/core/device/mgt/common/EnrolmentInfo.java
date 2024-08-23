@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.util.List;
 
 @ApiModel(value = "EnrolmentInfo", description = "This class carries all information related to a devices enrollment" +
                                                  " status.")
@@ -60,6 +60,9 @@ public class EnrolmentInfo implements Serializable {
     private Status status;
     @ApiModelProperty(name = "owner", value = "The device owner's name.", required = true )
     private String owner;
+
+    @ApiModelProperty(name = "tags", value = "Tags associated with enrolment.", required = false )
+    private List<String> tags;
 
     public EnrolmentInfo() {
     }
@@ -132,6 +135,14 @@ public class EnrolmentInfo implements Serializable {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     @Override

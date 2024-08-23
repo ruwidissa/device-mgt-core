@@ -21,6 +21,8 @@ import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuth
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.authorization.GroupAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -348,6 +350,10 @@ public class DeviceManagementServiceComponent {
         /* Registering Report Service */
         ReportManagementService reportManagementService = new ReportManagementServiceImpl();
         bundleContext.registerService(ReportManagementService.class.getName(), reportManagementService, null);
+
+        /* Registering Tag Management Service */
+        TagManagementProviderService tagManagementProviderService = new TagManagementProviderServiceImpl();
+        bundleContext.registerService(TagManagementProviderService.class.getName(), tagManagementProviderService, null);
 
         /* Registering DeviceAccessAuthorization Service */
         DeviceAccessAuthorizationService deviceAccessAuthorizationService = new DeviceAccessAuthorizationServiceImpl();

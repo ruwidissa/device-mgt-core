@@ -24,6 +24,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionMan
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderService;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
@@ -65,7 +66,6 @@ import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.report.mgt.ReportManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceTypeGeneratorService;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
-import io.entgra.device.mgt.core.device.mgt.common.spi.TraccarManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
@@ -165,6 +165,7 @@ public class DeviceMgtAPIUtils {
 
     private static volatile APIPublisherService apiPublisher;
     private static volatile TenantManagerAdminService tenantManagerAdminService;
+    private static volatile TagManagementProviderService tagManagementService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -503,6 +504,28 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException(msg);
         }
         return policyManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for TagManagementService.
+     *
+     * @return TagManagementService instance
+     * @throws IllegalStateException if TagManagementService cannot be initialized
+     */
+    public static TagManagementProviderService getTagManagementService() {
+        if (tagManagementService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (tagManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    tagManagementService = (TagManagementProviderService) ctx.getOSGiService(
+                            TagManagementProviderService.class, null);
+                    if (tagManagementService == null) {
+                        throw new IllegalStateException("Tag Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return tagManagementService;
     }
 
     public static PlatformConfigurationManagementService getPlatformConfigurationManagementService() {
