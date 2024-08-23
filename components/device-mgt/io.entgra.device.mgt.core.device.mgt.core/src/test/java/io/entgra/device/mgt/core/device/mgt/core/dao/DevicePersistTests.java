@@ -50,6 +50,7 @@ import java.util.List;
 public class DevicePersistTests extends BaseDeviceManagementTest {
 
     DeviceDAO deviceDAO;
+    TagDAO tagDAO;
     DeviceTypeDAO deviceTypeDAO;
 
     private static final Log log = LogFactory.getLog(DevicePersistTests.class);
@@ -59,6 +60,7 @@ public class DevicePersistTests extends BaseDeviceManagementTest {
     public void init() throws Exception {
         initDataSource();
         deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
+        tagDAO = DeviceManagementDAOFactory.getTagDAO();
         deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
     }
 
@@ -106,6 +108,8 @@ public class DevicePersistTests extends BaseDeviceManagementTest {
             int deviceId = deviceDAO.addDevice(TestDataHolder.initialTestDeviceType.getId(), device, tenantId);
             device.setId(deviceId);
             deviceDAO.addEnrollment(device, tenantId);
+            tagDAO.addTags(TestDataHolder.getTagList(), tenantId);
+            tagDAO.addDeviceTagMapping(Collections.singletonList(device.getDeviceIdentifier()), TestDataHolder.TEST_DEVICE_TYPE, TestDataHolder.TAGS, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
             TestDataHolder.initialTestDevice = device;
         } catch (DeviceManagementDAOException e) {
@@ -116,6 +120,10 @@ public class DevicePersistTests extends BaseDeviceManagementTest {
             Assert.fail(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TagManagementDAOException e) {
+            String msg = "Error occurred while adding tag mappings";
             log.error(msg, e);
             Assert.fail(msg, e);
         } finally {
@@ -503,6 +511,223 @@ public class DevicePersistTests extends BaseDeviceManagementTest {
             DeviceManagementDAOFactory.beginTransaction();
             List<Device> results = deviceDAO.getDevicesOfUser(TestDataHolder.OWNER, TestDataHolder.SUPER_TENANT_ID, status);
             Assert.assertEquals(1, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesWithTag() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(Collections.singletonList("tag1"));
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Device> results = deviceDAO.getDevices(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesWithTags() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(TestDataHolder.TAGS);
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Device> results = deviceDAO.getDevices(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesWithNonExistingTags() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(Collections.singletonList("tag10"));
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Device> results = deviceDAO.getDevices(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(0, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesWithTagAndStatus() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setStatusList(Collections.singletonList(Status.ACTIVE.name()));
+            pr.setTags(Collections.singletonList("tag1"));
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Device> results = deviceDAO.getDevices(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesWithTagsAndStatus() throws DeviceManagementDAOException, TransactionManagementException {
+        List<String> tags = new ArrayList<>() ;
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setStatusList(Collections.singletonList(Status.ACTIVE.name()));
+            pr.setTags(tags);
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Device> results = deviceDAO.getDevices(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDeviceCountWithTag() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(Collections.singletonList("tag1"));
+            DeviceManagementDAOFactory.beginTransaction();
+            int result = deviceDAO.getDeviceCount(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, result, "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDeviceCountWithTags() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(TestDataHolder.TAGS);
+            DeviceManagementDAOFactory.beginTransaction();
+            int result = deviceDAO.getDeviceCount(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, result, "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDeviceCountWithTagAndStatus() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setStatusList(Collections.singletonList(Status.ACTIVE.name()));
+            pr.setTags(Collections.singletonList("tag1"));
+            DeviceManagementDAOFactory.beginTransaction();
+            int result = deviceDAO.getDeviceCount(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, result, "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDeviceCountWithTagsAndStatus() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setStatusList(Collections.singletonList(Status.ACTIVE.name()));
+            pr.setTags(TestDataHolder.TAGS);
+            DeviceManagementDAOFactory.beginTransaction();
+            int result = deviceDAO.getDeviceCount(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, result, "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesWithTagAndGroupId() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(Collections.singletonList("tag1"));
+            pr.setGroupId(1);
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Device> results = deviceDAO.searchDevicesInGroup(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(0, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesWithTagsAndGroupId() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(TestDataHolder.TAGS);
+            pr.setGroupId(1);
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Device> results = deviceDAO.searchDevicesInGroup(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(0, results.size(), "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDeviceCountWithTagAndGroupId() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(Collections.singletonList("tag1"));
+            pr.setGroupId(1);
+            DeviceManagementDAOFactory.beginTransaction();
+            int result = deviceDAO.getCountOfDevicesInGroup(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(0, result, "No device returned");
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDeviceCountWithTagsAndGroupId() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setTags(TestDataHolder.TAGS);
+            pr.setGroupId(1);
+            DeviceManagementDAOFactory.beginTransaction();
+            int result = deviceDAO.getCountOfDevicesInGroup(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(0, result, "No device returned");
             DeviceManagementDAOFactory.commitTransaction();
         } catch (DeviceManagementDAOException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving the device" + e);

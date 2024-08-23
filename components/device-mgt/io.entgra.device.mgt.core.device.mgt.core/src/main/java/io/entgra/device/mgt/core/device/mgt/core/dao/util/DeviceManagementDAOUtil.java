@@ -35,13 +35,19 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 public final class DeviceManagementDAOUtil {
@@ -141,6 +147,10 @@ public final class DeviceManagementDAOUtil {
 	}*/
 
     public static EnrolmentInfo loadEnrolment(ResultSet rs) throws SQLException {
+        return loadEnrolment(rs, false);
+    }
+
+    public static EnrolmentInfo loadEnrolment(ResultSet rs, boolean isTagsProvided) throws SQLException {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
         enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
         enrolmentInfo.setOwner(rs.getString("OWNER"));
@@ -149,6 +159,16 @@ public final class DeviceManagementDAOUtil {
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
         enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
+        if (isTagsProvided) {
+            List<String> tags = new ArrayList<>();
+            String tagColumn = rs.getString("TAGS");
+            if (tagColumn != null) {
+                for (String tag : tagColumn.split(",")) {
+                    tags.add(tag.trim());
+                }
+            }
+            enrolmentInfo.setTags(tags);
+        }
         return enrolmentInfo;
     }
 
@@ -222,6 +242,10 @@ public final class DeviceManagementDAOUtil {
     }
 
     public static Device loadDevice(ResultSet rs) throws SQLException {
+        return loadDevice(rs, false);
+    }
+
+    public static Device loadDevice(ResultSet rs, boolean isTagsProvided) throws SQLException {
         Device device = new Device();
         device.setId(rs.getInt("DEVICE_ID"));
         device.setName(rs.getString("DEVICE_NAME"));
@@ -229,7 +253,7 @@ public final class DeviceManagementDAOUtil {
         device.setType(rs.getString("DEVICE_TYPE"));
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
         device.setLastUpdatedTimeStamp(rs.getTimestamp("LAST_UPDATED_TIMESTAMP").getTime());
-        device.setEnrolmentInfo(loadEnrolment(rs));
+        device.setEnrolmentInfo(loadEnrolment(rs, isTagsProvided));
         return device;
     }
 

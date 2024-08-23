@@ -61,7 +61,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Device related REST-API. This can be used to manipulated device related details.
@@ -334,6 +333,12 @@ public interface DeviceManagementService {
                     required = false)
             @QueryParam("requireDeviceInfo")
                     boolean requireDeviceInfo,
+            @ApiParam(
+                    name = "tag",
+                    value = "Describes the tags associated with the enrolment",
+                    required = false)
+            @QueryParam("tag")
+                    List<String> tags,
             @ApiParam(
                     name = "offset",
                     value = "The starting pagination index for the complete list of qualified items.",

@@ -33,6 +33,7 @@
             <class name="io.entgra.device.mgt.core.device.mgt.core.app.mgt.AppManagementConfigurationManagerTest"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.search.DeviceDetails"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.dao.GroupPersistTests"/>
+            <class name="io.entgra.device.mgt.core.device.mgt.core.dao.TagPersistTests"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.dao.EnrolmentPersistenceTests"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.dao.DeviceStatusPersistenceTests"/>
         </classes>
@@ -43,6 +44,7 @@
             <class name="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceTest"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.app.mgt.ApplicationManagementProviderServiceTest"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderServiceTest"/>
+            <class name="io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderServiceTest"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.operation.OperationManagementTests"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.operation.OperationManagementNoDBSchemaTests"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.operation.OperationManagementNegativeDBOperationTest"/>

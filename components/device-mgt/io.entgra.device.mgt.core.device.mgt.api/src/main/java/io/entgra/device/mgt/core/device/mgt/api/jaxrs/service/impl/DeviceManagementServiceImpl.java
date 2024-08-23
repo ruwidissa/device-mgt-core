@@ -180,6 +180,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("since") String since,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("requireDeviceInfo") boolean requireDeviceInfo,
+            @QueryParam("tag") List<String> tags,
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit) {
         try {
@@ -255,6 +256,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.OK).entity(devices).build();
             }
 
+            if (tags != null && !tags.isEmpty()) {
+                request.setTags(tags);
+            }
+            // this is the user who initiates the request
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
             if (groupId != 0) {
