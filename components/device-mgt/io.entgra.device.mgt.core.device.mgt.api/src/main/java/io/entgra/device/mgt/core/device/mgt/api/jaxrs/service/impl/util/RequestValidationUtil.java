@@ -484,6 +484,70 @@ public class RequestValidationUtil {
         }
     }
 
+    /**
+     * Validates the provided tag details to ensure that either a valid tagId or a non-empty tagName is provided,
+     * and that the tagInfo is not null. Throws InputValidationException if any of these conditions are not met.
+     *
+     * @param tagId the ID of the tag (must be greater than 0)
+     * @param tagName the name of the tag (must be non-empty if tagId is not provided)
+     * @param tagInfo the TagInfo object to validate (must not be null)
+     * @throws InputValidationException if neither a valid tagId nor a tagName is provided, or if tagInfo is null
+     */
+    public static void validateTagDetails(Integer tagId, String tagName, TagInfo tagInfo) {
+        if ((tagId == null || tagId <= 0) && StringUtils.isBlank(tagName)) {
+            String msg = "Either valid tagId or tagName must be provided.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build());
+        }
+        if (tagInfo == null) {
+            String msg = "Provided request body is empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request body is "
+                            + "empty").build());
+        }
+    }
+
+    /**
+     * Validates the provided list of TagInfo objects to ensure that it is not null.
+     * Throws InputValidationException if the list is null.
+     *
+     * @param tagInfo the list of TagInfo objects to validate (must not be null)
+     * @throws InputValidationException if the list is null
+     */
+    public static void validateTagListDetails(List<TagInfo> tagInfo) {
+        if (tagInfo == null) {
+            String msg = "Provided request body is empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request body is "
+                            + "empty").build());
+        }
+    }
+
+    /**
+     * Validates the provided TagMappingInfo object to ensure it is not null and contains valid
+     * device identifiers, device type, and tags. Throws InputValidationException if validation fails.
+     *
+     * @param tagMappingInfo the TagMappingInfo object to validate
+     * @throws InputValidationException if the tagMappingInfo or its required fields are invalid
+     */
+    public static void validateTagMappingDetails(TagMappingInfo tagMappingInfo) {
+        if (tagMappingInfo == null) {
+            String msg = "Provided request body is empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400L).setMessage("Request body is empty").build());
+        } else if (tagMappingInfo.getDeviceIdentifiers() == null || tagMappingInfo.getDeviceType() == null
+                || tagMappingInfo.getTags() == null) {
+            String msg = "Invalid tag mapping request body.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400L).setMessage("Invalid tag mapping request body").build());
+        }
+    }
+
     public static void validateScopes(List<Scope> scopes) {
         if (scopes == null || scopes.isEmpty()) {
             throw new InputValidationException(
