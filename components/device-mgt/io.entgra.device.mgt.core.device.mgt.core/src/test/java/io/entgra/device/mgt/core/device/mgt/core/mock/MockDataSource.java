@@ -17,8 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.mock;
 
-import org.mockito.Mock;
-
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,7 +25,6 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
 
 /**
  * This is the mock data source implementation that will be used in the test cases.

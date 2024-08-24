@@ -19,7 +19,6 @@ package io.entgra.device.mgt.core.policy.mgt.core.mgt;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;

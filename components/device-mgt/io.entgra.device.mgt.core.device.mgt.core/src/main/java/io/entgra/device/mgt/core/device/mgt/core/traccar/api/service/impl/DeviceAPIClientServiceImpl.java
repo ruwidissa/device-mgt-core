@@ -18,15 +18,12 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerDeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerPermissionInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocation;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TrackerAlreadyExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.TraccarClientFactory;
@@ -34,6 +31,9 @@ import io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans.TraccarDev
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans.TraccarGroups;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans.TraccarPosition;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans.TraccarUser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;

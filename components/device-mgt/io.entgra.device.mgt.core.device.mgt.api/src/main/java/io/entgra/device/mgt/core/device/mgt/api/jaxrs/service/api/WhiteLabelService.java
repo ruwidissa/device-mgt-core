@@ -17,30 +17,17 @@
  */
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Extension;
-import io.swagger.annotations.ExtensionProperty;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.ResponseHeader;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
-import io.swagger.annotations.ApiParam;
-import org.apache.axis2.transport.http.HTTPConstants;
+
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.PathParam;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
+import io.swagger.annotations.*;
+import org.apache.axis2.transport.http.HTTPConstants;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 

@@ -17,6 +17,9 @@
  */
 package io.entgra.device.mgt.core.identity.jwt.client.extension.service;
 
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
@@ -29,9 +32,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import java.io.ByteArrayInputStream;

@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.apimgt.keymgt.extension;
 
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.DefaultKeyManagerConnectorConfiguration;
@@ -27,9 +28,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.apimgt.keymgt.extension.customKeyManagerConfigComponent" immediate="true"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.apimgt.keymgt.extension.KeyManagerConnectorConfiguration",
+        service = DefaultKeyManagerConnectorConfiguration.class,
+        immediate = true)
 public class KeyManagerConnectorConfiguration extends DefaultKeyManagerConnectorConfiguration {
 
     @Override

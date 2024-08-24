@@ -30,9 +30,14 @@
     <artifactId>io.entgra.device.mgt.core.device.mgt.oauth.extensions</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - OAuth Extensions</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>commons-codec.wso2</groupId>
 			<artifactId>commons-codec</artifactId>
@@ -62,13 +67,16 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -82,32 +90,41 @@
                             io.entgra.device.mgt.core.device.mgt.oauth.extensions.*
                         </Export-Package>
                         <Import-Package>
-							org.wso2.carbon.identity.oauth2.grant.jwt;version="${carbon.identity.jwt.grant.version.range}",
-                            org.apache.commons.lang,
-                            org.apache.commons.logging,
-                            org.osgi.service.component,
-                            org.wso2.carbon.identity.application.common.model;version="${carbon.identity.framework.version.range}",
-                            org.wso2.carbon.identity.application.common;version="${carbon.identity.framework.version.range}",
-                            org.wso2.carbon.identity.application.mgt.*;version="${carbon.identity.framework.version.range}",
-                            org.wso2.carbon.user.api,
-                            org.wso2.carbon.user.core.service,
-                            org.wso2.carbon.user.core.tenant,
-                            org.wso2.carbon.user.core.util,
-                            org.json.simple,
-                            javax.cache,
-                            org.wso2.carbon.identity.core.util;version="${carbon.identity.framework.version.range}",
-                            org.wso2.carbon.utils,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.identity.oauth.*;version="${carbon.identity.framework.version.range}",
-							<!--org.wso2.carbon.apimgt.keymgt.*;version="${carbon.api.mgt.version.range}",-->
-							org.wso2.carbon.base,
-							org.wso2.carbon.identity.application.authentication.framework.model;version="${carbon.identity.framework.version.range}",
-							org.wso2.carbon.identity.base;version="${carbon.identity.framework.version.range}",
-							org.wso2.carbon.identity.oauth2.*;version="${carbon.identity.framework.version.range}",
-							org.wso2.carbon.utils.multitenancy,
-                            org.apache.oltu.oauth2.common.validators,
-                            org.apache.commons.lang3.tuple,
+                            io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oauth.validator,
+                            io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oauth.validator.internal,
+                            javax.servlet.http;version="[2.6,3)",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.lang3.tuple;version="[3.1,4)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.apache.oltu.oauth2.common.validators;version="[1.0,2)",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.identity.application.authentication.framework.model;version="[5.24,6)",
+                            org.wso2.carbon.identity.application.common;version="[5.24,6)",
+                            org.wso2.carbon.identity.application.common.model;version="[5.24,6)",
+                            org.wso2.carbon.identity.application.mgt;version="[5.24,6)",
+                            org.wso2.carbon.identity.core.util;version="[5.24,6)",
+                            org.wso2.carbon.identity.oauth.cache;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.dao;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.dto;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.grant.jwt;version="[2.1,3)",
+                            org.wso2.carbon.identity.oauth2.internal;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.model;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.token;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.token.handlers.grant;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.token.handlers.grant.saml;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.util;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.validators;version="[6.9,7)",
+                            org.wso2.carbon.user.api;version="[1.0,2)",
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.wso2.carbon.user.core.tenant;version="[4.8,5)",
+                            org.wso2.carbon.user.core.util;version="[4.8,5)",
+                            org.wso2.carbon.utils.multitenancy;version="[4.8,5)"
                         </Import-Package>
+                        <Embed-Dependency>
+                            oltu;scope=compile|runtime;inline=false
+                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>

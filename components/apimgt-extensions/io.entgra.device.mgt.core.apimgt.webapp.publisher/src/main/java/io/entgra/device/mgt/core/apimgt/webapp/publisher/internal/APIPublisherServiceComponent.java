@@ -29,55 +29,21 @@ import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherServiceImpl;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherStartupHandler;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.HashMap;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.apimgt.webapp.publisher" immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRegistryService"
- * unbind="unsetRegistryService"
- * @scr.reference name="APIM.application.service"
- * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setAPIApplicationServices"
- * unbind="unsetAPIApplicationServices"
- * @scr.reference name="APIM.publisher.service"
- * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setPublisherRESTAPIServices"
- * unbind="unsetPublisherRESTAPIServices"
- * @scr.reference name="io.entgra.meta.mgt"
- * interface="io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setMetaDataMgtService"
- * unbind="unsetMetaDataMgtService"
- * @scr.reference name="postApiPublishingObsever"
- * interface="io.entgra.device.mgt.core.apimgt.webapp.publisher.PostApiPublishingObsever"
- * cardinality="0..n"
- * policy="dynamic"
- * bind="setPostApiPublishingObsever"
- * unbind="unsetPostApiPublishingObsever"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherServiceComponent",
+        immediate = true)
 public class APIPublisherServiceComponent {
 
     private static Log log = LogFactory.getLog(APIPublisherServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -102,6 +68,7 @@ public class APIPublisherServiceComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
@@ -119,6 +86,12 @@ public class APIPublisherServiceComponent {
         bundleContext.registerService(ServerStartupObserver.class, new APIPublisherStartupHandler(), null);
     }
 
+    @Reference(
+            name = "user.realmservice.default",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Realm Service");
@@ -133,6 +106,12 @@ public class APIPublisherServiceComponent {
         APIPublisherDataHolder.getInstance().setRealmService(null);
     }
 
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (registryService != null && log.isDebugEnabled()) {
             log.debug("Registry service initialized");
@@ -144,6 +123,12 @@ public class APIPublisherServiceComponent {
         APIPublisherDataHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+            name = "APIM.application.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIApplicationServices")
     protected void setAPIApplicationServices(APIApplicationServices apiApplicationServices) {
         if (log.isDebugEnabled()) {
             log.debug("Setting DCR REST API Service");
@@ -158,6 +143,12 @@ public class APIPublisherServiceComponent {
         APIPublisherDataHolder.getInstance().setApiApplicationServices(null);
     }
 
+    @Reference(
+            name = "APIM.publisher.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPublisherRESTAPIServices")
     protected void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
         if (log.isDebugEnabled()) {
             log.debug("Setting APIM Publisher REST API Service");
@@ -172,6 +163,12 @@ public class APIPublisherServiceComponent {
         APIPublisherDataHolder.getInstance().setPublisherRESTAPIServices(null);
     }
 
+    @Reference(
+            name = "io.entgra.meta.mgt",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetMetaDataMgtService")
     protected void setMetaDataMgtService(MetadataManagementService metadataManagementService) {
         if (metadataManagementService != null && log.isDebugEnabled()) {
             log.debug("Meta data mgt mgt service initialized");
@@ -183,6 +180,12 @@ public class APIPublisherServiceComponent {
         APIPublisherDataHolder.getInstance().setMetadataManagementService(null);
     }
 
+    @Reference(
+            name = "postApiPublishingObsever",
+            service = io.entgra.device.mgt.core.apimgt.webapp.publisher.PostApiPublishingObsever.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPostApiPublishingObsever")
     protected void setPostApiPublishingObsever(PostApiPublishingObsever postApiPublishingObsever) {
         if (log.isDebugEnabled()) {
             log.debug("Setting PostApiPublishingObsever");

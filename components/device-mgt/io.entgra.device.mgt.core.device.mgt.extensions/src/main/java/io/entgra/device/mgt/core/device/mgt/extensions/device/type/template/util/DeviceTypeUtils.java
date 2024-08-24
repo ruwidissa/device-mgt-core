@@ -18,14 +18,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.util;
 
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
+import io.entgra.device.mgt.core.device.mgt.extensions.internal.DeviceTypeExtensionDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
-import io.entgra.device.mgt.core.device.mgt.extensions.internal.DeviceTypeExtensionDataHolder;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.api.RegistryService;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.Registry;
 

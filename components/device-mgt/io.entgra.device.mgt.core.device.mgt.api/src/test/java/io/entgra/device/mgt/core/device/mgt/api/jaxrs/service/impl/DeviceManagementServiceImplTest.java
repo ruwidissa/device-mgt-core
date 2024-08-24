@@ -18,19 +18,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.testng.Assert;
-import org.testng.IObjectFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.ObjectFactory;
-import org.testng.annotations.Test;
-import org.wso2.carbon.context.CarbonContext;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
@@ -52,11 +42,21 @@ import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchMgtException;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.impl.SearchManagerServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.testng.Assert;
+import org.testng.IObjectFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.ObjectFactory;
+import org.testng.annotations.Test;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -72,7 +72,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This class includes unit tests for testing the functionality of {@link DeviceManagementServiceImpl}
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext", "org.wso2.carbon.user.core.service.RealmService"})
 @PrepareForTest({DeviceMgtAPIUtils.class, MultitenantUtils.class, CarbonContext.class, RealmService.class})

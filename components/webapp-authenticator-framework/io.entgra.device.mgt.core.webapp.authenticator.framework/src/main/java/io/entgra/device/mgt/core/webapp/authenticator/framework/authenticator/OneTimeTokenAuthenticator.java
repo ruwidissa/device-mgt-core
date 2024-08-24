@@ -17,15 +17,15 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
-import org.apache.catalina.connector.Response;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.Constants;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import org.apache.catalina.connector.Response;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Properties;
 

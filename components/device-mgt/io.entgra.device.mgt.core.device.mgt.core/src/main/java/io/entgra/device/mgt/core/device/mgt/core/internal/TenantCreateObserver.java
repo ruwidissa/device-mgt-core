@@ -151,7 +151,9 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
                 APIPublisherUtils.createScopePublishUserIfNotExists(tenantDomain);
-                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                        "ClientForScopePublish",
+                        "client_credentials password refresh_token");
                 accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                         apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
             } catch (APIServicesException e) {
@@ -348,7 +350,9 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
             // in order to see if any new scopes were added or deleted
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            APIApplicationKey superTenantApiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+            APIApplicationKey superTenantApiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                    "ClientForScopePublish",
+                    "client_credentials password refresh_token");
             AccessTokenInfo superTenantAccessToken = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     superTenantApiApplicationKey.getClientId(), superTenantApiApplicationKey.getClientSecret());
             return publisherRESTAPIServices.getScopes(superTenantApiApplicationKey, superTenantAccessToken);

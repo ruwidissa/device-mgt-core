@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.device.mgt.api.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Management API Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains the APIs required for Device Management console UI</description>
 
     <build>

@@ -31,28 +31,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.osgi.service.component.annotations.*;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.device.organization.internal.DeviceOrganizationMgtServiceComponent" immediate="true"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setRegistryService"
- * unbind="unsetRegistryService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.device.organization.internal.DeviceOrganizationMgtServiceComponent",
+        immediate = true)
 public class DeviceOrganizationMgtServiceComponent {
 
     private static final Log log = LogFactory.getLog(DeviceOrganizationMgtServiceComponent.class);
@@ -60,6 +43,7 @@ public class DeviceOrganizationMgtServiceComponent {
     /**
      * @param componentContext
      */
+    @Activate
     protected void activate(ComponentContext componentContext) {
 
         if (log.isDebugEnabled()) {
@@ -87,6 +71,7 @@ public class DeviceOrganizationMgtServiceComponent {
     /**
      * @param componentContext
      */
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Device Organization Management Service Component");
@@ -94,6 +79,13 @@ public class DeviceOrganizationMgtServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "org.wso2.carbon.device.manager",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setDeviceManagementService",
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Device Management Service to Device Organization Mgt SC");
@@ -112,6 +104,14 @@ public class DeviceOrganizationMgtServiceComponent {
     /**
      * @param dataSourceService
      */
+
+    @Reference(
+            name = "org.wso2.carbon.ndatasource",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setDataSourceService",
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         if (log.isDebugEnabled()) {
             log.debug("Data source service set to Device Organization Mgt component");
@@ -128,7 +128,13 @@ public class DeviceOrganizationMgtServiceComponent {
         }
     }
 
-
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setRegistryService",
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled()) {
             log.debug("RegistryService set to Device Organization Mgt component");
@@ -142,6 +148,5 @@ public class DeviceOrganizationMgtServiceComponent {
         }
         DeviceOrganizationMgtDataHolder.getInstance().setRegistryService(null);
     }
-
 
 }

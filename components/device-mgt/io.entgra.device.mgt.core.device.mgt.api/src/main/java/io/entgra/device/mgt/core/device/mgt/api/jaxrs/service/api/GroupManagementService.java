@@ -18,6 +18,17 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
+import io.entgra.device.mgt.core.apimgt.annotations.Scope;
+import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceToGroupsAssignment;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -30,17 +41,6 @@ import io.swagger.annotations.ResponseHeader;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.apache.axis2.transport.http.HTTPConstants;
-import io.entgra.device.mgt.core.apimgt.annotations.Scope;
-import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceToGroupsAssignment;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -1349,11 +1349,11 @@ public interface GroupManagementService {
                                     "Server error occurred while creating the group or adding devices or sharing the group.",
                             response = ErrorResponse.class)
             })
-    Response createGroupWithRoles(@ApiParam(
-            name = "group",
-            value = "Define the group object with data.",
-            required = true)
-                                  @Valid DeviceGroupRoleWrapper group
-                                  );
-
+    Response createGroupWithRoles(
+            @ApiParam(
+                    name = "group",
+                    value = "Define the group object with data.",
+                    required = true)
+            @Valid DeviceGroupRoleWrapper group
+    );
 }

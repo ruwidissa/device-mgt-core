@@ -20,15 +20,17 @@ package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provid
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http.internal.HTTPPushNotificationServiceComponent" immediate="true"
- */
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http.internal.HTTPPushNotificationServiceComponent",
+        immediate = true)
 public class HTTPPushNotificationServiceComponent {
 
     private static final Log log = LogFactory.getLog(HTTPPushNotificationServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {

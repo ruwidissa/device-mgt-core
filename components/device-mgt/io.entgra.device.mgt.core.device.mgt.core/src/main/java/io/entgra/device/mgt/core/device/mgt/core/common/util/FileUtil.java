@@ -18,8 +18,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.common.util;
 
-import org.apache.commons.io.FileUtils;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

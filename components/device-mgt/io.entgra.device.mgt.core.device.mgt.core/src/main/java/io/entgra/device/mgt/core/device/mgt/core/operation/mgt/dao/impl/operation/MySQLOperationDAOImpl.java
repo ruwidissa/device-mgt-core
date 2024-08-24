@@ -18,9 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl.operation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityHolder;
@@ -31,6 +28,9 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationMana
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl.GenericOperationDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.util.OperationDAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

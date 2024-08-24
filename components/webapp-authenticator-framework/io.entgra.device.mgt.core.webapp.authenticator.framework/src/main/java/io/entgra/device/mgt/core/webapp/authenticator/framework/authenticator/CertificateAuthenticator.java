@@ -18,10 +18,6 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
 import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPException;
@@ -32,8 +28,12 @@ import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.security.cert.X509Certificate;
 import java.util.Properties;

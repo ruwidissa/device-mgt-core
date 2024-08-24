@@ -50,11 +50,7 @@ import io.entgra.device.mgt.core.device.mgt.core.task.impl.DeviceTaskManagerImpl
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * This is a test class to test the functionality in {@link DeviceTaskManager}.

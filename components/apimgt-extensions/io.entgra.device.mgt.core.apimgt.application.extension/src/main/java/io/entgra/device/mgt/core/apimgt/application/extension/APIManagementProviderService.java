@@ -22,6 +22,8 @@ import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplication
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 
+import java.util.ArrayList;
+
 /**
  * This comprise on operation that is been done with api manager from CDMF. This service needs to be implemented in APIM.
  */
@@ -33,27 +35,14 @@ public interface APIManagementProviderService {
      */
     boolean isTierLoaded();
 
-    /**
-     * Generate and retreive application keys. if the application does exist then
-     * create it and subscribe to apis that are grouped with the tags.
-     *
-     * @param apiApplicationName name of the application.
-     * @param tags               tags of the apis that application needs to be subscribed.
-     * @param keyType            of the application.
-     * @param username           to whom the application is created
-     * @param isAllowedAllDomains application is allowed to all the tenants
-     * @param validityTime       validity period of the application
-     * @return consumerkey and secrete of the created application.
-     * @throws APIManagerException
-     */
-    ApiApplicationKey generateAndRetrieveApplicationKeys(String apiApplicationName, String tags[],
-                                                         String keyType, String username, boolean isAllowedAllDomains,
-                                                         String validityTime) throws APIManagerException;
-
-    /**
-     * Remove APIM Application.
-     */
-    void removeAPIApplication(String applicationName, String username) throws APIManagerException;
+    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
+                                                         String keyType, String username,
+                                                         boolean isAllowedAllDomains,
+                                                         String validityTime,
+                                                         String password, String accessToken,
+                                                         ArrayList<String> supportedGrantTypes,
+                                                         String callbackUrl,
+                                                         boolean isMappingRequired) throws APIManagerException;
 
     /**
      * To get access token for given scopes and for the given validity period

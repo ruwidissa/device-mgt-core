@@ -18,8 +18,14 @@
 package io.entgra.device.mgt.core.tenant.mgt.core.impl;
 
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
-import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.roles.config.Role;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -30,19 +36,12 @@ import io.entgra.device.mgt.core.tenant.mgt.core.internal.TenantMgtDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
-import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.user.api.Permission;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.roles.config.Role;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

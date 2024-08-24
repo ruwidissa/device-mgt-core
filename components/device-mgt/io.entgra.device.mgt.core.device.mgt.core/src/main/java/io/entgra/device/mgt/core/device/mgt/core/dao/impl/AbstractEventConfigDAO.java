@@ -18,12 +18,12 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventConfigDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

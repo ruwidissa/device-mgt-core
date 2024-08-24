@@ -17,9 +17,6 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer;
 
-import org.apache.catalina.connector.Request;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.Permission;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagerService;
@@ -28,6 +25,9 @@ import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationEx
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationFrameworkUtil;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
+import org.apache.catalina.connector.Request;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;

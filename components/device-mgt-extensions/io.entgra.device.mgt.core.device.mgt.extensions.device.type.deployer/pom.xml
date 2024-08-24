@@ -31,9 +31,14 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Device Type Deployer</name>
     <description>WSO2 Carbon - Device Type Deployer Implementation</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>commons-lang.wso2</groupId>
 			<artifactId>commons-lang</artifactId>
@@ -45,14 +50,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -107,13 +104,37 @@
             <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -130,35 +151,49 @@
                             io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.*
                         </Export-Package>
                         <Import-Package>
-                            javax.naming,
-                            javax.sql,
-                            javax.xml,
-                            javax.xml.bind,
-                            javax.xml.bind.annotation,
-                            javax.xml.parsers; version="${javax.xml.parsers.import.pkg.version}",
-                            org.apache.axis2.context,
-                            org.apache.axis2.deployment.*,
-                            org.apache.commons.lang;version="${commons-lang.wso2.osgi.version.range}",
-                            org.apache.commons.logging,
+                            io.entgra.device.mgt.core.device.mgt.common.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util,
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.exception;version="[5.0,6)",
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",
+                            org.apache.axis2.context;version="[1.6,2)",
+                            org.apache.axis2.deployment;version="[1.6,2)",
+                            org.apache.axis2.deployment.repository.util;version="[1.6,2)",
+                            org.apache.axis2.engine;version="[1.6,2)",
+                            org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.w3c.dom,
-                            org.wso2.carbon.context,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-							io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.*,
-                            org.wso2.carbon.registry.api,
-                            org.wso2.carbon.registry.core,
-                            org.wso2.carbon.registry.core.*,
-                            org.wso2.carbon.utils.*,
-                            javax.xml.namespace,
-							org.apache.commons.io,
-							org.wso2.carbon.application.deployer.*,
-							org.apache.axis2.engine,
-							org.wso2.carbon.ndatasource.core,
+                            org.w3c.dom,org.wso2.carbon.application.deployer;version="[4.8,5)",
+                            org.wso2.carbon.application.deployer.config;version="[4.8,5)",
+                            org.wso2.carbon.application.deployer.handler;version="[4.8,5)",
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.ndatasource.core;version="[4.8,5)",
+                            org.wso2.carbon.registry.core.service;version="[1.0,2)",
+                            org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Package>
                         <Axis2Deployer>DeviceTypeDeployer</Axis2Deployer>
-						<!--<WSO2-Application-Deployer>Device Type Capp Deployer</WSO2-Application-Deployer>-->
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>
+                        --add-opens=java.xml/jdk.xml.internal=ALL-UNNAMED
+                        --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
+                    </argLine>
+                    <systemPropertyVariables>
+                        <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
+                    </systemPropertyVariables>
+                    <suiteXmlFiles>
+                        <file>src/test/resources/testng.xml</file>
+                    </suiteXmlFiles>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
                 </configuration>
             </plugin>
             <plugin>

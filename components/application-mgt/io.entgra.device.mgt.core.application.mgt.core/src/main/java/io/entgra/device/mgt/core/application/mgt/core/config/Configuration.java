@@ -17,14 +17,14 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.config;
 
+import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.config.MDMConfig;
 import io.entgra.device.mgt.core.application.mgt.common.config.RatingConfiguration;
-import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
 
-import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
  * Represents the Application Management Configuration.

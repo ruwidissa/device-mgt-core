@@ -52,6 +52,8 @@ import io.entgra.device.mgt.core.device.mgt.common.push.notification.Notificatio
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationProvider;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.*;
 import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
@@ -73,6 +75,12 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManager;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DeviceTaskManagerImpl;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.DeviceConnectivityLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceConnectivityLoggerImpl;
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -745,7 +753,14 @@ public class OperationManagerImpl implements OperationManager {
                 DeviceCacheManagerImpl.getInstance().removeDeviceFromCache(deviceId, tenantId);
                 break;
         }
-        log.info("Device Connected", deviceConnectivityLogContextBuilder.setDeviceId(deviceId.getId()).setDeviceType(deviceId.getType()).setActionTag("PENDING_OPERATION").setTenantDomain(tenantDomain).setTenantId(String.valueOf(tenantId)).setUserName(userName).build());
+        log.info("Device Connected", deviceConnectivityLogContextBuilder
+                .setDeviceId(deviceId.getId())
+                .setDeviceType(deviceId.getType())
+                .setActionTag("PENDING_OPERATION")
+                .setTenantDomain(tenantDomain)
+                .setTenantId(String.valueOf(tenantId))
+                .setUserName(userName)
+                .build());
         return getOperations(deviceId, Operation.Status.PENDING, enrolmentId);
     }
 

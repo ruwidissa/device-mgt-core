@@ -17,25 +17,21 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.internal;
 
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.osgi.service.component.annotations.*;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.internal.FCMPushNotificationServiceComponent" immediate="true"
- * @scr.reference name="carbon.device.mgt.provider"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementProviderService"
- * unbind="unsetDeviceManagementProviderService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.internal.FCMPushNotificationServiceComponent",
+        immediate = true)
 public class FCMPushNotificationServiceComponent {
 
     private static final Log log = LogFactory.getLog(FCMPushNotificationServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             //Do nothing
@@ -48,11 +44,16 @@ public class FCMPushNotificationServiceComponent {
                     "implementation bundle", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //Do nothing
     }
-
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementProviderService")
     protected void setDeviceManagementProviderService(
             DeviceManagementProviderService deviceManagementProviderService) {
         FCMDataHolder.getInstance().setDeviceManagementProviderService(deviceManagementProviderService);

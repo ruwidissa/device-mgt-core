@@ -19,15 +19,9 @@
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.PolicyLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraPolicyLoggerImpl;
-import org.apache.commons.lang.StringUtils;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
@@ -46,6 +40,9 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.CommandOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMgtConstants;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.PolicyLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraPolicyLoggerImpl;
 import io.entgra.device.mgt.core.policy.mgt.common.Criterion;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.common.ProfileManagementException;
@@ -63,6 +60,7 @@ import io.entgra.device.mgt.core.policy.mgt.core.mgt.ProfileManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.bean.UpdatedPolicyDeviceListBean;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.SQLException;
@@ -644,8 +642,8 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public void activatePolicy(int policyId) throws PolicyManagementException {
+        Policy policy = this.getPolicy(policyId);
         try {
-            Policy policy = this.getPolicy(policyId);
             PolicyManagementDAOFactory.beginTransaction();
             policyDAO.activatePolicy(policyId);
             policyDAO.recordUpdatedPolicy(policy);
@@ -1480,7 +1478,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return
      */
     private List<CorrectiveAction> getSingleCorrectiveAction
-            (List<CorrectiveAction> allCorrectiveActions, int policyId) {
+    (List<CorrectiveAction> allCorrectiveActions, int policyId) {
         List<CorrectiveAction> correctiveActionsOfPolicy = new ArrayList<>();
         for (CorrectiveAction correctiveAction : allCorrectiveActions) {
             if (correctiveAction.getAssociatedGeneralPolicyId() != null &&

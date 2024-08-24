@@ -18,6 +18,18 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceToGroupsAssignment;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.GroupManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
+import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -31,22 +43,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceToGroupsAssignment;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.GroupManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
-import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -55,7 +51,7 @@ import java.util.List;
 /**
  * This is a test case for {@link GroupManagementServiceImpl}.
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "javax.xml.parsers"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "javax.xml.parsers", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext", "org.wso2.carbon.context.PrivilegedCarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, CarbonContext.class})
@@ -129,13 +125,13 @@ public class GroupManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
                 .toReturn(context);
         Mockito.doReturn(2).when(groupManagementProviderService)
-                .getGroupCount(Mockito.anyString(), Mockito.anyString());
+                .getGroupCount(Mockito.anyString(), Mockito.any());
         Response response = groupManagementService.getGroupCount();
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "GetGroupCount request failed with valid parameters");
         Mockito.reset(groupManagementProviderService);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService)
-                .getGroupCount(Mockito.anyString(), Mockito.anyString());
+                .getGroupCount(Mockito.anyString(), Mockito.any());
         response = groupManagementService.getGroupCount();
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "GetGroupCount request succeeded with in-valid parameters");

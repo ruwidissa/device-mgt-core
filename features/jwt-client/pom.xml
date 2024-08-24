@@ -31,7 +31,7 @@
     <artifactId>jwt-client-feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - JWT Client Extension Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <modules>
         <module>io.entgra.device.mgt.core.identity.jwt.client.extension.feature</module>

@@ -19,6 +19,22 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
+import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
+import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
 import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
@@ -27,20 +43,22 @@ import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionMan
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceFilters;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.Feature;
+import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
+import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
+import io.entgra.device.mgt.core.device.mgt.common.OperationLogFilters;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
@@ -90,12 +108,23 @@ import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClie
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.text.ParseException;
@@ -933,10 +962,45 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
         KeyMgtService keyMgtService = new KeyMgtServiceImpl();
         try {
-            DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
-                    "client_credentials", null, new String[] {"device_management"}, false, validityTime);
-            deviceConfig.setClientId(dcrResponse.getClientId());
-            deviceConfig.setClientSecret(dcrResponse.getClientSecret());
+            ApiApplicationKey apiApplicationKey;
+            try {
+                APIApplicationServices apiApplicationServices = DeviceMgtAPIUtils.getApiApplicationServices();
+                APIApplicationKey adminDCRResponse = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                        "ClientForJWTTokenGeneration",
+                        "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer"
+                );
+
+                PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx.
+                        getOSGiService(JWTClientManagerService.class, null);
+                JWTClient jwtClient = jwtClientManagerService.getJWTClient();
+                AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(adminDCRResponse.getClientId(),
+                        adminDCRResponse.getClientSecret(),
+                        username, "appm:subscribe apim:admin apim:api_key apim:app_import_export apim:app_manage" +
+                                " apim:store_settings apim:sub_alert_manage apim:sub_manage apim:subscribe openid perm:device:enroll " +
+                                "perm:devices:details perm:devices:features perm:devices:search perm:devices:view perm:groups:groups " +
+                                "perm:users:send-invitation");
+
+                APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
+                apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
+                        new String[] {"device_management"}, "PRODUCTION", null, false, String.valueOf(validityTime),
+                        null, accessTokenInfo.getAccessToken(), null, null,true);
+
+            } catch (JWTClientException e) {
+                String msg = "Error while generating an application tokens for Tenant Admin.";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            } catch (APIServicesException e) {
+                String msg = "Error while generating api Application";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+
+            //todo call REST APIs
+            deviceConfig.setClientId(apiApplicationKey.getConsumerKey());
+            deviceConfig.setClientSecret(apiApplicationKey.getConsumerSecret());
 
             StringBuilder scopes = new StringBuilder("device:" + type.replace(" ", "") + ":" + id);
             for (String topic : mqttEventTopicStructure) {
@@ -954,7 +1018,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             // add scopes for update operation /tenantDomain/deviceType/deviceId/update/operation
             scopes.append(" perm:topic:pub:" + tenantDomain + ":" + type + ":" + id + ":update:operation");
 
-            TokenRequest tokenRequest = new TokenRequest(dcrResponse.getClientId(), dcrResponse.getClientSecret(),
+            TokenRequest tokenRequest = new TokenRequest(apiApplicationKey.getConsumerKey(),
+            apiApplicationKey.getConsumerSecret(),
                     null, scopes.toString(), "client_credentials", null,
                     null, null, null,  validityTime);
             TokenResponse tokenResponse = keyMgtService.generateAccessToken(tokenRequest);
@@ -984,6 +1049,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (APIManagerException e) {
+            String msg = "Error while calling rest Call for application key generation";
+            log.error(msg, e);
         }
         return Response.status(Response.Status.OK).entity(deviceConfig).build();
 

@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationMan
 import io.entgra.device.mgt.core.application.mgt.common.exception.IdentityServerManagementException;
 import io.entgra.device.mgt.core.application.mgt.core.serviceprovider.ISServiceProviderApplicationService;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -35,7 +36,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
+
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.util.Collections;

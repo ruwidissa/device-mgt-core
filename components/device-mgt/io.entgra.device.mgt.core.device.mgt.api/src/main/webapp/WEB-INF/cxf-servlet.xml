@@ -43,7 +43,6 @@
             <ref bean="groupManagementAdminService"/>
             <ref bean="applicationManagementAdminService"/>
             <ref bean="deviceTypeManagementAdminService"/>
-            <ref bean="deviceAnalyticsArtifactUploaderAdminService"/>
 			<ref bean="deviceEventManagementService"/>
 			<ref bean="deviceAgentService"/>
             <ref bean="swaggerResource"/>
@@ -96,7 +95,6 @@
     <bean id="userManagementAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.UserManagementAdminServiceImpl"/>
     <bean id="deviceTypeManagementAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceTypeManagementAdminServiceImpl"/>
 	<bean id="deviceAccessAuthorizationAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceAccessAuthorizationAdminServiceImpl"/>
-	<bean id="deviceAnalyticsArtifactUploaderAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceAnalyticsArtifactUploaderAdminServiceImpl"/>
 	<bean id="deviceEventManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.DeviceEventManagementServiceImpl"/>
 	<bean id="deviceAgentService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.DeviceAgentServiceImpl"/>
 	<bean id="jsonProvider" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.common.GsonMessageBodyHandler"/>

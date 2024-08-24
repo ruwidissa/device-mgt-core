@@ -21,7 +21,6 @@ package io.entgra.device.mgt.core.device.mgt.core.dao;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
 
 import java.util.List;
-import java.util.Map;
 
 public interface EventConfigDAO {
 

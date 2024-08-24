@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.config.license;
 
-import org.w3c.dom.Document;
-import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.bind.JAXBContext;

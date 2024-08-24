@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.task.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.core.archival.ArchivalException;
 import io.entgra.device.mgt.core.device.mgt.core.archival.ArchivalService;
 import io.entgra.device.mgt.core.device.mgt.core.archival.ArchivalServiceImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.ntask.core.Task;
 
 import java.text.SimpleDateFormat;

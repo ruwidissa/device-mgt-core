@@ -20,8 +20,6 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.List;
-
 /**
  * This hold stats data record
  */

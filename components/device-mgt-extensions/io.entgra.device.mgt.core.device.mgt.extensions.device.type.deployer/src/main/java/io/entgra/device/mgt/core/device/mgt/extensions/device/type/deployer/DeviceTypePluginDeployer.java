@@ -17,6 +17,13 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer;
 
+import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.internal.DeviceTypeManagementDataHolder;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util.DeviceTypeConfigUtil;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeConfigIdentifier;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeManagerService;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.exception.DeviceTypeConfigurationException;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.AbstractDeployer;
 import org.apache.axis2.deployment.DeploymentException;
@@ -27,13 +34,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.w3c.dom.Document;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.internal.DeviceTypeManagementDataHolder;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util.DeviceTypeConfigUtil;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeConfigIdentifier;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeManagerService;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.exception.DeviceTypeConfigurationException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

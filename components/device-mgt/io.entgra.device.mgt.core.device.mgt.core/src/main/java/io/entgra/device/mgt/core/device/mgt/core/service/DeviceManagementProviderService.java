@@ -26,19 +26,11 @@ import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
 import org.apache.commons.collections.map.SingletonMap;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DeviceConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UserNotFoundException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.*;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
@@ -54,7 +46,6 @@ import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceStatus;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -1075,7 +1066,14 @@ public interface DeviceManagementProviderService {
     List<Application> getInstalledApplicationsOnDevice(Device device) throws DeviceManagementException;
     List<Device> getEnrolledDevicesSince(Date since) throws DeviceManagementException;
     List<Device> getEnrolledDevicesPriorTo(Date before) throws DeviceManagementException;
-    void deleteDeviceDataByTenantDomain(String tenantDomain) throws DeviceManagementException;
+
+    /**
+     * Delete all the device related data for a given Tenant by Tenant Id
+     *
+     * @param tenantId Id of the Tenant
+     * @throws DeviceManagementException if error occurs when deleting device data by using tenant Id
+     */
+    void deleteDeviceDataByTenantId(int tenantId) throws DeviceManagementException;
 
     /**
      * Get owner details and device IDs for a given owner and tenant.

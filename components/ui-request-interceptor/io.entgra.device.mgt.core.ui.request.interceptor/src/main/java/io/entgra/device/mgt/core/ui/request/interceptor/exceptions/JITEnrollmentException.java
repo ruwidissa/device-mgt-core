@@ -20,6 +20,8 @@
 package io.entgra.device.mgt.core.ui.request.interceptor.exceptions;
 
 public class JITEnrollmentException extends Exception {
+    private static final long serialVersionUID = -5414968249196525915L;
+
     public JITEnrollmentException(String msg, Throwable t) {
         super(msg, t);
     }

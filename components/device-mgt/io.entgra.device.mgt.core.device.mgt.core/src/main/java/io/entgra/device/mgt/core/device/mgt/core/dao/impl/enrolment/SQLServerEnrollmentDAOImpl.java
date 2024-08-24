@@ -17,19 +17,19 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.enrolment;
 
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractEnrollmentDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import java.sql.*;
-import java.util.ArrayList;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 
 public class SQLServerEnrollmentDAOImpl extends AbstractEnrollmentDAOImpl {
 

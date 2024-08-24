@@ -166,7 +166,18 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
@@ -357,7 +368,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                         device.getType() + " upon the user '" + device.getEnrolmentInfo().getOwner() +
                                         "'");
                             }
-                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(existingDevice.getId())).setDeviceType(String.valueOf(existingDevice.getType())).setOwner(newEnrolmentInfo.getOwner()).setOwnership(String.valueOf(newEnrolmentInfo.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
+                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder
+                                    .setDeviceId(String.valueOf(existingDevice.getId()))
+                                    .setDeviceType(String.valueOf(existingDevice.getType()))
+                                    .setOwner(newEnrolmentInfo.getOwner())
+                                    .setOwnership(String.valueOf(newEnrolmentInfo.getOwnership()))
+                                    .setTenantID(String.valueOf(tenantId))
+                                    .setTenantDomain(tenantDomain)
+                                    .setUserName(userName)
+                                    .build());
                             status = true;
                         } else {
                             log.warn("Unable to update device enrollment for device : " + device.getDeviceIdentifier() +
@@ -5267,20 +5286,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void deleteDeviceDataByTenantDomain(String tenantDomain) throws DeviceManagementException {
-        int tenantId;
-        try{
-            TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
-            TenantInfoBean tenantInfoBean = tenantMgtAdminService.getTenant(tenantDomain);
-            tenantId = tenantInfoBean.getTenantId();
-
-        } catch (Exception e) {
-            String msg = "Error getting tenant ID from domain: "
-                    + tenantDomain;
-            log.error(msg);
-            throw new DeviceManagementException(msg, e);
-        }
-
+    public void deleteDeviceDataByTenantId(int tenantId) throws DeviceManagementException {
         try {
             DeviceManagementDAOFactory.beginTransaction();
 

@@ -17,10 +17,10 @@
  */
 package io.entgra.device.mgt.core.application.mgt.common;
 
-import java.sql.Timestamp;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @ApiModel(value = "LifecycleState", description = "LifecycleState represents the Lifecycle state for an application release")
@@ -45,8 +45,8 @@ public class LifecycleState {
     private String updatedBy;
 
     @ApiModelProperty(name = "updatedAt",
-            value = "Timestamp of the lifecycle has been updated")
-    private Timestamp updatedAt;
+            value = "The seconds from the epoch of 1970-01-01T00:00:00Z that the lifecycle has been updated")
+    private Long updatedAt;
 
     @ApiModelProperty(name = "reasonForChange",
             value = "Reason for the application release lifecycle change from previous state to current state.")
@@ -76,11 +76,11 @@ public class LifecycleState {
         this.updatedBy = updatedBy;
     }
 
-    public Timestamp getUpdatedAt() {
+    public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
+    public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
 

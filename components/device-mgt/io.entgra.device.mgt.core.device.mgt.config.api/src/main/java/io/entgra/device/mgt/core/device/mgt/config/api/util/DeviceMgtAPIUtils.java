@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.config.api.util;
 
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**

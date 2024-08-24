@@ -36,10 +36,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
@@ -66,6 +62,14 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -77,15 +81,47 @@
                         <Bundle-Description>Grafana API Management Core Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.internal</Private-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.*,
-                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            javax.xml.bind.annotation,
-                            javax.xml.bind,
-                            org.apache.commons.lang,
-                            org.wso2.carbon,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            io.entgra.device.mgt.core.device.mgt.core.*
-                            io.entgra.device.mgt.core.application.mgt.core.*
+                            com.google.common.cache;version="[32.1,33)";resolution:=optional,
+                            com.google.gson;version="[2.9,3)",
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.bean,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.xml.bean,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.service,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.service.bean,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.service.cache,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.service.impl,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.connection,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.query,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.query.encoder,
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util,
+                            io.entgra.device.mgt.core.application.mgt.common.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.core.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.core.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.common.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.config.datasource;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.dao;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.report.mgt.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.report.mgt.dao.common;version="[5.0,6)",
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.bind.annotation;version="[0.0,1)",
+                            javax.xml.parsers,
+                            org.apache.commons.codec.binary;version="[1.4,2)",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.lang3;version="[3.11,4)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.apache.http;version="[4.4,5)",
+                            org.apache.http.client,
+                            org.apache.http.client.methods,
+                            org.apache.http.impl.client,
+                            org.apache.juli.logging;version="[9.0,10)",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.w3c.dom,org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.internal,
@@ -103,28 +139,31 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
 		<dependency>
-			<groupId>org.wso2.orbit.org.scannotation</groupId>
+			<groupId>io.entgra.org.scannotation</groupId>
 			<artifactId>scannotation</artifactId>
 		</dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -139,6 +178,12 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
@@ -147,17 +192,22 @@
         <dependency>
             <groupId>org.apache.httpcomponents.wso2</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.1.1.wso2v1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -173,7 +223,7 @@
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -191,8 +241,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -221,7 +271,7 @@
             <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.tomcat.wso2</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>jdbc-pool</artifactId>
         </dependency>
         <dependency>
@@ -240,14 +290,6 @@
             <groupId>org.apache.ws.commons.axiom.wso2</groupId>
             <artifactId>axiom</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.apache.ws.commons.axiom.wso2</groupId>
-            <artifactId>axiom-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom.wso2</groupId>
-            <artifactId>axiom</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
@@ -257,11 +299,11 @@
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
         </dependency>
 
@@ -276,23 +318,19 @@
             <groupId>commons-collections.wso2</groupId>
             <artifactId>commons-collections</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.transport.mgt.email.sender.core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
@@ -321,9 +359,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
-
-
-
 </project>

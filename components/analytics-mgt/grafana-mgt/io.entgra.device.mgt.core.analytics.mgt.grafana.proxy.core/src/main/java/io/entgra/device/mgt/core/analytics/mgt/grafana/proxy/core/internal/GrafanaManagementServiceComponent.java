@@ -26,15 +26,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
-/**
- * @scr.component name="io.entgra.analytics.mgt.grafana.proxy.grafanamanagementservicecomponent" immediate="true"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.internal.GrafanaManagementServiceComponent",
+        immediate = true)
 public class GrafanaManagementServiceComponent {
 
     private static Log log = LogFactory.getLog(GrafanaManagementServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -59,6 +63,7 @@ public class GrafanaManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Grafana Management Service Component");

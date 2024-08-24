@@ -17,44 +17,63 @@
  */
 package io.entgra.device.mgt.core.transport.mgt.email.sender.core;
 
-import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.api.RegistryException;
+import org.apache.velocity.util.ExtProperties;
 
 import java.io.InputStream;
+import java.io.Reader;
 
 public class RegistryBasedResourceLoader extends ResourceLoader {
 
     private static final String EMAIL_CONFIG_BASE_LOCATION = "email-templates";
 
     @Override
-    public void init(ExtendedProperties extendedProperties) {
+    public void init(ExtProperties extProperties) {
 
     }
 
     @Override
+    public Reader getResourceReader(String name, String encoding) throws ResourceNotFoundException {
+//        try {
+//            Registry registry =
+//                    CarbonContext.getThreadLocalCarbonContext().getRegistry(RegistryType.SYSTEM_CONFIGURATION);
+//            if (registry == null) {
+//                throw new IllegalStateException("No valid registry instance is attached to the current carbon context");
+//            }
+//            if (!registry.resourceExists(EMAIL_CONFIG_BASE_LOCATION + "/" + name)) {
+//                throw new ResourceNotFoundException("Resource '" + name + "' does not exist");
+//            }
+//            org.wso2.carbon.registry.api.Resource resource =
+//                    registry.get(EMAIL_CONFIG_BASE_LOCATION + "/" + name);
+//            resource.setMediaType("text/plain");
+//
+//            return new InputStreamReader(resource.getContentStream());
+//        } catch (RegistryException e) {
+//            throw new ResourceNotFoundException("Error occurred while retrieving resource", e);
+//        }
+        return null;
+    }
+
     public InputStream getResourceStream(String name) throws ResourceNotFoundException {
-        try {
-            Registry registry =
-                    CarbonContext.getThreadLocalCarbonContext().getRegistry(RegistryType.SYSTEM_CONFIGURATION);
-            if (registry == null) {
-                throw new IllegalStateException("No valid registry instance is attached to the current carbon context");
-            }
-            if (!registry.resourceExists(EMAIL_CONFIG_BASE_LOCATION + "/" + name)) {
-                throw new ResourceNotFoundException("Resource '" + name + "' does not exist");
-            }
-            org.wso2.carbon.registry.api.Resource resource =
-                    registry.get(EMAIL_CONFIG_BASE_LOCATION + "/" + name);
-            resource.setMediaType("text/plain");
-            return resource.getContentStream();
-        } catch (RegistryException e) {
-            throw new ResourceNotFoundException("Error occurred while retrieving resource", e);
-        }
+//        try {
+//            Registry registry =
+//                    CarbonContext.getThreadLocalCarbonContext().getRegistry(RegistryType.SYSTEM_CONFIGURATION);
+//            if (registry == null) {
+//                throw new IllegalStateException("No valid registry instance is attached to the current carbon context");
+//            }
+//            if (!registry.resourceExists(EMAIL_CONFIG_BASE_LOCATION + "/" + name)) {
+//                throw new ResourceNotFoundException("Resource '" + name + "' does not exist");
+//            }
+//            org.wso2.carbon.registry.api.Resource resource =
+//                    registry.get(EMAIL_CONFIG_BASE_LOCATION + "/" + name);
+//            resource.setMediaType("text/plain");
+//            return resource.getContentStream();
+//        } catch (RegistryException e) {
+//            throw new ResourceNotFoundException("Error occurred while retrieving resource", e);
+//        }
+        return null;
     }
 
     @Override

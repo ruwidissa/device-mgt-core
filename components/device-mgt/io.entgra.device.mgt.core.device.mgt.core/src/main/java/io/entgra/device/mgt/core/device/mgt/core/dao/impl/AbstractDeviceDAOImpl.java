@@ -18,10 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import org.apache.commons.collections.map.SingletonMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
@@ -31,12 +27,16 @@ import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DevicePrope
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceMonitoringData;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
+import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.context.PrivilegedCarbonContext;

@@ -20,8 +20,8 @@ package io.entgra.device.mgt.core.application.mgt.common.dto;
 
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
-import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
 import io.entgra.device.mgt.core.application.mgt.common.SubAction;
+import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
 import io.entgra.device.mgt.core.application.mgt.common.response.ApplicationRelease;
 
 import java.util.List;

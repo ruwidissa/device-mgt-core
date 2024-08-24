@@ -19,19 +19,19 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceData;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.policy.mgt.common.monitor.PolicyDeviceWrapper;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.MonitoringDAO;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.MonitoringDAOException;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.util.PolicyManagementDAOUtil;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.*;
 import java.util.*;

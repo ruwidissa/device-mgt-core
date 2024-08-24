@@ -18,6 +18,16 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceTypeManagementAdminServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceTypeGeneratorService;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeGeneratorServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
@@ -33,16 +43,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceTypeGeneratorService;
-import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeGeneratorServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceTypeManagementAdminServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.core.Response;
 
@@ -51,7 +51,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This class holds the unit tests for the class {@link DeviceTypeManagementAdminService}
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*",  "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
                                   "org.wso2.carbon.context.PrivilegedCarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class, CarbonContext.class})

@@ -31,19 +31,22 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Policy Information Point</name>
     <description>WSO2 Carbon - Policy Information Point</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -56,6 +59,14 @@
                         <Export-Package>
                             io.entgra.device.mgt.core.policy.information.point.*
                         </Export-Package>
+                        <Import-Package>
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.policy.information.point,
+                            io.entgra.device.mgt.core.policy.mgt.common;version="[5.0,6)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}"
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -89,20 +100,22 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.policy.mgt.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
     </dependencies>
 

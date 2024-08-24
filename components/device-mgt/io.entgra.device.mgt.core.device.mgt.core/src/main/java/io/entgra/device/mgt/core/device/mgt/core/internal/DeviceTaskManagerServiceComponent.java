@@ -18,10 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
 import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
@@ -38,20 +34,17 @@ import io.entgra.device.mgt.core.device.mgt.core.status.task.impl.DeviceStatusTa
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceMgtTaskException;
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManagerService;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DeviceTaskManagerServiceImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
 import java.util.Map;
-
-/**
- * @scr.component name="org.wso2.carbon.device.task.manager" immediate="true"
- * @scr.reference name="device.ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- */
-
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.core.internal.DeviceTaskManagerServiceComponent",
+        immediate = true)
 @SuppressWarnings("unused")
 public class DeviceTaskManagerServiceComponent {
 
@@ -59,6 +52,7 @@ public class DeviceTaskManagerServiceComponent {
     private DeviceManagementConfig deviceManagementConfig;
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -133,6 +127,7 @@ public class DeviceTaskManagerServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         try {
             stopOperationMonitoringTask();
@@ -192,6 +187,12 @@ public class DeviceTaskManagerServiceComponent {
         }
     }
 
+    @Reference(
+            name = "task.service",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskService")
     protected void setTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the task service.");

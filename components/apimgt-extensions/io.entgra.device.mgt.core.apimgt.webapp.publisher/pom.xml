@@ -31,32 +31,34 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Management Webapp Publisher</name>
     <description>WSO2 Carbon - API Management Webapp Publisher</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
         </dependency>
         <dependency>
@@ -64,8 +66,9 @@
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -80,7 +83,7 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.scannotation</groupId>
+            <groupId>io.entgra.org.scannotation</groupId>
             <artifactId>scannotation</artifactId>
         </dependency>
         <dependency>
@@ -118,8 +121,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -134,19 +137,27 @@
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -161,53 +172,45 @@
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.*
                         </Export-Package>
                         <Import-Package>
-                            com.google.gson;version="[2.3,2.8.6)",
-                            com.google.gson.reflect;version="[2.3,2.8.6)",
-                            io.swagger.annotations,
-                            javax.servlet;version="2.6",
-                            javax.xml,
-                            javax.xml.bind,
-                            javax.xml.bind.annotation,
-                            javax.xml.parsers,
-                            org.apache.catalina;version="9.0",
-                            org.apache.catalina.core;version="9.0",
-                            org.apache.commons.logging;version="1.2",
-                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
-                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.scannotation;version="1.0",
-                            org.scannotation.archiveiterator;version="1.0",
-                            org.w3c.dom,
+                            com.google.gson;version="[2.9,3)",
+                            com.google.gson.reflect;version="[2.9,3)",
+                            io.entgra.device.mgt.core.apimgt.annotations;version="[5.0,6)",
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.*,
-                            io.entgra.device.mgt.core.apimgt.annotations,
-                            org.wso2.carbon.apimgt.api,
-                            org.wso2.carbon.apimgt.api.model,
-                            org.wso2.carbon.apimgt.impl,
-                            org.wso2.carbon.apimgt.impl.utils,
-                            io.entgra.device.mgt.core.apimgt.webapp.publisher,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.config,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.dto,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.exception,
-                            io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.listener,
-                            io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.util,
                             io.entgra.device.mgt.core.device.mgt.common.exceptions,
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt,
                             io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
                             io.entgra.device.mgt.core.device.mgt.core.config,
                             io.entgra.device.mgt.core.device.mgt.core.config.permission,
-                            org.wso2.carbon.base;version="1.0",
-                            org.wso2.carbon.context;version="4.6",
-                            org.wso2.carbon;version="4.6",
-                            org.wso2.carbon.core;version="4.6",
-                            org.wso2.carbon.core.util;version="4.6",
-                            org.wso2.carbon.registry.core.service;version="1.0",
-                            org.wso2.carbon.user.api;version="1.0",
-                            org.wso2.carbon.user.core.service;version="4.6",
-                            org.wso2.carbon.user.core.tenant;version="4.6",
-                            org.wso2.carbon.utils;version="4.6",
-                            org.wso2.carbon.utils.multitenancy;version="4.6",
-                            org.apache.commons.lang,
-                            org.json,
-                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt,
-                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt
+                            io.swagger.annotations;version="[1.6,2)",
+                            javax.servlet;version="[2.6,3)",
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.bind.annotation;version="[0.0,1)",
+                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",
+                            org.apache.catalina;version="${catalina.version.range}",
+                            org.apache.catalina.core;version="${catalina.version.range}",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.json;version="[3.0,4)",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.scannotation;version="[1.0,2)",
+                            org.scannotation.archiveiterator;version="[1.0,2)",
+                            org.w3c.dom,
+                            org.wso2.carbon.apimgt.api;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.api.model;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl.utils;version="[9.28,10)",
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.core;version="[4.8,5)",
+                            org.wso2.carbon.core.util;version="[4.8,5)",
+                            org.wso2.carbon.registry.core.service,
+                            org.wso2.carbon.user.api,
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.wso2.carbon.user.core.tenant;version="[4.8,5)",
+                            org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Package>
                         <Embed-Dependency>
                             jsr311-api;scope=compile|runtime;inline=false

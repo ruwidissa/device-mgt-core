@@ -18,8 +18,15 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor.util;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -32,50 +39,48 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.*;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.InputStreamBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
+import org.apache.http.Consts;
 import org.apache.http.cookie.SM;
-import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
-import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.Reader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HandlerUtil {
 
@@ -92,71 +97,69 @@ public class HandlerUtil {
      * @return response as string
      * @throws IOException IO exception returns if error occurs when executing the httpMethod
      */
-    public static ProxyResponse execute(HttpRequestBase httpRequest) throws IOException {
-        try (CloseableHttpClient client = getHttpClient()) {
-            HttpResponse response = client.execute(httpRequest);
-            ProxyResponse proxyResponse = new ProxyResponse();
+    public static ProxyResponse execute(ClassicHttpRequest httpRequest) throws IOException {
 
-            if (response == null) {
-                log.error("Received null response for http request : " + httpRequest.getMethod() + " " + httpRequest
-                        .getURI().toString());
-                proxyResponse.setCode(HandlerConstants.INTERNAL_ERROR_CODE);
-                proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
-                        HandlerConstants.INTERNAL_ERROR_CODE));
-                return proxyResponse;
-            } else {
-                int statusCode = response.getStatusLine().getStatusCode();
-                String jsonString = getResponseString(response);
+        try (CloseableHttpClient client = getHttpClient()) {
+            return client.execute(httpRequest, response -> {
+                final HttpEntity responseEntity = response.getEntity();
+                ProxyResponse handlerResponse = new ProxyResponse();
+                int statusCode = response.getCode();
+                if (responseEntity == null) {
+                    log.error("Received null response for http request : " + httpRequest.getMethod() + " " + httpRequest.getRequestUri());
+                    handlerResponse.setCode(HandlerConstants.INTERNAL_ERROR_CODE);
+                    handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                    handlerResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
+                            HandlerConstants.INTERNAL_ERROR_CODE));
+                    return handlerResponse;
+                }
+                JsonNode responseData = getResponseDataAsJsonNode(responseEntity);
                 if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
-                    proxyResponse.setCode(statusCode);
-                    proxyResponse.setData(jsonString);
-                    proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
-                    proxyResponse.setExecutorResponse("SUCCESS");
-                    proxyResponse.setHeaders(response.getAllHeaders());
-                    return proxyResponse;
+                    handlerResponse.setCode(statusCode);
+                    handlerResponse.setData(responseData);
+                    handlerResponse.setStatus(ProxyResponse.Status.SUCCESS);
+                    handlerResponse.setExecutorResponse("SUCCESS");
+                    handlerResponse.setHeaders(response.getHeaders());
+                    return handlerResponse;
                 } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                    if (isTokenExpired(jsonString)) {
-                        proxyResponse.setCode(statusCode);
-                        proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                        proxyResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
+                    if (isTokenExpired(responseData)) {
+                        handlerResponse.setCode(statusCode);
+                        handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                        handlerResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
                     } else {
                         log.error(
                                 "Received " + statusCode + " response for http request : " + httpRequest.getMethod()
-                                        + " " + httpRequest.getURI().toString() + ". Error message: " + jsonString);
-                        proxyResponse.setCode(statusCode);
-                        proxyResponse.setData(jsonString);
-                        proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                        proxyResponse.setExecutorResponse(
+                                        + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
+                        handlerResponse.setCode(statusCode);
+                        handlerResponse.setData(responseData);
+                        handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                        handlerResponse.setExecutorResponse(
                                 HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
                     }
-                    return proxyResponse;
+                    return handlerResponse;
                 }
-                log.error("Received " + statusCode +
-                        " response for http request : " + httpRequest.getMethod() + " " + httpRequest.getURI()
-                        .toString() + ". Error message: " + jsonString);
-                proxyResponse.setCode(statusCode);
-                proxyResponse.setData(jsonString);
-                proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                proxyResponse
+                log.error("Received " + statusCode + " response for http request : " + httpRequest.getMethod()
+                        + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
+                handlerResponse.setCode(statusCode);
+                handlerResponse.setData(responseData);
+                handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                handlerResponse
                         .setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
-                return proxyResponse;
-            }
+                return handlerResponse;
+            });
         }
     }
 
-    public static boolean isTokenExpired(String jsonBody) {
-        return jsonBody.contains("Access token expired") || jsonBody
+    public static boolean isTokenExpired(JsonNode jsonBody) {
+        return jsonBody.textValue().contains("Access token expired") || jsonBody.textValue()
                 .contains("Invalid input. Access token validation failed");
     }
 
     public static String getMemeType(HttpResponse response) {
-        String memeType = "";
-        Header contentType = response.getEntity().getContentType();
+        Header contentType = response.getFirstHeader("Content-Type");
         if (contentType != null) {
-            memeType = contentType.getValue().split(";")[0].trim();
+            return contentType.getValue().split(";")[0].trim();
         }
-        return memeType;
+        return "";
     }
 
     /***
@@ -266,29 +269,17 @@ public class HandlerUtil {
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         resp.setCharacterEncoding(Consts.UTF_8.name());
-        JSONObject response = new JSONObject();
-        String responseData = proxyResponse.getData();
+        JsonNode responseData = proxyResponse.getData();
 
-        if (!StringUtils.isEmpty(responseData)) {
-            try {
-                if (responseData.startsWith("{")) {
-                    JSONObject responseDataJsonObj = new JSONObject(responseData);
-                    response.put("data", responseDataJsonObj);
-                } else if (responseData.startsWith("[")) {
-                    JSONArray responseDataJsonArr = new JSONArray(responseData);
-                    response.put("data", responseDataJsonArr);
-                } else {
-                    log.warn("Response data is not valid json string >> " + responseData);
-                    response.put("data", responseData);
-                }
-            } catch (JSONException e) {
-                log.error("Response data is not passable");
-                response.put("data", responseData);
-            }
+        if (!(responseData == null)) {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> newNodeMap = new HashMap<>();
+            newNodeMap.put("data", responseData);
+            responseData = mapper.convertValue(newNodeMap, JsonNode.class);
         }
 
         try (PrintWriter writer = resp.getWriter()) {
-            writer.write(response.toString());
+            writer.write(responseData != null ? responseData.toString() : "{}");
         }
     }
 
@@ -363,7 +354,21 @@ public class HandlerUtil {
         boolean isIgnoreHostnameVerification = Boolean.parseBoolean(System.
                 getProperty("org.wso2.ignoreHostnameVerification"));
         if (isIgnoreHostnameVerification) {
-            return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+            try {
+                return HttpClients.custom()
+                        .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                                .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                                        .setSslContext(SSLContextBuilder.create()
+                                                .loadTrustMaterial(TrustAllStrategy.INSTANCE)
+                                                .build())
+                                        .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                                        .build())
+                                .build())
+                        .build();
+            } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+                log.error("Error Occurred while creating the custom http client", e);
+                throw new RuntimeException(e);
+            }
         } else {
             return HttpClients.createDefault();
         }
@@ -414,13 +419,13 @@ public class HandlerUtil {
      * @throws FileUploadException If unable to parse the incoming request for multipart content extraction.
      * @throws IOException         If error occurred while generating the request body.
      */
-    public static void generateRequestEntity(HttpServletRequest req, HttpEntityEnclosingRequestBase proxyRequest)
+    public static void generateRequestEntity(HttpServletRequest req, ClassicHttpRequest proxyRequest)
             throws FileUploadException, IOException {
         if (ServletFileUpload.isMultipartContent(req)) {
             ServletFileUpload servletFileUpload = new ServletFileUpload(new DiskFileItemFactory());
             List<FileItem> fileItemList = servletFileUpload.parseRequest(req);
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-            entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            entityBuilder.setMode(HttpMultipartMode.LEGACY);
             for (FileItem item : fileItemList) {
                 if (!item.isFormField()) {
                     entityBuilder.addPart(item.getFieldName(), new InputStreamBody(item.getInputStream(),
@@ -435,7 +440,7 @@ public class HandlerUtil {
             if (StringUtils.isNotEmpty(req.getHeader(HttpHeaders.CONTENT_LENGTH)) ||
                     StringUtils.isNotEmpty(req.getHeader(HttpHeaders.TRANSFER_ENCODING))) {
                 InputStreamEntity entity = new InputStreamEntity(req.getInputStream(),
-                        Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)));
+                        Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)), ContentType.parse(req.getContentType()));
                 proxyRequest.setEntity(new BufferedHttpEntity(entity));
             }
             HandlerUtil.copyRequestHeaders(req, proxyRequest, true);
@@ -449,12 +454,12 @@ public class HandlerUtil {
      * @param proxyRequest proxy request instance.
      * @throws IOException         If error occurred while generating the request body.
      */
-    public static void generateChatRequestEntity(HttpServletRequest req, HttpEntityEnclosingRequestBase proxyRequest)
+    public static void generateChatRequestEntity(HttpServletRequest req, ClassicHttpRequest proxyRequest)
             throws  IOException {
         if (StringUtils.isNotEmpty(req.getHeader(HttpHeaders.CONTENT_LENGTH)) ||
                 StringUtils.isNotEmpty(req.getHeader(HttpHeaders.TRANSFER_ENCODING))) {
             InputStreamEntity entity = new InputStreamEntity(req.getInputStream(),
-                    Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)));
+                    Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)), ContentType.parse(req.getContentType()));
             proxyRequest.setEntity(new BufferedHttpEntity(entity));
         }
     }
@@ -465,17 +470,30 @@ public class HandlerUtil {
      * @param tags - tags which are retrieved by reading app manager configuration
      * @param username - username provided from login form or admin username
      * @param password - password provided from login form or admin password
+     * @param callbackUrl - callback url
+     * @param supportedGrantTypes - supported grant types
      * @return {@link StringEntity} of the payload to create the client application
      */
-    public static StringEntity constructAppRegPayload(JsonArray tags, String appName, String username, String password) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(HandlerConstants.APP_NAME_KEY, appName);
-        jsonObject.addProperty(HandlerConstants.USERNAME, username);
-        jsonObject.addProperty(HandlerConstants.PASSWORD, password);
-        jsonObject.addProperty(HandlerConstants.IS_ALLOWED_TO_ALL_DOMAINS_KEY, "false");
-        jsonObject.add(HandlerConstants.TAGS_KEY, tags);
-        String payload = jsonObject.toString();
-        return new StringEntity(payload, ContentType.APPLICATION_JSON);
+    public static StringEntity constructAppRegPayload(ArrayNode tags, String appName, String username, String password,
+                                                      String callbackUrl, ArrayList<String> supportedGrantTypes) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> data = new HashMap<>();
+
+        data.put(HandlerConstants.APP_NAME_KEY, appName);
+        data.put(HandlerConstants.USERNAME, username);
+        data.put(HandlerConstants.PASSWORD, password);
+        data.put(HandlerConstants.IS_ALLOWED_TO_ALL_DOMAINS_KEY, "false");
+        data.put(HandlerConstants.TAGS_KEY, tags);
+        if (callbackUrl != null) {
+            data.put(HandlerConstants.CALLBACK_URL_KEY, callbackUrl);
+        }
+        if (supportedGrantTypes != null) {
+            data.put(HandlerConstants.GRANT_TYPE_KEY, supportedGrantTypes);
+
+        }
+
+        return new StringEntity(objectMapper.valueToTree(data).toString(), ContentType.APPLICATION_JSON);
     }
 
     /***
@@ -485,9 +503,9 @@ public class HandlerUtil {
      * @param gatewayUrl - gateway endpoint URL
      * @param httpSession - current active HttpSession
      * @param resp - HttpServletResponse
-     * @return {@link JsonObject} of UI configurations
+     * @return {@link JsonNode} of UI configurations
      */
-    public static JsonObject getUIConfigAndPersistInSession(String uiConfigUrl, String gatewayUrl, HttpSession httpSession,
+    public static JsonNode getUIConfigAndPersistInSession(String uiConfigUrl, String gatewayUrl, HttpSession httpSession,
                                                             HttpServletResponse resp) throws IOException {
         HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
         ProxyResponse uiConfigResponse = HandlerUtil.execute(uiConfigEndpoint);
@@ -498,73 +516,33 @@ public class HandlerUtil {
             HandlerUtil.handleError(resp, uiConfigResponse);
         }
 
-        if (uiConfigResponse.getData() == null) {
+        JsonNode responseData = uiConfigResponse.getData();
+        if (responseData == null) {
             log.error("UI config retrieval is failed, and didn't find UI configuration for App manager.");
             HandlerUtil.handleError(resp, null);
-        }
-        JsonParser jsonParser = new JsonParser();
-
-        JsonElement uiConfigJsonElement = jsonParser.parse(uiConfigResponse.getData());
-        JsonObject uiConfigJsonObject = null;
-        if (uiConfigJsonElement.isJsonObject()) {
-            uiConfigJsonObject = uiConfigJsonElement.getAsJsonObject();
-            if (uiConfigJsonObject == null) {
-                log.error(
-                        "Either UI config json element is not an json object or converting rom json element to json object is failed.");
-                HandlerUtil.handleError(resp, null);
-            }
-            httpSession.setAttribute(HandlerConstants.UI_CONFIG_KEY, uiConfigJsonObject);
+        } else {
+            httpSession.setAttribute(HandlerConstants.UI_CONFIG_KEY, responseData);
             httpSession.setAttribute(HandlerConstants.PLATFORM, gatewayUrl);
         }
-        return uiConfigJsonObject;
+        return responseData;
     }
 
     /***
      * Converts scopes from JsonArray to string with space separated values.
      *
-     * @param scopes - scope Json Array and it is retrieved by reading UI config.
+     * @param scopes - scope Array and it is retrieved by reading UI config.
      * @return string value of the defined scopes
      */
-    public static String getScopeString(JsonArray scopes) {
-        if (scopes != null && scopes.size() > 0) {
+    public static String getScopeString(JsonNode scopes) {
+        if (scopes != null && scopes.isArray() && !scopes.isEmpty()) {
             StringBuilder builder = new StringBuilder();
-            for (JsonElement scope : scopes) {
-                String tmpScope = scope.getAsString() + " ";
-                builder.append(tmpScope);
+            for (JsonNode objNode : scopes) {
+                builder.append(objNode.asText()).append(" ");
             }
             return builder.toString();
         } else {
             return null;
         }
-    }
-
-    /***
-     * Converts xml file into string.
-     *
-     * @param xmlFile - xmlFile which needs to be converted into string.
-     * @return string value of the xml file.
-     */
-    public static String xmlToString(File xmlFile) {
-        String stringOutput = null;
-
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(xmlFile);
-            OutputFormat format = new OutputFormat(doc);
-            StringWriter stringWriterOutput = new StringWriter();
-            XMLSerializer serial = new XMLSerializer(stringWriterOutput, format);
-            serial.serialize(doc);
-            stringOutput = stringWriterOutput.toString();
-        } catch (IOException e) {
-            log.error("Error occurred while sending the response into the socket. ", e);
-        } catch (ParserConfigurationException e) {
-            log.error("Error while creating the document builder.");
-        } catch (SAXException e) {
-            log.error("Error while parsing xml file.", e);
-        }
-
-        return stringOutput;
     }
 
     /***
@@ -609,35 +587,28 @@ public class HandlerUtil {
      * Retry request again after refreshing the access token
      *
      * @param req         incoming {@link HttpServletRequest}
-     * @param httpRequest subclass of {@link HttpRequestBase} related to the current request.
+     * @param httpRequest {@link ClassicHttpRequest} related to the current request.
      * @return {@link ProxyResponse} if successful and <code>null</code> if failed.
      * @throws IOException If an error occurs when try to retry the request.
      */
-    public static ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpRequestBase httpRequest,
-                                                               String apiEndpoint, boolean isDefaultAuthToken) throws IOException {
-        ProxyResponse retryResponse = refreshToken(req, apiEndpoint, isDefaultAuthToken);
+    public static ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, ClassicHttpRequest httpRequest,
+                                                               String apiEndpoint) throws IOException {
+        ProxyResponse retryResponse = refreshToken(req, apiEndpoint);
         if (isResponseSuccessful(retryResponse)) {
             HttpSession session = req.getSession(false);
             if (session == null) {
                 log.error("Unauthorized, You are not logged in. Please log in to the portal");
                 return constructProxyResponseByErrorCode(HttpStatus.SC_UNAUTHORIZED);
             }
-            if (!isDefaultAuthToken) {
-                httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
-                if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API after refreshing the token.");
-                    return proxyResponse;
-                }
+            httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
+            ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
+            if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                log.error("Error occurred while invoking the API after refreshing the token.");
                 return proxyResponse;
             }
+            return proxyResponse;
         }
         return retryResponse;
-    }
-
-    public static ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpRequestBase httpRequest,
-                                                               String apiEndpoint) throws IOException {
-        return retryRequestWithRefreshedToken(req, httpRequest, apiEndpoint, false);
     }
 
     /***
@@ -657,7 +628,6 @@ public class HandlerUtil {
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");
             tokenResultResponse = constructProxyResponseByErrorCode(HttpStatus.SC_UNAUTHORIZED);
-//            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return tokenResultResponse;
         }
         if (isDefaultAuthToken) {
@@ -668,25 +638,17 @@ public class HandlerUtil {
         tokenResultResponse = getTokenResult(authData, keymanagerUrl);
         if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
             log.error("Error occurred while refreshing access token.");
-//            HandlerUtil.handleError(resp, tokenResultResponse);
             return tokenResultResponse;
         }
 
-        JsonParser jsonParser = new JsonParser();
-        JsonElement jTokenResult = jsonParser.parse(tokenResultResponse.getData());
-
-        if (jTokenResult.isJsonObject()) {
-            if (isDefaultAuthToken) {
-                setNewDefaultAuthData(constructAuthDataFromTokenResult(jTokenResult, authData), session);
-            } else {
-                setNewAuthData(constructAuthDataFromTokenResult(jTokenResult, authData), session);
-            }
+        JsonNode tokenResponse = tokenResultResponse.getData();
+        if (tokenResponse != null) {
+            setNewAuthData(constructAuthDataFromTokenResult(tokenResponse, authData), session);
             return tokenResultResponse;
         }
 
         log.error("Error Occurred in token renewal process.");
         tokenResultResponse = constructProxyResponseByErrorCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-//        handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         return tokenResultResponse;
     }
 
@@ -719,17 +681,17 @@ public class HandlerUtil {
         session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, newAuthData);
     }
 
-    public static void setNewDefaultAuthData(AuthData newAuthData, HttpSession session) {
-        authData = newAuthData;
-        session.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newAuthData);
-    }
-
-    public static AuthData constructAuthDataFromTokenResult(JsonElement tokenResult, AuthData authData) {
-        JsonObject jTokenResultAsJsonObject = tokenResult.getAsJsonObject();
+    /**
+     * Construct {@link AuthData} from token response
+     * @param tokenResult {@link JsonNode}
+     * @param authData {@link AuthData} existing auth data values
+     * @return new {@link AuthData} object
+     */
+    public static AuthData constructAuthDataFromTokenResult(JsonNode tokenResult, AuthData authData) {
         AuthData newAuthData = new AuthData();
-        newAuthData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
-        newAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
-        newAuthData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
+        newAuthData.setAccessToken(tokenResult.get("access_token").textValue());
+        newAuthData.setRefreshToken(tokenResult.get("refresh_token").textValue());
+        newAuthData.setScope(tokenResult.get("scope"));
         newAuthData.setClientId(authData.getClientId());
         newAuthData.setClientSecret(authData.getClientSecret());
         newAuthData.setEncodedClientApp(authData.getEncodedClientApp());
@@ -746,7 +708,7 @@ public class HandlerUtil {
      *                            This should be set to <code>false</code> when handling multipart requests as Http
      *                            client will generate the Content-Type header automatically.
      */
-    public static void copyRequestHeaders(HttpServletRequest req, HttpRequestBase httpRequest, boolean preserveContentType) {
+    public static void copyRequestHeaders(HttpServletRequest req, ClassicHttpRequest httpRequest, boolean preserveContentType) {
         Enumeration<String> headerNames = req.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
@@ -772,18 +734,6 @@ public class HandlerUtil {
         return headerValue;
     }
 
-    public static String getResponseString(HttpResponse response) throws IOException {
-        try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
-            StringBuilder responseBuilder = new StringBuilder();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                responseBuilder.append(line);
-            }
-            return responseBuilder.toString();
-        }
-    }
-
-
     public static boolean isPropertyDefined(String property) {
         return StringUtils.isEmpty(System.getProperty(property));
     }
@@ -798,5 +748,46 @@ public class HandlerUtil {
 
     public static String generateStateToken() {
         return new BigInteger(130, new SecureRandom()).toString(32);
+    }
+
+    /**
+     * Get response data and convert data into a json tree
+     * @param responseEntity Incoming {@link HttpEntity}
+     * @return {@link JsonNode} consists with response data content
+     * @throws IOException Throws when IO exception encountered
+     */
+    public static JsonNode getResponseDataAsJsonNode(HttpEntity responseEntity) throws IOException {
+        JsonFactory jsonFactory = new JsonFactory();
+        ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+        JsonNode finalNode;
+        try (InputStream inputStream = responseEntity.getContent()) {
+            String content = getResponseDataAsString(inputStream);
+            try {
+                finalNode = objectMapper.readTree(content);
+            } catch (JsonProcessingException e) {
+                ObjectNode objectNode = objectMapper.createObjectNode();
+                objectNode.put("message", content);
+                finalNode = objectMapper.valueToTree(objectNode);
+            }
+        }
+        return finalNode;
+    }
+
+    /**
+     * Get response content as a string
+     * @param inputStream Incoming response content as a stream
+     * @return String content of the incoming response
+     * @throws IOException Throws when IO exception encountered
+     */
+    public static String getResponseDataAsString(InputStream inputStream) throws IOException {
+        char []buffer = new char[8192];
+        StringBuilder stringBuilder = new StringBuilder();
+        try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            int charsRead;
+            while ((charsRead = reader.read(buffer, 0, buffer.length)) > 0) {
+                stringBuilder.append(buffer, 0, charsRead);
+            }
+        }
+        return stringBuilder.toString();
     }
 }

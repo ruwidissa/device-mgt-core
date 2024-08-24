@@ -18,12 +18,12 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.app.mgt;
 
+import io.entgra.device.mgt.core.device.mgt.core.app.mgt.config.AppManagementConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.device.mgt.core.app.mgt.config.AppManagementConfig;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 

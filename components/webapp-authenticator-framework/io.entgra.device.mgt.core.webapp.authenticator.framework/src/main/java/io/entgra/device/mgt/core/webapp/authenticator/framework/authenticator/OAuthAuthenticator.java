@@ -17,11 +17,6 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
-import org.apache.catalina.connector.Response;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.buf.MessageBytes;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.Constants;
@@ -29,6 +24,11 @@ import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
+import org.apache.catalina.connector.Response;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.tomcat.util.buf.ByteChunk;
+import org.apache.tomcat.util.buf.MessageBytes;
 
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -74,7 +74,7 @@ public class OAuthAuthenticator implements WebappAuthenticator {
         }
         try {
             String bearerToken = getBearerToken(request);
-            bearerToken = bearerToken.substring(bearerToken.indexOf("_")+1);
+//            bearerToken = bearerToken.substring(bearerToken.indexOf("_")+1);
             String resource = requestUri + ":" + requestMethod;
             OAuthValidationResponse oAuthValidationResponse = this.tokenValidator.validateToken(bearerToken, resource);
             authenticationInfo = Utils.setAuthenticationInfo(oAuthValidationResponse, authenticationInfo);

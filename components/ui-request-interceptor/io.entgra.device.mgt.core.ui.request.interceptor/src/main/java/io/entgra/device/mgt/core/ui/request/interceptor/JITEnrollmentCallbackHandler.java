@@ -18,10 +18,12 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITEnrollmentData;
@@ -32,8 +34,8 @@ import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.w3c.dom.Document;
@@ -53,8 +55,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Objects;
+import java.util.*;
 
 @WebServlet(
         name = "JIT Enrollment callback handler",
@@ -75,6 +76,7 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
     private String scope;
     private String JITConfigurationPath;
     private JITEnrollmentData JITEnrollmentInfo;
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         gatewayUrl = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
@@ -130,7 +132,7 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
             } else if (Objects.equals(JITEnrollmentInfo.getOs(), HandlerConstants.OS_IOS)) {
                 enrollmentScopes = (Element) JITConfigurationDoc.
                         getElementsByTagName(HandlerConstants.TAG_IOS_ENROLLMENT_SCOPES).item(0);
-            } else if (Objects.equals(JITEnrollmentInfo.getOs(), HandlerConstants.OS_WINDOWS))  {
+            } else if (Objects.equals(JITEnrollmentInfo.getOs(), HandlerConstants.OS_WINDOWS)) {
                 enrollmentScopes = (Element) JITConfigurationDoc.
                         getElementsByTagName(HandlerConstants.TAG_WINDOWS_ENROLLMENT_SCOPES).item(0);
             } else {
@@ -168,32 +170,42 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
      * @return {@link JsonObject} Json object corresponding to provided json string
      * @throws JITEnrollmentException throws when error occurred while parsing
      */
-    private JsonObject parseResponseData(String data) throws JITEnrollmentException {
-        JsonParser parser = new JsonParser();
-        JsonElement responseData = parser.parse(data);
-        if (responseData.isJsonObject()) {
-            return responseData.getAsJsonObject();
+    private JsonNode parseResponseData(String data) throws JITEnrollmentException {
+
+        JsonFactory jsonFactory = new JsonFactory();
+        ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+        try {
+            return objectMapper.readTree(data);
+        } catch (JsonProcessingException e) {
+            throw new JITEnrollmentException("Unexpected response body return");
         }
-        throw new JITEnrollmentException("Unexpected response body return");
     }
 
     /***
      * Build application registration request
-     * @return {@link HttpPost} Application registration request
+     * @return {@link ClassicHttpRequest} Application registration request
      */
-    private HttpPost buildApplicationRegistrationRequest() {
-        HttpPost applicationRegistrationRequest = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
-        applicationRegistrationRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC
-                + JITInfo.getEncodedClientCredentials());
-        applicationRegistrationRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+    private ClassicHttpRequest buildApplicationRegistrationRequest() {
+
         JsonArray tags = new JsonArray();
         tags.add("device_management");
-        JsonObject payload = new JsonObject();
-        payload.addProperty("applicationName", applicationName);
-        payload.add("tags", tags);
-        payload.addProperty("allowedToAllDomains", false);
-        payload.addProperty("mappingAnExistingOAuthApp", false);
-        applicationRegistrationRequest.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> payload = new HashMap<>();
+
+        payload.put("applicationName", applicationName);
+        payload.put("tags", tags);
+        payload.put("allowedToAllDomains", false);
+        payload.put("mappingAnExistingOAuthApp", false);
+
+        ClassicHttpRequest applicationRegistrationRequest = ClassicRequestBuilder.post(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT)
+                .setEntity(new org.apache.hc.core5.http.io.entity.StringEntity(objectMapper.valueToTree(payload).toString(),
+                        org.apache.hc.core5.http.ContentType.APPLICATION_JSON))
+                .setHeader(org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE,
+                        org.apache.hc.core5.http.ContentType.APPLICATION_JSON.toString())
+                .setHeader(org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
+                        JITInfo.getEncodedClientCredentials())
+                .build();
         return applicationRegistrationRequest;
     }
 
@@ -201,10 +213,10 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
      * Populate dynamic client's data
      * @param application - application data receiving from dcr request
      */
-    private void populateApplicationData(JsonObject application) {
-        clientId = application.get("client_id").getAsString();
-        clientSecret = application.get("client_secret").getAsString();
-        String headerValue = clientId+ ':' + clientSecret;
+    private void populateApplicationData(JsonNode application) {
+        clientId = application.get("client_id").asText();
+        clientSecret = application.get("client_secret").asText();
+        String headerValue = clientId + ':' + clientSecret;
         encodedClientCredentials = Base64.getEncoder().encodeToString(headerValue.getBytes());
     }
 
@@ -213,12 +225,12 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
      * @return {@link JsonObject} Json object contain registered application data
      * @throws JITEnrollmentException throws when error occurred while application registration
      */
-    private JsonObject registerApplication() throws JITEnrollmentException {
+    private JsonNode registerApplication() throws JITEnrollmentException {
         try {
             ProxyResponse proxyResponse = HandlerUtil.execute(buildApplicationRegistrationRequest());
             if (proxyResponse.getCode() == HttpStatus.SC_CREATED ||
                     proxyResponse.getCode() == HttpStatus.SC_OK) {
-                return parseResponseData(proxyResponse.getData());
+                return parseResponseData(proxyResponse.getData().toString());
             }
             throw new JITEnrollmentException("Unexpected response status return for application registration request");
         } catch (IOException ex) {
@@ -231,12 +243,12 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
      * @return {@link JsonObject} Json object containing token data
      * @throws JITEnrollmentException throws when error occurred while acquiring token
      */
-    private JsonObject getToken() throws JITEnrollmentException {
+    private JsonNode getToken() throws JITEnrollmentException {
         try {
             ProxyResponse proxyResponse = HandlerUtil.execute(buildTokenAcquireRequest());
             if (proxyResponse.getCode() == org.apache.http.HttpStatus.SC_CREATED ||
                     proxyResponse.getCode() == org.apache.http.HttpStatus.SC_OK) {
-                return parseResponseData(proxyResponse.getData());
+                return parseResponseData(proxyResponse.getData().toString());
             }
             throw new JITEnrollmentException("Unexpected response status return for token acquiring request");
         } catch (IOException ex) {
@@ -246,17 +258,19 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
 
     /***
      * Build token acquire request
-     * @return {@link HttpPost} Token acquire request
+     * @return {@link ClassicHttpRequest} Token acquire request
      */
-    private HttpPost buildTokenAcquireRequest() {
-        HttpPost tokenAcquiringRequest = new HttpPost(keyManagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT);
-        tokenAcquiringRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
-        tokenAcquiringRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC
-                + encodedClientCredentials);
+    private ClassicHttpRequest buildTokenAcquireRequest() {
+
         StringEntity payload = new StringEntity(
                 "grant_type=" + HandlerConstants.CLIENT_CREDENTIAL_GRANT_TYPE + "&scope=" + scope,
                 ContentType.APPLICATION_FORM_URLENCODED);
-        tokenAcquiringRequest.setEntity(payload);
+
+        ClassicHttpRequest tokenAcquiringRequest = ClassicRequestBuilder.post(keyManagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT)
+                .setHeader(org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
+                .setHeader(org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientCredentials)
+                .setEntity(new org.apache.hc.core5.http.io.entity.StringEntity(payload.toString(), org.apache.hc.core5.http.ContentType.APPLICATION_JSON))
+                .build();
         return tokenAcquiringRequest;
     }
 
@@ -265,13 +279,13 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
      * @param session   - {@link HttpSession}
      * @param token     - Json object containing token data
      */
-    private void persistAuthData(HttpSession session, JsonObject token) {
+    private void persistAuthData(HttpSession session, JsonNode token) {
         AuthData authData = new AuthData();
-        authData.setAccessToken(token.get("access_token").getAsString());
+        authData.setAccessToken(token.get("access_token").asText());
         authData.setClientId(clientId);
         authData.setClientSecret(clientSecret);
         authData.setEncodedClientApp(encodedClientCredentials);
-        authData.setScope(token.get("scope").getAsString());
+        authData.setScope(token.get("scope"));
         session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
     }
 }

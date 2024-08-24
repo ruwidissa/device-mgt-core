@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.config;
 
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
+import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.bind.JAXBContext;

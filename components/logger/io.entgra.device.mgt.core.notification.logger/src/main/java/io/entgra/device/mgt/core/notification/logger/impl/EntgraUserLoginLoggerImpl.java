@@ -23,7 +23,7 @@ import io.entgra.device.mgt.core.notification.logger.UserLoginLogContext;
 import io.entgra.device.mgt.core.notification.logger.util.MDCContextUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.MDC;
+import org.slf4j.MDC;
 
 public class EntgraUserLoginLoggerImpl implements EntgraLogger {
 

@@ -18,19 +18,9 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
-import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
-import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
-import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
-import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
-import org.wso2.carbon.tomcat.ext.valves.TomcatValveContainer;
-import org.wso2.carbon.user.core.service.RealmService;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.WebappAuthenticationValve;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.WebappAuthenticatorRepository;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
@@ -38,60 +28,30 @@ import io.entgra.device.mgt.core.webapp.authenticator.framework.config.Authentic
 import io.entgra.device.mgt.core.webapp.authenticator.framework.config.AuthenticatorConfigService;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.config.WebappAuthenticatorConfig;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.config.impl.AuthenticatorConfigServiceImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
+import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
+import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
+import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
+import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
+import org.wso2.carbon.tomcat.ext.valves.TomcatValveContainer;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-/**
- * @scr.component name="org.wso2.carbon.webapp.authenticator" immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="org.wso2.carbon.certificate.mgt"
- * interface="io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService"
- * policy="dynamic"
- * cardinality="1..n"
- * bind="setCertificateManagementService"
- * unbind="unsetCertificateManagementService"
- * @scr.reference name="io.entgra.device.mgt.core.certificate.mgt.core.scep"
- * interface="io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager"
- * policy="dynamic"
- * cardinality="1..n"
- * bind="setSCEPManagementService"
- * unbind="unsetSCEPManagementService"
- * @scr.reference name="identity.oauth2.validation.service"
- * interface="org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setOAuth2ValidationService"
- * unbind="unsetOAuth2ValidationService"
- * @scr.reference name="tenant.indexloader"
- * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTenantIndexLoader"
- * unbind="unsetTenantIndexLoader"
- * @scr.reference name="tenant.registryloader"
- * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
- * cardinality="1..1" policy="dynamic"
- * bind="setTenantRegistryLoader"
- * unbind="unsetTenantRegistryLoader"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setOTPManagementService"
- * unbind="unsetOTPManagementService"
- */
-
+@Component(
+        name = "io.entgra.device.mgt.core.webapp.authenticator.framework.internal.WebappAuthenticatorFrameworkServiceComponent",
+        immediate = true)
 public class WebappAuthenticatorFrameworkServiceComponent {
     private static final Log log = LogFactory.getLog(WebappAuthenticatorFrameworkServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Starting Web Application Authenticator Framework Bundle");
@@ -134,10 +94,17 @@ public class WebappAuthenticatorFrameworkServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("RealmService acquired");
@@ -149,6 +116,12 @@ public class WebappAuthenticatorFrameworkServiceComponent {
         AuthenticatorFrameworkDataHolder.getInstance().setRealmService(null);
     }
 
+    @Reference(
+            name = "certificate.mgt.service",
+            service =  io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetCertificateManagementService")
     protected void setCertificateManagementService(CertificateManagementService certificateManagementService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting certificate management service");
@@ -164,6 +137,12 @@ public class WebappAuthenticatorFrameworkServiceComponent {
         AuthenticatorFrameworkDataHolder.getInstance().setCertificateManagementService(null);
     }
 
+    @Reference(
+            name = "scep.mgr",
+            service =  io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetSCEPManagementService")
     protected void setSCEPManagementService(SCEPManager scepManager) {
         if (log.isDebugEnabled()) {
             log.debug("Setting SCEP management service");
@@ -184,6 +163,12 @@ public class WebappAuthenticatorFrameworkServiceComponent {
      *
      * @param tokenValidationService An instance of OAuth2TokenValidationService
      */
+    @Reference(
+            name = "oauth2.token.validation.service",
+            service =  org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOAuth2ValidationService")
     protected void setOAuth2ValidationService(OAuth2TokenValidationService tokenValidationService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting OAuth2TokenValidationService Service");
@@ -203,6 +188,12 @@ public class WebappAuthenticatorFrameworkServiceComponent {
         AuthenticatorFrameworkDataHolder.getInstance().setOAuth2TokenValidationService(null);
     }
 
+    @Reference(
+            name = "tenant.index.loader",
+            service = org.wso2.carbon.registry.indexing.service.TenantIndexingLoader.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantIndexLoader")
     protected void setTenantIndexLoader(TenantIndexingLoader tenantIndexLoader) {
         AuthenticatorFrameworkDataHolder.getInstance().setTenantIndexingLoader(tenantIndexLoader);
     }
@@ -211,6 +202,12 @@ public class WebappAuthenticatorFrameworkServiceComponent {
         AuthenticatorFrameworkDataHolder.getInstance().setTenantIndexingLoader(null);
     }
 
+    @Reference(
+            name = "tenant.registry.loader",
+            service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantRegistryLoader")
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         AuthenticatorFrameworkDataHolder.getInstance().setTenantRegistryLoader(tenantRegistryLoader);
     }
@@ -219,6 +216,12 @@ public class WebappAuthenticatorFrameworkServiceComponent {
         AuthenticatorFrameworkDataHolder.getInstance().setTenantRegistryLoader(null);
     }
 
+    @Reference(
+            name = "otp.mgt.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOTPManagementService")
     protected void setOTPManagementService(OTPManagementService otpManagementService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting OTP Management OSGI Service");

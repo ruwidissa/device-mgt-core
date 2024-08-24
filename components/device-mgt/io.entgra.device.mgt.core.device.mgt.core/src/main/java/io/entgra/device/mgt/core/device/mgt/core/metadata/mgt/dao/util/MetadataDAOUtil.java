@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.util;
 
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -26,12 +26,11 @@ import io.entgra.device.mgt.core.device.mgt.core.config.cache.CertificateCacheCo
 import io.entgra.device.mgt.core.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.enrollment.guide.EnrollmentGuideConfiguration;
-import io.entgra.device.mgt.core.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
-import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
-import io.entgra.device.mgt.core.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.geo.location.GeoLocationConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.identity.IdentityConfigurations;
 import io.entgra.device.mgt.core.device.mgt.core.config.keymanager.KeyManagerConfigurations;
+import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.pagination.PaginationConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.pull.notification.PullNotificationConfiguration;
@@ -39,6 +38,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.PushNo
 import io.entgra.device.mgt.core.device.mgt.core.config.remote.session.RemoteSessionConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.status.task.DeviceStatusTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.task.TaskConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
 
 import javax.xml.bind.annotation.XmlElement;

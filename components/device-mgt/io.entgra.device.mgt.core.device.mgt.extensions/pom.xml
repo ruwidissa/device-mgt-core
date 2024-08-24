@@ -31,9 +31,14 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Device Management Extensions</name>
     <description>WSO2 Carbon - Device Management Extensions</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
@@ -61,6 +66,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
@@ -73,7 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -87,8 +98,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -106,10 +117,10 @@
             <artifactId>org.wso2.carbon.governance.registry.extensions</artifactId>
             <scope>test</scope>
             <exclusions>
-            <exclusion>
-                <groupId>jaxen</groupId>
-                <artifactId>jaxen</artifactId>
-            </exclusion>
+                <exclusion>
+                    <groupId>jaxen</groupId>
+                    <artifactId>jaxen</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -136,14 +147,28 @@
             <artifactId>org.apache.sling.testing.osgi-mock</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -159,34 +184,56 @@
                             io.entgra.device.mgt.core.device.mgt.extensions.*
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.governance.api.*,
-                            javax.xml.namespace;resolution:=optional,
-                            org.wso2.carbon.context,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            org.wso2.carbon.registry.api,
-                            org.wso2.carbon.registry.core,
-                            org.wso2.carbon.registry.core.exceptions,
-                            org.wso2.carbon.registry.core.session,
-                            org.wso2.carbon.base,
-							javax.xml.bind,
-							org.apache.commons.logging,
-							org.wso2.carbon.utils,
-							javax.naming,
-							javax.sql,
-							javax.xml,
-							javax.xml.bind.annotation,
-                            javax.xml.stream,
-							javax.xml.parsers;resolution:=optional,
-							org.apache.commons.lang,
+                            com.google.gson;version="[2.9,3)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.app.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.configuration.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.general;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.invitation.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.license.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.metadata.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.pull.notification;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.push.notification;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.type.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template,
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config,
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao,
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception,
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.feature,
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.policy.mgt,
+                            io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.pull.notification,
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.spi,
+                            javax.naming,
+                            javax.sql,
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.bind.annotation;version="[0.0,1)",
+                            javax.xml.namespace,
+                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",
+                            javax.xml.stream;version="[1.0,2)",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-							org.w3c.dom,
-							org.wso2.carbon.ndatasource.core,
-							org.wso2.carbon.registry.core.service,
-							org.wso2.carbon.utils.dbcreator,
-							org.wso2.carbon.utils.multitenancy,
-                            io.entgra.device.mgt.core.device.mgt.core.service,
-                            com.google.gson
+                            org.w3c.dom,
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.governance.api.exception;version="[4.8,5)",
+                            org.wso2.carbon.governance.api.generic;version="[4.8,5)",
+                            org.wso2.carbon.governance.api.generic.dataobjects;version="[4.8,5)",
+                            org.wso2.carbon.governance.api.util;version="[4.8,5)",
+                            org.wso2.carbon.ndatasource.core;version="[4.8,5)",
+                            org.wso2.carbon.registry.api;version="[1.0,2)",
+                            org.wso2.carbon.registry.core;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.exceptions;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.service;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.session;version="[1.0,2)",
+                            org.wso2.carbon.utils;version="[4.8,5)",
+                            org.wso2.carbon.utils.dbcreator;version="[4.8,5)"
                         </Import-Package>
 						<DynamicImport-Package>io.entgra.device.mgt.core.device.mgt.extensions.pull.notification,
 							io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.*</DynamicImport-Package>
@@ -228,8 +275,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-    
 </project>

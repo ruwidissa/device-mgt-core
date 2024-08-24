@@ -18,28 +18,23 @@
 
 package io.entgra.device.mgt.core.device.mgt.url.printer.internal;
 
+import io.entgra.device.mgt.core.device.mgt.url.printer.URLPrinterStartupHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.core.ServerStartupObserver;
-import io.entgra.device.mgt.core.device.mgt.url.printer.URLPrinterStartupHandler;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-/**
- * @scr.component name="UrlPrinterServiceComponent"
- * immediate="true"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.url.printer.internal.UrlPrinterServiceComponent",
+        immediate = true)
 public class UrlPrinterServiceComponent {
 
     private static final Log log = LogFactory.getLog(UrlPrinterServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("Activating Url printer Service Component");
@@ -54,13 +49,19 @@ public class UrlPrinterServiceComponent {
             log.error("Error occurred while activating Url printer Service Component", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Url printer Service Component");
         }
     }
 
+    @Reference(
+            name = "configuration.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ConfigurationContextService");

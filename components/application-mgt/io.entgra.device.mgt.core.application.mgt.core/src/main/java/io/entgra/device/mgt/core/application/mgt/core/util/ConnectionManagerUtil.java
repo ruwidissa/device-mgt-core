@@ -17,16 +17,16 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.TransactionManagementException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * ConnectionManagerUtil is responsible for handling all the datasource connections utilities.

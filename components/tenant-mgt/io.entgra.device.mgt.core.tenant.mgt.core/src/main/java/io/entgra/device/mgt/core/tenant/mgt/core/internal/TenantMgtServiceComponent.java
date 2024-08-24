@@ -18,6 +18,8 @@
 package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
@@ -30,33 +32,20 @@ import io.entgra.device.mgt.core.tenant.mgt.core.listener.DeviceMgtTenantListene
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.tenant.manager" immediate="true"
- * @scr.reference name="org.wso2.carbon.application.mgt.service"
- * interface="io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setApplicationManager"
- * unbind="unsetApplicationManager"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- */
-
+@Component(
+        name = "io.entgra.device.mgt.core.tenant.mgt.core.internal.TenantMgtServiceComponent",
+        immediate = true)
 @SuppressWarnings("unused")
 public class TenantMgtServiceComponent {
 
     private static final Log log = LogFactory.getLog(TenantManagerService.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             TenantManagerService tenantManagerService = new TenantManagerServiceImpl();
@@ -91,10 +80,17 @@ public class TenantMgtServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         // nothing to do
     }
 
+    @Reference(
+            name = "application.mgr",
+            service = io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetApplicationManager")
     protected void setApplicationManager(ApplicationManager applicationManager) {
         if(log.isDebugEnabled()) {
             log.info("Application manager service is binding");
@@ -109,6 +105,12 @@ public class TenantMgtServiceComponent {
         TenantMgtDataHolder.getInstance().setApplicationManager(null);
     }
 
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if(log.isDebugEnabled()) {
             log.info("Realm Service service is binding");

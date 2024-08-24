@@ -18,6 +18,10 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import org.apache.catalina.connector.Request;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.MimeHeaders;
@@ -25,10 +29,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.MultitenantConstants;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 
 import java.io.File;
 import java.io.FileInputStream;

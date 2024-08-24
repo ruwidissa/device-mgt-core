@@ -17,6 +17,11 @@
  */
 package io.entgra.device.mgt.core.identity.jwt.client.extension.service;
 
+import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -30,11 +35,6 @@ import org.testng.IObjectFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -43,9 +43,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import org.powermock.modules.testng.PowerMockTestCase;
 
 @PrepareForTest(JWTClientUtil.class)
-public class JWTClientTest {
+public class JWTClientTest extends PowerMockTestCase{
     private static final Log log = LogFactory.getLog(JWTClientTest.class);
 
     @ObjectFactory

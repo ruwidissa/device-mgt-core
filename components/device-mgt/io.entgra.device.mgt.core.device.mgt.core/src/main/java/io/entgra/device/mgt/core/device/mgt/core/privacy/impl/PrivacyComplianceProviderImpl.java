@@ -19,9 +19,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.privacy.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -32,6 +29,9 @@ import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHo
 import io.entgra.device.mgt.core.device.mgt.core.privacy.PrivacyComplianceProvider;
 import io.entgra.device.mgt.core.device.mgt.core.privacy.dao.PrivacyComplianceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.privacy.dao.PrivacyComplianceDAOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;

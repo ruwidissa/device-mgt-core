@@ -19,20 +19,15 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
-import org.json.JSONObject;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.RequestBody;
-import okhttp3.Credentials;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
+import okhttp3.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -51,7 +46,7 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
     @Override
-    public APIApplicationKey createAndRetrieveApplicationCredentials() throws APIServicesException {
+    public APIApplicationKey createAndRetrieveApplicationCredentials(String clientName, String grantType) throws APIServicesException {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String serverUser = getScopePublishUserName(tenantDomain);
         String serverPassword = getScopePublishUserPassword(tenantDomain);
@@ -60,8 +55,8 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
-        jsonObject.put("clientName", Constants.CLIENT_NAME);
-        jsonObject.put("grantType", Constants.GRANT_TYPE);
+        jsonObject.put("clientName", clientName);
+        jsonObject.put("grantType", grantType);
         jsonObject.put("owner", serverUser);
         jsonObject.put("saasApp", true);
 
@@ -76,6 +71,35 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             try (Response response = client.newCall(request).execute()) {
                 return gson.fromJson(response.body().string(), APIApplicationKey.class);
             }
+        } catch (IOException e) {
+            msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public APIApplicationKey createAndRetrieveApplicationCredentialsWithUser(String clientName, String username, String password, String grantType)
+            throws APIServicesException {
+
+        String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
+        jsonObject.put("clientName", clientName);
+        jsonObject.put("grantType", grantType);
+        jsonObject.put("owner", username);
+        jsonObject.put("saasApp", true);
+
+        RequestBody requestBody = RequestBody.Companion.create(jsonObject.toString(), JSON);
+        Request request = new Request.Builder()
+                .url(applicationEndpoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic(username, password))
+                .post(requestBody)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            return gson.fromJson(response.body().string(), APIApplicationKey.class);
         } catch (IOException e) {
             msg = "Error occurred while processing the response";
             log.error(msg, e);

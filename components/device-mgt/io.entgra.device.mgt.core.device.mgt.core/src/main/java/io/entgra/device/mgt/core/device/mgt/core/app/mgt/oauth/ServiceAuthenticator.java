@@ -18,10 +18,10 @@
 package io.entgra.device.mgt.core.device.mgt.core.app.mgt.oauth;
 
 
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.transport.http.HttpTransportProperties;
-import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 
 /**
  * Authenticate a given service client.

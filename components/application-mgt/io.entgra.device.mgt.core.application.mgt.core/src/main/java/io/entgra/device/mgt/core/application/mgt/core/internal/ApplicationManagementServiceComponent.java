@@ -33,60 +33,33 @@ import io.entgra.device.mgt.core.application.mgt.core.impl.FileTransferServiceIm
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
-import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.List;
 
-/**
- * @scr.component name="org.wso2.carbon.application.mgt.service" immediate="true"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- * @scr.reference name="realm.service"
- * immediate="true"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="datasource.service"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- * @scr.reference name="app.mgt.ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- * @scr.reference name="io.entgra.device.mgt.core.tenant.manager"
- * interface="io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setTenantManagementAdminService"
- * unbind="unsetTenantManagementAdminService"
- */
+
 @SuppressWarnings("unused")
+@Component(
+        name = "io.entgra.device.mgt.core.application.mgt.core.internal.ApplicationManagementServiceComponent",
+        immediate = true)
 public class ApplicationManagementServiceComponent {
 
     private static Log log = LogFactory.getLog(ApplicationManagementServiceComponent.class);
 
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         BundleContext bundleContext = componentContext.getBundleContext();
         try {
@@ -147,11 +120,18 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ApplicationDTO Management OSGI Manager");
@@ -168,6 +148,12 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         DataHolder.getInstance().setRealmService(realmService);
     }
@@ -178,6 +164,12 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /*Not implemented. Not needed but to make sure the datasource service are registered, as it is needed create
          databases. */
@@ -190,6 +182,12 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "task.service",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskService")
     public void setTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the task service to Application Management SC.");
@@ -203,21 +201,5 @@ public class ApplicationManagementServiceComponent {
             log.debug("Removing the task service from Application Management SC");
         }
         DataHolder.getInstance().setTaskService(null);
-    }
-
-    @SuppressWarnings("unused")
-    protected void setTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting Tenant management admin Service");
-        }
-        DataHolder.getInstance().setTenantManagerAdminService(tenantManagerAdminService);
-    }
-
-    @SuppressWarnings("unused")
-    protected void unsetTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Un setting Tenant management admin service");
-        }
-        DataHolder.getInstance().setTenantManagerAdminService(null);
     }
 }

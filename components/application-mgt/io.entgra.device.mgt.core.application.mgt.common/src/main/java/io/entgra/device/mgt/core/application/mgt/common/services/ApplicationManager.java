@@ -28,7 +28,6 @@ import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
@@ -548,18 +547,18 @@ public interface ApplicationManager {
     void deleteApplicationDataOfTenant(int tenantId) throws ApplicationManagementException;
 
     /**
-     * Delete all application related data of a tenant by tenant Domain
+     * Delete all application related data of a tenant by tenant Id
      *
-     * @param tenantDomain Domain of the Tenant
+     * @param tenantId Id of the Tenant
      * @throws ApplicationManagementException thrown if an error occurs when deleting data
      */
-    void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException;
+    void deleteApplicationDataByTenantId(int tenantId) throws ApplicationManagementException;
 
     /**
-     * Delete all Application artifacts related to a tenant by Tenant Domain
+     * Delete all Application artifacts related to a tenant by Tenant Id
      *
-     * @param tenantDomain Domain of the Tenant
+     * @param tenantId Id of the Tenant
      * @throws ApplicationManagementException thrown if an error occurs when deleting app folders
      */
-    void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException;
+    void deleteApplicationArtifactsByTenantId(int tenantId) throws ApplicationManagementException;
 }

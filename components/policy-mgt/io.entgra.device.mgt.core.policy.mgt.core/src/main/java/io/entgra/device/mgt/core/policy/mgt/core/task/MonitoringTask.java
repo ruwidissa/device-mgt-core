@@ -18,10 +18,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringManager;
@@ -31,6 +27,10 @@ import io.entgra.device.mgt.core.device.mgt.core.task.impl.DynamicPartitionedSch
 import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.MonitoringManager;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
 import java.util.List;

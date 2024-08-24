@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -33,6 +34,8 @@ public class APIManagerServiceDataHolder {
     private TenantManager tenantManager;
 
     private static APIManagerServiceDataHolder thisInstance = new APIManagerServiceDataHolder();
+
+    private ConsumerRESTAPIServices consumerRESTAPIServices;
 
     private APIManagerServiceDataHolder() {
     }
@@ -59,6 +62,7 @@ public class APIManagerServiceDataHolder {
         }
         return apiManagerConfigurationService;
     }
+
 
     public PublisherRESTAPIServices getPublisherRESTAPIServices() {
         return publisherRESTAPIServices;
@@ -89,5 +93,13 @@ public class APIManagerServiceDataHolder {
             throw new IllegalStateException("Realm service is not initialized properly");
         }
         this.tenantManager = realmService.getTenantManager();
+    }
+
+    public ConsumerRESTAPIServices getConsumerRESTAPIServices() {
+        return consumerRESTAPIServices;
+    }
+
+    public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        this.consumerRESTAPIServices = consumerRESTAPIServices;
     }
 }

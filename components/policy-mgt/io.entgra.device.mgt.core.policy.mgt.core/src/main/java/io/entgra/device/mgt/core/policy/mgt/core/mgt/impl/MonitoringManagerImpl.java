@@ -18,8 +18,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
@@ -40,15 +38,13 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.common.monitor.ComplianceDecisionPoint;
 import io.entgra.device.mgt.core.policy.mgt.common.monitor.PolicyDeviceWrapper;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.MonitoringDAO;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.MonitoringDAOException;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyDAO;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagerDAOException;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.*;
 import io.entgra.device.mgt.core.policy.mgt.core.impl.ComplianceDecisionPointImpl;
 import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.MonitoringManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

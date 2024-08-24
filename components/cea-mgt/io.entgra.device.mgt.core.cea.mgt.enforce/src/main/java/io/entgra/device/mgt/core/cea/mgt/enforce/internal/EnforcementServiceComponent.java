@@ -25,27 +25,16 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.cea.mgt.enforcementServiceManager" immediate="true"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementServiceProviderService"
- * unbind="unsetDeviceManagementServiceProviderService"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- */
-
+@Component(
+        name = "io.entgra.device.mgt.core.cea.mgt.enforcementServiceManager",
+        immediate = true)
 public class EnforcementServiceComponent {
     private static final Log log = LogFactory.getLog(EnforcementServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             EnforcementServiceManager enforcementServiceManager = new EnforcementServiceManagerImpl();
@@ -60,6 +49,13 @@ public class EnforcementServiceComponent {
         }
     }
 
+    @Reference(
+            name = "org.wso2.carbon.device.manager",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setDeviceManagementServiceProviderService",
+            unbind = "unsetDeviceManagementServiceProviderService")
     protected void setDeviceManagementServiceProviderService(DeviceManagementProviderService deviceManagementProviderService) {
         EnforcementServiceComponentDataHolder.getInstance().setDeviceManagementProviderService(deviceManagementProviderService);
         if (log.isDebugEnabled()) {
@@ -74,6 +70,13 @@ public class EnforcementServiceComponent {
         }
     }
 
+    @Reference(
+            name = "user.realmservice.default",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setRealmService",
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         EnforcementServiceComponentDataHolder.getInstance().setRealmService(realmService);
         if (log.isDebugEnabled()) {

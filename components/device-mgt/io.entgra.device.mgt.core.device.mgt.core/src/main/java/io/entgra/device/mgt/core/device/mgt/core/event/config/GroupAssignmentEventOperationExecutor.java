@@ -19,9 +19,6 @@
 package io.entgra.device.mgt.core.device.mgt.core.event.config;
 
 import com.google.gson.Gson;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfigurationException;
@@ -40,6 +37,9 @@ import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHo
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMgtConstants;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;

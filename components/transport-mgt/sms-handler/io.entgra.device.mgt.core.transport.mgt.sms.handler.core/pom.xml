@@ -36,10 +36,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
@@ -66,6 +62,14 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -77,14 +81,19 @@
                         <Bundle-Description>SMS Management Core Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.transport.mgt.sms.handler.core.internal</Private-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.*,
-                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            javax.xml.bind.annotation,
-                            javax.xml.bind,
-                            org.apache.commons.lang,
-                            org.wso2.carbon,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            io.entgra.device.mgt.core.device.mgt.core.*
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.bean;version="[5.0,6)",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.core.config,
+                            javax.xml.bind;version="[0.0,1)",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.w3c.dom,
+                            org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.transport.mgt.sms.handler.core.internal,
@@ -99,8 +108,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -121,6 +135,11 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

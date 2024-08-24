@@ -19,6 +19,8 @@
 package io.entgra.device.mgt.core.ui.request.interceptor.exceptions;
 
 public class LoginException extends Exception {
+    private static final long serialVersionUID = -6376045524044788791L;
+
     public LoginException(String message) {
         super(message);
     }

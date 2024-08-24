@@ -17,12 +17,12 @@
  */
 package io.entgra.device.mgt.core.task.mgt.core.internal;
 
-import io.entgra.device.mgt.core.task.mgt.core.dao.common.TaskManagementDAOFactory;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
-import io.entgra.device.mgt.core.task.mgt.core.config.TaskManagementConfig;
-import io.entgra.device.mgt.core.task.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService;
 import io.entgra.device.mgt.core.task.mgt.core.config.TaskConfigurationManager;
+import io.entgra.device.mgt.core.task.mgt.core.config.TaskManagementConfig;
+import io.entgra.device.mgt.core.task.mgt.core.config.datasource.DataSourceConfig;
+import io.entgra.device.mgt.core.task.mgt.core.dao.common.TaskManagementDAOFactory;
 import io.entgra.device.mgt.core.task.mgt.core.service.TaskManagementServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,32 +30,16 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
+import org.osgi.service.component.annotations.*;
 
-/**
- * @scr.component name="io.entgra.task.mgt.service" immediate="true"
- * @scr.reference name="datasource.service"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- * @scr.reference name="app.mgt.ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- * @scr.reference name="entgra.heart.beat.service"
- * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setHeartBeatService"
- * unbind="unsetHeartBeatService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.task.mgt.core.internal.TaskManagerServiceComponent",
+        immediate = true)
 public class TaskManagerServiceComponent {
 
     private static final Log log = LogFactory.getLog(TaskManagerServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
 
         if (log.isDebugEnabled()) {
@@ -80,13 +64,19 @@ public class TaskManagerServiceComponent {
             log.error("Error occurred while activating Task Manager Service Component", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Task Manager Service Component");
         }
     }
 
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /* This is to avoid Task Manager Service Component getting initialized before the underlying datasources
         are registered */
@@ -99,6 +89,12 @@ public class TaskManagerServiceComponent {
         //do nothing
     }
 
+    @Reference(
+            name = "task.service",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskService")
     @SuppressWarnings("unused")
     public void setTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
@@ -115,6 +111,12 @@ public class TaskManagerServiceComponent {
         TaskManagerDataHolder.getInstance().setnTaskService(null);
     }
 
+    @Reference(
+            name = "heartbeat.service",
+            service = io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetHeartBeatService")
     @SuppressWarnings("unused")
     protected void setHeartBeatService(HeartBeatManagementService heartBeatService) {
         if (log.isDebugEnabled()) {

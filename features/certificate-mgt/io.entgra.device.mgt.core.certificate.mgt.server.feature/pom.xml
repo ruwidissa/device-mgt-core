@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.certificate.mgt.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Certificate Management Server Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains the core bundles required for back-end Certificate Management functionality
     </description>
 
@@ -48,7 +48,7 @@
             <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.google.code.jscep</groupId>
+            <groupId>io.entgra.com.google.code.jscep</groupId>
             <artifactId>jscep</artifactId>
         </dependency>
         <dependency>
@@ -73,7 +73,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -124,7 +123,7 @@
                                     org.wso2.orbit.org.bouncycastle:bcpkix-jdk15on:${bcpkix.wso2.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.orbit.com.google.code.jscep:jscep:${jscep.version}
+                                    io.entgra.com.google.code.jscep:jscep:${jscep.version}
                                 </bundleDef>
                                 <bundleDef>
                                     commons-io.wso2:commons-io:${version.commons.io}
