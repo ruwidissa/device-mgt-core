@@ -71,6 +71,8 @@ public class LoginHandler extends HttpServlet {
                 httpSession.invalidate();
             }
             httpSession = req.getSession(true);
+            final String baseContextPath = req.getContextPath();
+            final String applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler")) + "-login";
 
             JsonNode uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession,
                     resp);
@@ -83,14 +85,16 @@ public class LoginHandler extends HttpServlet {
 
             // Check if OAuth app cache exists. If not create a new application.
             LoginCache loginCache = HandlerUtil.getLoginCache(httpSession);
-            OAuthAppCacheKey oAuthAppCacheKey = new OAuthAppCacheKey(HandlerConstants.PUBLISHER_APPLICATION_NAME, username);
+            OAuthAppCacheKey oAuthAppCacheKey = new OAuthAppCacheKey(applicationName, username);
             OAuthApp oAuthApp = loginCache.getOAuthAppCache(oAuthAppCacheKey);
 
             if (oAuthApp == null) {
-
+                ArrayList<String> supportedGrantTypes = new ArrayList<>();
+                supportedGrantTypes.add(HandlerConstants.PASSWORD_GRANT_TYPE);
+                supportedGrantTypes.add(HandlerConstants.REFRESH_TOKEN_GRANT_TYPE);
                 ClassicHttpRequest apiRegEndpoint = ClassicRequestBuilder.post(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT)
-                        .setEntity(HandlerUtil.constructAppRegPayload(tags, HandlerConstants.PUBLISHER_APPLICATION_NAME,
-                                username, password, null, null))
+                        .setEntity(HandlerUtil.constructAppRegPayload(tags, applicationName,
+                                username, password, null, supportedGrantTypes))
                         .setHeader(org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE,
                                 org.apache.hc.core5.http.ContentType.APPLICATION_JSON.toString())
                         .setHeader(org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder().encodeToString((username + HandlerConstants.COLON + password).getBytes()))
@@ -114,7 +118,7 @@ public class LoginHandler extends HttpServlet {
                         encodedClientApp = Base64.getEncoder()
                                 .encodeToString((clientId + HandlerConstants.COLON + clientSecret).getBytes());
                         oAuthApp = new OAuthApp(
-                                HandlerConstants.PUBLISHER_APPLICATION_NAME,
+                                applicationName,
                                 username,
                                 clientId,
                                 clientSecret,
