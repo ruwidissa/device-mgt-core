@@ -23,6 +23,7 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
+import io.entgra.device.mgt.core.application.mgt.common.ReleaseVersionInfo;
 import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
@@ -2047,6 +2048,52 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
+    }
+
+    @Override
+    public List<ReleaseVersionInfo> getApplicationReleaseVersions(String uuid, int tenantId) throws ApplicationManagementDAOException {
+        List<ReleaseVersionInfo> releaseVersionInfos = new ArrayList<>();
+        String sql = "SELECT VERSION, " +
+                "RELEASE_TYPE, " +
+                "RATING, " +
+                "CURRENT_STATE, " +
+                "UUID FROM " +
+                "AP_APP_RELEASE WHERE " +
+                "AP_APP_ID=" +
+                "(SELECT AP_APP_ID " +
+                "FROM AP_APP_RELEASE " +
+                "WHERE UUID = ? " +
+                "AND TENANT_ID = ?)";
+        try {
+            Connection connection = getDBConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, uuid);
+                preparedStatement.setInt(2, tenantId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    ReleaseVersionInfo releaseVersionInfo;
+                    while(resultSet.next()) {
+                        releaseVersionInfo = new ReleaseVersionInfo();
+                        releaseVersionInfo.setVersion(resultSet.getString("VERSION"));
+                        releaseVersionInfo.setReleaseType(resultSet.getString("RELEASE_TYPE"));
+                        releaseVersionInfo.setRating(resultSet.getString("RATING"));
+                        releaseVersionInfo.setState(resultSet.getString("CURRENT_STATE"));
+                        releaseVersionInfo.setUuid(resultSet.getString("UUID"));
+                        releaseVersionInfos.add(releaseVersionInfo);
+                    }
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error encountered while acquiring database connection to get available release versions for " +
+                    "UUID : " + uuid ;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while getting available release versions for : " + uuid +
+                    "Executed query : [" + sql + "]";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+        return releaseVersionInfos;
     }
 
 }

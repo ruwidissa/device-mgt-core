@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.application.mgt.common.services;
 
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
+import io.entgra.device.mgt.core.application.mgt.common.ReleaseVersionInfo;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
@@ -561,4 +562,12 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException thrown if an error occurs when deleting app folders
      */
     void deleteApplicationArtifactsByTenantId(int tenantId) throws ApplicationManagementException;
+
+    /**
+     * Extract and retrieve application release version data for a given UUID
+     * @param uuid UUID of the application
+     * @return List of {@link ReleaseVersionInfo}
+     * @throws ApplicationManagementException throws when error encountered while retrieving data
+     */
+    List<ReleaseVersionInfo> getApplicationReleaseVersions(String uuid) throws ApplicationManagementException;
 }
