@@ -936,7 +936,7 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                 isOwnershipProvided = true;
             }
             if (user != null && !user.isEmpty()) {
-                query += " AND e.OWNER = ?";
+                query += " AND e.OWNER LIKE ?";
                 isOwnerProvided = true;
             }
             if (status != null && !status.isEmpty()) {
@@ -967,13 +967,13 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                 ps.setString(index++, EnrolmentInfo.Status.REMOVED.toString());
                 ps.setString(index++, EnrolmentInfo.Status.DELETED.toString());
                 if (isDeviceNameProvided) {
-                    ps.setString(index++, name + "%");
+                    ps.setString(index++, "%" + name + "%");
                 }
                 if (isOwnershipProvided) {
                     ps.setString(index++, ownership);
                 }
                 if (isOwnerProvided) {
-                    ps.setString(index++, user);
+                    ps.setString(index++, "%" + user + "%");
                 }
                 if (isStatusProvided) {
                     for (String deviceStatus : status) {
