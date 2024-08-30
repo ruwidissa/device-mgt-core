@@ -17,7 +17,10 @@
  */
 package io.entgra.device.mgt.core.certificate.mgt.core.util;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.math.BigInteger;
+import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -41,5 +44,28 @@ public class CommonUtil {
 
     public static synchronized BigInteger generateSerialNumber() {
         return BigInteger.valueOf(System.currentTimeMillis());
+    }
+
+    /**
+     * Returns the value of the given attribute from the subject distinguished name. eg: "entgra.net"
+     * from "CN=entgra.net"
+     * @param requestCertificate {@link X509Certificate} that needs to extract an attribute from
+     * @param attribute the attribute name that needs to be extracted from the cert. eg: "CN="
+     * @return the value of the attribute
+     */
+    public static String getSubjectDnAttribute(X509Certificate requestCertificate, String attribute) {
+        String distinguishedName = requestCertificate.getSubjectDN().getName();
+        if (StringUtils.isNotEmpty(distinguishedName)) {
+            String[] dnSplits = distinguishedName.split(",");
+            for (String dnSplit : dnSplits) {
+                if (dnSplit.contains(attribute)) {
+                    String[] cnSplits = dnSplit.split("=");
+                    if (StringUtils.isNotEmpty(cnSplits[1])) {
+                        return cnSplits[1];
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
