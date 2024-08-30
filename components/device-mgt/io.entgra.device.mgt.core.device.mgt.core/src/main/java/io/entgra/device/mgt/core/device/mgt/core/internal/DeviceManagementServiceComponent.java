@@ -262,6 +262,9 @@ public class DeviceManagementServiceComponent {
         UserRoleCreateObserver userRoleCreateObserver = new UserRoleCreateObserver();
         bundleContext.registerService(ServerStartupObserver.class.getName(), userRoleCreateObserver, null);
 
+        OperationStartupHandler operationStartupHandler = new OperationStartupHandler();
+        bundleContext.registerService(ServerStartupObserver.class.getName(), operationStartupHandler, null);
+
         /* Registering Device Management Service */
         DeviceManagementProviderService deviceManagementProvider = new DeviceManagementProviderServiceImpl();
         DeviceManagementDataHolder.getInstance().setDeviceManagementProvider(deviceManagementProvider);
