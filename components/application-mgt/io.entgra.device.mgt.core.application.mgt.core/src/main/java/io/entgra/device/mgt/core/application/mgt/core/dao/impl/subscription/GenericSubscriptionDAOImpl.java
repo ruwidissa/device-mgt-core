@@ -967,25 +967,37 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
     @Override
     public List<String> getAppSubscribedUsers(int offsetValue, int limitValue, int appReleaseId,
-                                              int tenantId)
+                                              int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to get already subscribed users for " +
-                      "given app release id.");
+            log.debug("Request received in DAO Layer to get subscribed/unsubscribed users for the given app release ID.");
         }
         try {
             Connection conn = this.getDBConnection();
             List<String> subscribedUsers = new ArrayList<>();
-            String sql = "SELECT "
-                         + "US.USER_NAME AS USER_NAME "
-                         + "FROM AP_USER_SUBSCRIPTION US "
-                         + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
+            String sql = "SELECT US.USER_NAME AS USER_NAME " +
+                    "FROM AP_USER_SUBSCRIPTION US " +
+                    "WHERE AP_APP_RELEASE_ID = ? " +
+                    "AND TENANT_ID = ? ";
+            if (uninstalled != null) {
+                sql += "AND UNSUBSCRIBED = ? ";
+            }
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                sql += "AND US.USER_NAME LIKE ? ";
+            }
+            sql += "LIMIT ? OFFSET ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, appReleaseId);
-                stmt.setInt(2, tenantId);
-                stmt.setInt(3, limitValue);
-                stmt.setInt(4, offsetValue);
+                int index = 1;
+                stmt.setInt(index++, appReleaseId);
+                stmt.setInt(index++, tenantId);
+                if (uninstalled != null) {
+                    stmt.setBoolean(index++, uninstalled);
+                }
+                if (searchName != null && !searchName.trim().isEmpty()) {
+                    stmt.setString(index++, "%" + searchName + "%");
+                }
+                stmt.setInt(index++, limitValue);
+                stmt.setInt(index, offsetValue);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         subscribedUsers.add(rs.getString("USER_NAME"));
@@ -994,50 +1006,62 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 return subscribedUsers;
             }
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining the DB connection to get already " +
-                         "subscribed users for given app release id.";
+            String msg = "Error occurred while obtaining the DB connection to get subscribed/unsubscribed users for the " +
+                    "given app release ID.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while getting subscribed users for given app release id.";
+            String msg = "SQL Error occurred while getting subscribed/unsubscribed users for the given app release ID.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
     @Override
-    public int getSubscribedUserCount(int appReleaseId, int tenantId)
+    public int getSubscribedUserCount(int appReleaseId, int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to get already subscribed users for " +
+            log.debug("Request received in DAO Layer to get already subscribed/unsubscribed users for " +
                       "given app release id.");
         }
         try {
             Connection conn = this.getDBConnection();
-            String sql = "SELECT "
-                         + "COUNT(US.USER_NAME) AS USER_NAME "
-                         + "FROM AP_USER_SUBSCRIPTION US "
-                         + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
+            String sql = "SELECT COUNT(US.USER_NAME) AS USER_COUNT " +
+                    "FROM AP_USER_SUBSCRIPTION US " +
+                    "WHERE AP_APP_RELEASE_ID = ? " +
+                    "AND TENANT_ID = ?";
+            if (uninstalled != null) {
+                sql += " AND UNSUBSCRIBED = ?";
+            }
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                sql += " AND US.USER_NAME LIKE ?";
+            }
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, appReleaseId);
-                stmt.setInt(2, tenantId);
+                int index = 1;
+                stmt.setInt(index++, appReleaseId);
+                stmt.setInt(index++, tenantId);
 
+                if (uninstalled != null) {
+                    stmt.setBoolean(index++, uninstalled);
+                }
+                if (searchName != null && !searchName.trim().isEmpty()) {
+                    stmt.setString(index++, "%" + searchName + "%");
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getInt("USER_NAME");
+                        return rs.getInt("USER_COUNT");
                     }
                 }
                 return 0;
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get already " +
-                         "subscribed users count for given app release id.";
+                    "subscribed/unsubscribed users count for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while getting subscribed users for given app release id.";
+            String msg = "SQL Error occurred while getting subscribed/unsubscribed users count for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
@@ -1151,25 +1175,40 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
     @Override
     public List<String> getAppSubscribedRoles(int offsetValue, int limitValue, int appReleaseId,
-                                              int tenantId)
+                                              int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to get already subscribed roles for " +
+            log.debug("Request received in DAO Layer to get already subscribed/unsubscribed roles for " +
                       "given app release id.");
         }
         try {
             Connection conn = this.getDBConnection();
             List<String> subscribedRoles = new ArrayList<>();
             String sql = "SELECT "
-                         + "RS.ROLE_NAME AS ROLE "
-                         + "FROM AP_ROLE_SUBSCRIPTION RS "
-                         + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
+                    + "RS.ROLE_NAME AS ROLE "
+                    + "FROM AP_ROLE_SUBSCRIPTION RS "
+                    + "WHERE AP_APP_RELEASE_ID = ? "
+                    + "AND TENANT_ID = ?";
+            if (uninstalled != null) {
+                sql += " AND UNSUBSCRIBED = ?";
+            }
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                sql += " AND RS.ROLE_NAME LIKE ?";
+            }
+            sql += " LIMIT ? OFFSET ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, appReleaseId);
-                ps.setInt(2, tenantId);
-                ps.setInt(3, limitValue);
-                ps.setInt(4, offsetValue);
+                int paramIndex = 1;
+                ps.setInt(paramIndex++, appReleaseId);
+                ps.setInt(paramIndex++, tenantId);
+
+                if (uninstalled != null) {
+                    ps.setBoolean(paramIndex++, uninstalled);
+                }
+                if (searchName != null && !searchName.trim().isEmpty()) {
+                    ps.setString(paramIndex++, "%" + searchName + "%");
+                }
+                ps.setInt(paramIndex++, limitValue);
+                ps.setInt(paramIndex, offsetValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedRoles.add(rs.getString("ROLE"));
@@ -1179,49 +1218,61 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get already " +
-                         "subscribed roles for given app release id.";
+                    "subscribed/unsubscribed roles for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while getting subscribed roles for given app release id.";
+            String msg = "SQL Error occurred while getting subscribed/unsubscribed roles for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
     @Override
-    public int getSubscribedRoleCount(int appReleaseId, int tenantId)
+    public int getSubscribedRoleCount(int appReleaseId, int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to get already subscribed roles for " +
+            log.debug("Request received in DAO Layer to get already subscribed/unsubscribed roles for " +
                       "given app release id.");
         }
         try {
             Connection conn = this.getDBConnection();
             String sql = "SELECT "
-                         + "COUNT(RS.ROLE_NAME) AS ROLE_NAME "
-                         + "FROM AP_ROLE_SUBSCRIPTION RS "
-                         + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
+                    + "COUNT(RS.ROLE_NAME) AS ROLE_COUNT "
+                    + "FROM AP_ROLE_SUBSCRIPTION RS "
+                    + "WHERE AP_APP_RELEASE_ID = ? "
+                    + "AND TENANT_ID = ?";
+            if (uninstalled != null) {
+                sql += " AND UNSUBSCRIBED = ?";
+            }
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                sql += " AND RS.ROLE_NAME LIKE ?";
+            }
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, appReleaseId);
-                stmt.setInt(2, tenantId);
-
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, appReleaseId);
+                stmt.setInt(paramIndex++, tenantId);
+                if (uninstalled != null) {
+                    stmt.setBoolean(paramIndex++, uninstalled);
+                }
+                if (searchName != null && !searchName.trim().isEmpty()) {
+                    stmt.setString(paramIndex++, "%" + searchName + "%");
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getInt("ROLE_NAME");
+                        return rs.getInt("ROLE_COUNT");
                     }
+                    return 0;
                 }
-                return 0;
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get already " +
-                         "subscribed roles count for given app release id.";
+                         "subscribed/unsubscribed roles count for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while getting subscribed roles for given app release id.";
+            String msg = "SQL Error occurred while getting subscribed/unsubscribed roles count for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
@@ -1269,25 +1320,37 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
     @Override
     public List<String> getAppSubscribedGroups(int offsetValue, int limitValue, int appReleaseId,
-                                               int tenantId)
+                                               int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to get already subscribed groups for " +
+            log.debug("Request received in DAO Layer to get already subscribed/unsubscribed groups for " +
                       "given app release id.");
         }
         try {
             Connection conn = this.getDBConnection();
             List<String> subscribedGroups = new ArrayList<>();
-            String sql = "SELECT "
-                         + "GS.GROUP_NAME AS APP_GROUPS "
-                         + "FROM AP_GROUP_SUBSCRIPTION GS "
-                         + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
+            String sql = "SELECT GS.GROUP_NAME AS APP_GROUPS " +
+                    "FROM AP_GROUP_SUBSCRIPTION GS " +
+                    "WHERE AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
+            if (uninstalled != null) {
+                sql += " AND UNSUBSCRIBED = ?";
+            }
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                sql += " AND GS.GROUP_NAME LIKE ?";
+            }
+            sql += " LIMIT ? OFFSET ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, appReleaseId);
-                ps.setInt(2, tenantId);
-                ps.setInt(3, limitValue);
-                ps.setInt(4, offsetValue);
+                int paramIndex = 1;
+                ps.setInt(paramIndex++, appReleaseId);
+                ps.setInt(paramIndex++, tenantId);
+                if (uninstalled != null) {
+                    ps.setBoolean(paramIndex++, uninstalled);
+                }
+                if (searchName != null && !searchName.trim().isEmpty()) {
+                    ps.setString(paramIndex++, "%" + searchName + "%");
+                }
+                ps.setInt(paramIndex++, limitValue);
+                ps.setInt(paramIndex, offsetValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedGroups.add(rs.getString("APP_GROUPS"));
@@ -1297,11 +1360,11 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get already " +
-                         "subscribed groups for given app release id.";
+                         "subscribed/unsubscribed groups for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while getting subscribed groups for given " +
+            String msg = "SQL Error occurred while getting subscribed/unsubscribed groups for given " +
                          "app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
@@ -1309,24 +1372,34 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public int getSubscribedGroupCount(int appReleaseId, int tenantId)
+    public int getSubscribedGroupCount(int appReleaseId, int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to get already subscribed groups for " +
-                      "given app release id.");
+            log.debug("Request received in DAO Layer to get the count of subscribed/unsubscribed groups for " +
+                    "given app release id.");
         }
         try {
             Connection conn = this.getDBConnection();
-            String sql = "SELECT "
-                         + "COUNT(GS.GROUP_NAME) AS APP_GROUPS_COUNT "
-                         + "FROM AP_GROUP_SUBSCRIPTION GS "
-                         + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
+            String sql = "SELECT COUNT(GS.GROUP_NAME) AS APP_GROUPS_COUNT " +
+                    "FROM AP_GROUP_SUBSCRIPTION GS " +
+                    "WHERE AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
+            if (uninstalled != null) {
+                sql += " AND UNSUBSCRIBED = ?";
+            }
+            if (searchName != null && !searchName.trim().isEmpty()) {
+                sql += " AND GS.GROUP_NAME LIKE ?";
+            }
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, appReleaseId);
-                stmt.setInt(2, tenantId);
-
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, appReleaseId);
+                stmt.setInt(paramIndex++, tenantId);
+                if (uninstalled != null) {
+                    stmt.setBoolean(paramIndex++, uninstalled);
+                }
+                if (searchName != null && !searchName.trim().isEmpty()) {
+                    stmt.setString(paramIndex++, "%" + searchName + "%");
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return rs.getInt("APP_GROUPS_COUNT");
@@ -1335,12 +1408,13 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 return 0;
             }
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining the DB connection to get already " +
-                         "subscribed groups count for given app release id.";
+            String msg = "Error occurred while obtaining the DB connection to get the count of " +
+                    "subscribed/unsubscribed groups for given app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while getting subscribed groups for given app release id.";
+            String msg = "SQL Error occurred while getting the count of subscribed/unsubscribed groups for given " +
+                    "app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
