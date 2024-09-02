@@ -68,6 +68,9 @@ public class HTTPDeviceTypeManagerService extends DeviceTypeManagerService imple
                     if (feature.getCode() != null && feature.getName() != null) {
                         configFeature.setCode(feature.getCode());
                         configFeature.setDescription(feature.getDescription());
+                        if (feature.getTooltip() != null) {
+                            configFeature.setTooltip(feature.getTooltip());
+                        }
                         configFeature.setName(feature.getName());
                         if (feature.getMetadataEntries() != null && feature.getMetadataEntries().size() > 0) {
                             List<String> metaValues = new ArrayList<>();
