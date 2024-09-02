@@ -22,7 +22,7 @@ package io.entgra.device.mgt.core.application.mgt.common;
 public class ReleaseVersionInfo {
     private String version;
     private String releaseType;
-    private String rating;
+    private double rating;
     private String state;
     private String uuid;
 
@@ -38,11 +38,11 @@ public class ReleaseVersionInfo {
         return releaseType;
     }
 
-    public String getRating() {
+    public double getRating() {
         return rating;
     }
 
-    public void setRating(String rating) {
+    public void setRating(double rating) {
         this.rating = rating;
     }
 
