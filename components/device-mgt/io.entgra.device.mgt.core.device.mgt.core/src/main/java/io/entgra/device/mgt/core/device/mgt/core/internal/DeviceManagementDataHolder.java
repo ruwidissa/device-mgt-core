@@ -100,6 +100,7 @@ public class DeviceManagementDataHolder {
     private DeviceStatusManagementService deviceStatusManagementService;
     private APIApplicationServices apiApplicationServices;
     private PublisherRESTAPIServices publisherRESTAPIServices;
+    private OperationStartupHandler operationStartupHandler;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
@@ -456,5 +457,13 @@ public class DeviceManagementDataHolder {
 
     public void setGroupAccessAuthorizationService(GroupAccessAuthorizationService groupAccessAuthorizationService) {
         this.groupAccessAuthorizationService = groupAccessAuthorizationService;
+    }
+
+    public OperationStartupHandler getOperationStartupHandler() {
+        return operationStartupHandler;
+    }
+
+    public void setOperationStartupHandler(OperationStartupHandler operationStartupHandler) {
+        this.operationStartupHandler = operationStartupHandler;
     }
 }
