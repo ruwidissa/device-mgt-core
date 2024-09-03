@@ -49,7 +49,7 @@ public class OperationConfigurationService {
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while retrieving operation configuration";
             log.error(msg, e);
-            throw new OperationConfigException(e);
+            throw new OperationConfigException(msg, e);
         }
         if (metadata != null) {
             return gson.fromJson(metadata.getMetaValue(), OperationConfig.class);
@@ -71,11 +71,11 @@ public class OperationConfigurationService {
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while adding operation configuration";
             log.error(msg, e);
-            throw new OperationConfigException(e);
+            throw new OperationConfigException(msg, e);
         } catch (MetadataKeyAlreadyExistsException e) {
             String msg = "Operation configuration already exists";
             log.error(msg, e);
-            throw new OperationConfigAlreadyExistsException(e);
+            throw new OperationConfigAlreadyExistsException(msg, e);
         }
     }
 
@@ -91,7 +91,7 @@ public class OperationConfigurationService {
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while updating operation configuration";
             log.error(msg, e);
-            throw new OperationConfigException(e);
+            throw new OperationConfigException(msg, e);
         }
     }
 
@@ -102,11 +102,11 @@ public class OperationConfigurationService {
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while deleting operation configuration";
             log.error(msg, e);
-            throw new OperationConfigException(e);
+            throw new OperationConfigException(msg, e);
         } catch (MetadataKeyNotFoundException e) {
             String msg = "Operation configuration already exists";
             log.error(msg, e);
-            throw new OperationConfigNotFoundException(e);
+            throw new OperationConfigNotFoundException(msg, e);
         }
     }
 
