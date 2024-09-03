@@ -59,6 +59,13 @@ public class Feature implements Serializable {
     private String description;
 
     @ApiModelProperty(
+            name = "tooltip",
+            value = "Provides a tooltip for the features.",
+            required = false
+    )
+    private String tooltip;
+
+    @ApiModelProperty(
             name = "type",
             value = "Type of the feature.",
             required = true
@@ -138,6 +145,16 @@ public class Feature implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @XmlElement
+    public String getTooltip() {
+        return tooltip;
+    }
+
+    public void setTooltip(String tooltip) {
+        this.tooltip = tooltip;
+    }
+
 
     @XmlAttribute
     public String getType() {
