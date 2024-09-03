@@ -130,21 +130,21 @@ public class GenericOperationDAOImpl implements OperationDAO {
 
     public int updateOperationByDeviceTypeAndInitialStatus(String deiceType, String initialStatus, String requiredStatus)
             throws OperationManagementDAOException {
-        PreparedStatement stmt = null;
         int numOfRecordsUpdated;
-        try {
-            long time = DeviceManagementDAOUtil.getCurrentUTCTime();
-            Connection connection = OperationManagementDAOFactory.getConnection();
+        long time = DeviceManagementDAOUtil.getCurrentUTCTime();
 
-            String sql = "UPDATE DM_ENROLMENT_OP_MAPPING SET STATUS=?, UPDATED_TIMESTAMP=? WHERE DEVICE_TYPE=?";
+        String sql = "UPDATE DM_ENROLMENT_OP_MAPPING SET STATUS=?, UPDATED_TIMESTAMP=? WHERE DEVICE_TYPE=?";
 
-            if (initialStatus == null) {
-                sql += " AND STATUS IS NULL";
-            } else {
-                sql += " AND STATUS=?";
-            }
+        if (initialStatus == null) {
+            sql += " AND STATUS IS NULL";
+        } else {
+            sql += " AND STATUS=?";
+        }
 
-            stmt = connection.prepareStatement(sql);
+        try (
+                Connection connection = OperationManagementDAOFactory.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
+        ) {
             stmt.setString(1, requiredStatus);
             stmt.setLong(2, time);
             stmt.setString(3, deiceType);
@@ -156,8 +156,6 @@ public class GenericOperationDAOImpl implements OperationDAO {
         } catch (SQLException e) {
             throw new OperationManagementDAOException("Error occurred while update device mapping operation status " +
                     e.getMessage(), e);
-        } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt);
         }
         return numOfRecordsUpdated;
     }
