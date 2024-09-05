@@ -25,6 +25,7 @@ import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DeviceConfi
 import io.entgra.device.mgt.core.device.mgt.common.general.TenantDetail;
 import io.entgra.device.mgt.core.device.mgt.config.api.beans.ErrorResponse;
 import io.swagger.annotations.*;
+import io.entgra.device.mgt.core.device.mgt.core.operation.change.status.task.dto.OperationConfig;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -77,6 +78,13 @@ import java.util.List;
                 key = "admin:permissions:add",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/permissions/add"}
+        ),
+        @Scope(
+                name = "Manage operation configuration",
+                description = "Add or update operation configuration",
+                key = "admin:operation_config:manage",
+                roles = {"Internal/devicemgt-user"},
+                permissions = {"/operation-configuration/manage"}
         )
 }
 )
@@ -319,4 +327,173 @@ public interface DeviceManagementConfigService {
     })
     @Produces(MediaType.APPLICATION_JSON)
     Response addPermission(List<String> permissions);
+
+    @GET
+    @Path("/operation-configuration")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HttpMethod.GET,
+            value = "Getting operation configuration",
+            notes = "Retrieve the operation configuration",
+            tags = "Device Management Configuration",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = "scope", value = "admin:operation_config:manage")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully fetched the operation configuration.",
+                    response = OperationConfig.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "Bad Request.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized. \n Unauthorized operation! Only admin role can perform this operation."),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n No operation found",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while adding operation configuration.",
+                    response = ErrorResponse.class)
+    })
+    Response getOperationConfiguration();
+
+    @POST
+    @Path("/operation-configuration")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HttpMethod.POST,
+            value = "Add operation configuration",
+            notes = "Add operation configuration.",
+            tags = "Device Management Configuration",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = "scope", value =
+                                    "admin:operation_config:manage")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully added the operation configuration.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has wrong operation configuration.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while adding operation configuration",
+                    response = ErrorResponse.class)
+    })
+    @Produces(MediaType.APPLICATION_JSON)
+    Response addOperationConfiguration(OperationConfig config);
+
+    @PUT
+    @Path("/operation-configuration")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HttpMethod.PUT,
+            value = "Update operation configuration",
+            notes = "Update operation configuration.",
+            tags = "Device Management Configuration",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = "scope", value = "admin:operation_config:manage")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully Update the operation configuration.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has wrong operation configuration.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while adding operation configuration.",
+                    response = ErrorResponse.class)
+    })
+    @Produces(MediaType.APPLICATION_JSON)
+    Response updateOperationConfiguration(OperationConfig config);
+
+    @DELETE
+    @Path("/operation-configuration")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HttpMethod.DELETE,
+            value = "Delete operation configuration",
+            notes = "Delete operation configuration",
+            tags = {"Device Management Configuration"},
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = "scope", value = "admin:operation_config:manage")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n  Successfully deleted the operation configuration",
+                            response = Response.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request.",
+                            response = Response.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Operation configuration not provided",
+                            response = Response.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Server error occurred while deleting the operation configuration.",
+                            response = Response.class)
+            }
+    )
+    Response deleteOperationConfiguration();
 }
