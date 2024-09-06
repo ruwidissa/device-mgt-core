@@ -116,7 +116,32 @@ public class ConfigurationBasedFeatureManager implements FeatureManager {
                     operationMeta.put(UI_PARAMS, uiParams);
                     operationMeta.put(FORM_PARAMS, formParams);
                 }
-
+                if (operation.getConfirmationTexts() != null) {
+                    Feature.ConfirmationTexts confirmationTexts = new Feature.ConfirmationTexts();
+                    confirmationTexts.setDeleteConfirmModalTitle(
+                            operation.getConfirmationTexts().getDeleteConfirmModalTitle());
+                    confirmationTexts.setDeleteConfirmModalText(
+                            operation.getConfirmationTexts().getDeleteConfirmModalText());
+                    confirmationTexts.setDeleteConfirmationTextDescribe(
+                            operation.getConfirmationTexts().getDeleteConfirmationTextDescribe());
+                    confirmationTexts.setDeleteConfirmationText(
+                            operation.getConfirmationTexts().getDeleteConfirmationText());
+                    confirmationTexts.setCancelText(operation.getConfirmationTexts().getCancelText());
+                    confirmationTexts.setConfirmText(operation.getConfirmationTexts().getConfirmText());
+                    confirmationTexts.setInputLabel(operation.getConfirmationTexts().getInputLabel());
+                    confirmationTexts.setInputRequireMessage(
+                            operation.getConfirmationTexts().getInputRequireMessage());
+                    deviceFeature.setConfirmationTexts(confirmationTexts);
+                }
+                if (operation.getTooltipTexts() != null) {
+                    Feature.DangerZoneTooltipTexts tooltipTexts = new Feature.DangerZoneTooltipTexts();
+                    tooltipTexts.setToolTipTitle(operation.getTooltipTexts().getToolTipTitle());
+                    tooltipTexts.setToolTipPopConfirmText(operation.getTooltipTexts().getToolTipPopConfirmText());
+                    tooltipTexts.setConfirmText(operation.getTooltipTexts().getConfirmText());
+                    tooltipTexts.setCancelText(operation.getTooltipTexts().getCancelText());
+                    tooltipTexts.setToolTipAvailable(operation.getTooltipTexts().getToolTipAvailable());
+                    deviceFeature.setDangerZoneTooltipTexts(tooltipTexts);
+                }
                 if (metadataEntries == null) {
                     metadataEntries = new ArrayList<>();
                 }
