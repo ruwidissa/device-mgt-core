@@ -47,7 +47,9 @@ import java.util.List;
     "description",
     "tooltip",
     "operation",
-    "metaData"
+    "metaData",
+    "confirmationTexts",
+    "dangerZoneTooltipTexts"
 })
 public class Feature {
 
@@ -72,6 +74,12 @@ public class Feature {
     @XmlElementWrapper(name = "MetaData")
     @XmlElement(name = "Property", required = true)
     private List<String> metaData;
+
+    @XmlElement(name = "ConfirmationTexts", required = false)
+    private List<String> confirmationTexts;
+
+    @XmlElement(name = "DangerZoneTooltipTexts", required = false)
+    private List<String> dangerZoneTooltipTexts;
 
     /**
      * Gets the value of the name property.
@@ -208,5 +216,21 @@ public class Feature {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<String> getConfirmationTexts() {
+        return confirmationTexts;
+    }
+
+    public void setConfirmationTexts(List<String> confirmationTexts) {
+        this.confirmationTexts = confirmationTexts;
+    }
+
+    public List<String> getDangerZoneTooltipTexts() {
+        return dangerZoneTooltipTexts;
+    }
+
+    public void setDangerZoneTooltipTexts(List<String> dangerZoneTooltipTexts) {
+        this.dangerZoneTooltipTexts = dangerZoneTooltipTexts;
     }
 }

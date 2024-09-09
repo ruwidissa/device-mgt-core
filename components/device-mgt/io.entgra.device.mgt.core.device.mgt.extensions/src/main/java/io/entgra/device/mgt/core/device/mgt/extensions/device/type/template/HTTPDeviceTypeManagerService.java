@@ -79,6 +79,29 @@ public class HTTPDeviceTypeManagerService extends DeviceTypeManagerService imple
                             }
                             configFeature.setMetaData(metaValues);
                         }
+                        if (feature.getConfirmationTexts() != null) {
+                            List<String> confirmationTextValues = new ArrayList<>();
+                            Feature.ConfirmationTexts confirmationText = feature.getConfirmationTexts();
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmModalTitle());
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmModalText());
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmationTextDescribe());
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmationText());
+                            confirmationTextValues.add(confirmationText.getCancelText());
+                            confirmationTextValues.add(confirmationText.getConfirmText());
+                            confirmationTextValues.add(confirmationText.getInputLabel());
+                            confirmationTextValues.add(confirmationText.getInputRequireMessage());
+                            configFeature.setConfirmationTexts(confirmationTextValues);
+                        }
+                        if (feature.getDangerZoneTooltipTexts() != null) {
+                            List<String> dangerZoneTextValues = new ArrayList<>();
+                            Feature.DangerZoneTooltipTexts dangerZoneText = feature.getDangerZoneTooltipTexts();
+                            dangerZoneTextValues.add(dangerZoneText.getToolTipTitle());
+                            dangerZoneTextValues.add(dangerZoneText.getToolTipPopConfirmText());
+                            dangerZoneTextValues.add(dangerZoneText.getConfirmText());
+                            dangerZoneTextValues.add(dangerZoneText.getCancelText());
+                            dangerZoneTextValues.add(dangerZoneText.getToolTipAvailable());
+                            configFeature.setDangerZoneTooltipTexts(dangerZoneTextValues);
+                        }
                         featureList.add(configFeature);
                     }
                 }
