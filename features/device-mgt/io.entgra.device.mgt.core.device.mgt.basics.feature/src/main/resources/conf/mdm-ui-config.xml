@@ -362,6 +362,7 @@
         <Scope>and:ops:change-lock-code</Scope>
         <Scope>and:ops:upgrade-firmware</Scope>
         <Scope>and:ops:send-notif</Scope>
+        <Scope>and:ops:secure-folder</Scope>
         <Scope>dm:geo:geo-fence:manage</Scope>
         <Scope>dm:whitelable:view</Scope>
         <Scope>dm:whitelable:update</Scope>
