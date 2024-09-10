@@ -196,8 +196,10 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
             List<Device> devices = HelperUtil.getGroupManagementProviderService().
                     getAllDevicesOfGroup(subscriptionInfo.getIdentifier(), false);
             List<Integer> removedIds = devices.stream()
-                    .filter(device -> {String status = String.valueOf(device.getEnrolmentInfo().getStatus());
-                        return "REMOVED".equalsIgnoreCase(status) || "DELETED".equalsIgnoreCase(status);})
+                    .filter(device -> {
+                        String status = String.valueOf(device.getEnrolmentInfo().getStatus());
+                        return "REMOVED".equalsIgnoreCase(status) || "DELETED".equalsIgnoreCase(status);
+                    })
                     .map(device -> device.getEnrolmentInfo().getId()).collect(Collectors.toList());
             List<Integer> enrollmentIdsOwnByGroup = devices.stream().map(device -> device.getEnrolmentInfo().getId()).collect(Collectors.toList());
             enrollmentIdsOwnByGroup.removeAll(removedIds);
@@ -206,7 +208,7 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
                     .map(Device::getId).collect(Collectors.toList());
             SubscriptionStatisticDTO subscriptionStatisticDTO = subscriptionDAO.
                     getSubscriptionStatistic(deviceIdsOwnByGroup, isUnsubscribe, tenantId, applicationReleaseDTO.getId());
-            int allDeviceCount= deviceIdsOwnByGroup.size();
+            int allDeviceCount = deviceIdsOwnByGroup.size();
             return SubscriptionManagementHelperUtil.getSubscriptionStatistics(subscriptionStatisticDTO, allDeviceCount);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error encountered while getting subscription statistics for group: " + subscriptionInfo.getIdentifier();
