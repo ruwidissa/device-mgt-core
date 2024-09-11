@@ -39,6 +39,7 @@ import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.SubscriptionManagementHelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.service.SubscriptionManagementHelperService;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.GroupDetailsDTO;
@@ -197,8 +198,8 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
                     getAllDevicesOfGroup(subscriptionInfo.getIdentifier(), false);
             List<Integer> removedIds = devices.stream()
                     .filter(device -> {
-                        String status = String.valueOf(device.getEnrolmentInfo().getStatus());
-                        return "REMOVED".equalsIgnoreCase(status) || "DELETED".equalsIgnoreCase(status);
+                        EnrolmentInfo.Status status = device.getEnrolmentInfo().getStatus();
+                        return status == EnrolmentInfo.Status.REMOVED || status == EnrolmentInfo.Status.DELETED;
                     })
                     .map(device -> device.getEnrolmentInfo().getId()).collect(Collectors.toList());
             List<Integer> enrollmentIdsOwnByGroup = devices.stream().map(device -> device.getEnrolmentInfo().getId()).collect(Collectors.toList());
