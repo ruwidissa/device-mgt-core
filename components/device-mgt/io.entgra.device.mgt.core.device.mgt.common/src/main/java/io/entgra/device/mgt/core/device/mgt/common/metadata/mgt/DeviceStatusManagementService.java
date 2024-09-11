@@ -38,7 +38,7 @@ public interface DeviceStatusManagementService {
      *
      * @throws MetadataManagementException if error while resetting default device status
      */
-    void resetToDefaultDeviceStausFilter() throws MetadataManagementException;
+    void resetToDefaultDeviceStatusFilter(int tenantId) throws MetadataManagementException;
 
     /**
      * This method is useful to update existing allowed device status
