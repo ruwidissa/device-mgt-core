@@ -68,14 +68,14 @@ public class OperationConfigurationService {
 
         try {
             metadataManagementService.createMetadata(metadata);
-        } catch (MetadataManagementException e) {
-            String msg = "Error occurred while adding operation configuration";
-            log.error(msg, e);
-            throw new OperationConfigException(msg, e);
         } catch (MetadataKeyAlreadyExistsException e) {
             String msg = "Operation configuration already exists";
             log.error(msg, e);
             throw new OperationConfigAlreadyExistsException(msg, e);
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while adding operation configuration";
+            log.error(msg, e);
+            throw new OperationConfigException(msg, e);
         }
     }
 
@@ -99,14 +99,14 @@ public class OperationConfigurationService {
 
         try {
             metadataManagementService.deleteMetadata(OPERATION_CONFIG);
-        } catch (MetadataManagementException e) {
-            String msg = "Error occurred while deleting operation configuration";
-            log.error(msg, e);
-            throw new OperationConfigException(msg, e);
         } catch (MetadataKeyNotFoundException e) {
             String msg = "Operation configuration already exists";
             log.error(msg, e);
             throw new OperationConfigNotFoundException(msg, e);
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while deleting operation configuration";
+            log.error(msg, e);
+            throw new OperationConfigException(msg, e);
         }
     }
 
