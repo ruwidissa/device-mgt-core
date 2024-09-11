@@ -346,15 +346,15 @@ public class DeviceManagementServiceComponent {
         bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
 
         /* Registering DeviceState Filter Service */
-        DeviceStatusManagementService deviceStatusManagemntService = new DeviceStatusManagementServiceImpl();
-        DeviceManagementDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagemntService);
+        DeviceStatusManagementService deviceStatusManagementService = new DeviceStatusManagementServiceImpl();
+        DeviceManagementDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagementService);
         try {
-            deviceStatusManagemntService.addDefaultDeviceStatusFilterIfNotExist(tenantId);
+            deviceStatusManagementService.addDefaultDeviceStatusFilterIfNotExist(tenantId);
         } catch (Throwable e) {
             log.error("Error occurred while adding default tenant device status", e);
 
         }
-        bundleContext.registerService(DeviceStatusManagementService.class.getName(), deviceStatusManagemntService, null);
+        bundleContext.registerService(DeviceStatusManagementService.class.getName(), deviceStatusManagementService, null);
 
         /* Registering Event Configuration Service */
         EventConfigurationProviderService eventConfigurationService = new EventConfigurationProviderServiceImpl();

@@ -21,7 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.common.exceptions;
 /**
  * Custom exception class to be used in MetadataMgmt related functionalities.
  */
-public class MetadataKeyNotFoundException extends Exception {
+public class MetadataKeyNotFoundException extends MetadataManagementException {
 
     private static final long serialVersionUID = 5260831982626354815L;
     private String errorMessage;
