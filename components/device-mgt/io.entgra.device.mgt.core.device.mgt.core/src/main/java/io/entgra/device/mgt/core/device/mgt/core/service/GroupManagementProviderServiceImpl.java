@@ -77,6 +77,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
     private final GroupDAO groupDAO;
     private final DeviceDAO deviceDAO;
+
     /**
      * Set groupDAO from GroupManagementDAOFactory when class instantiate.
      */
