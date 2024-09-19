@@ -77,7 +77,6 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
     private final GroupDAO groupDAO;
     private final DeviceDAO deviceDAO;
-
     /**
      * Set groupDAO from GroupManagementDAOFactory when class instantiate.
      */
@@ -1738,6 +1737,21 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         try {
             GroupManagementDAOFactory.openConnection();
             return groupDAO.getDeviceCount(groupName, tenantId);
+        } catch (SQLException | GroupManagementDAOException e) {
+            String msg = "Error occurred while retrieving device count.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getDeviceCountWithGroup(String groupName,int  deviceTypeId) throws GroupManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            GroupManagementDAOFactory.openConnection();
+            return groupDAO.getDeviceCountWithGroup(groupName,deviceTypeId, tenantId);
         } catch (SQLException | GroupManagementDAOException e) {
             String msg = "Error occurred while retrieving device count.";
             log.error(msg, e);

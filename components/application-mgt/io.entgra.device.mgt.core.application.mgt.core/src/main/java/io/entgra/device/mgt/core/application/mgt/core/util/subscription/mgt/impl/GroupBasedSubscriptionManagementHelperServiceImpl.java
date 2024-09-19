@@ -49,6 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -147,7 +148,6 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
-
     }
 
     @Override
@@ -194,22 +194,14 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            List<Device> devices = HelperUtil.getGroupManagementProviderService().
-                    getAllDevicesOfGroup(subscriptionInfo.getIdentifier(), false);
-            List<Integer> removedIds = devices.stream()
-                    .filter(device -> {
-                        EnrolmentInfo.Status status = device.getEnrolmentInfo().getStatus();
-                        return status == EnrolmentInfo.Status.REMOVED || status == EnrolmentInfo.Status.DELETED;
-                    })
-                    .map(device -> device.getEnrolmentInfo().getId()).collect(Collectors.toList());
-            List<Integer> enrollmentIdsOwnByGroup = devices.stream().map(device -> device.getEnrolmentInfo().getId()).collect(Collectors.toList());
-            enrollmentIdsOwnByGroup.removeAll(removedIds);
-            List<Integer> deviceIdsOwnByGroup = devices.stream()
-                    .filter(device -> enrollmentIdsOwnByGroup.contains(device.getEnrolmentInfo().getId()))
-                    .map(Device::getId).collect(Collectors.toList());
-            SubscriptionStatisticDTO subscriptionStatisticDTO = subscriptionDAO.
-                    getSubscriptionStatistic(deviceIdsOwnByGroup, isUnsubscribe, tenantId, applicationReleaseDTO.getId());
-            int allDeviceCount = deviceIdsOwnByGroup.size();
+            List<String> deviceStatuses = Arrays.asList(EnrolmentInfo.Status.ACTIVE.name(),
+                    EnrolmentInfo.Status.INACTIVE.name(), EnrolmentInfo.Status.UNREACHABLE.name());
+            List<Device> devices = HelperUtil.getGroupManagementProviderService().getAllDevicesOfGroup(subscriptionInfo.getIdentifier(), deviceStatuses, false);
+            List<Integer> deviceIdsOwnByGroup = devices.stream().map(Device::getId).collect(Collectors.toList());
+            SubscriptionStatisticDTO subscriptionStatisticDTO = subscriptionDAO.getSubscriptionStatistic
+                    (deviceIdsOwnByGroup, isUnsubscribe, tenantId, applicationReleaseDTO.getId());
+            int allDeviceCount = HelperUtil.getGroupManagementProviderService().getDeviceCountWithGroup(subscriptionInfo.getIdentifier(),
+                    applicationDAO.getApplication(applicationReleaseDTO.getUuid(), tenantId).getDeviceTypeId());
             return SubscriptionManagementHelperUtil.getSubscriptionStatistics(subscriptionStatisticDTO, allDeviceCount);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error encountered while getting subscription statistics for group: " + subscriptionInfo.getIdentifier();

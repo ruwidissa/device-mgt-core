@@ -392,4 +392,6 @@ public interface GroupManagementProviderService {
 
     int getDeviceCount(String groupName) throws GroupManagementException;
 
+
+    int getDeviceCountWithGroup(String groupName, int deviceTypeId) throws GroupManagementException;
 }

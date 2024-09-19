@@ -489,4 +489,6 @@ public interface GroupDAO {
             throws GroupManagementDAOException;
 
     int getDeviceCount(String groupName, int tenantId) throws GroupManagementDAOException;
+
+    int getDeviceCountWithGroup(String groupName, int deviceTypeId, int tenantId) throws GroupManagementDAOException;
 }
