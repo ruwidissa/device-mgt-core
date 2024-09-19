@@ -1753,8 +1753,12 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         try {
             GroupManagementDAOFactory.openConnection();
             return groupDAO.getDeviceCountWithGroup(groupName,deviceTypeId, tenantId);
-        } catch (SQLException | GroupManagementDAOException e) {
-            String msg = "Error occurred while retrieving device count.";
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while retrieving device count.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (GroupManagementDAOException e) {
+            String msg = "DAO error occurred while retrieving device count.";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } finally {
