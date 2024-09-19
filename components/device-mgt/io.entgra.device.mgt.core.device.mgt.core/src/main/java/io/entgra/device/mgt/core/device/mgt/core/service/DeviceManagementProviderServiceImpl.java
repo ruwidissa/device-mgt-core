@@ -1177,7 +1177,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     public double generateCost(List<Device> allDevices, Timestamp startDate, Timestamp endDate,  Cost tenantCost, List<Device> deviceStatusNotAvailable, double totalCost) throws DeviceManagementException {
         List<DeviceStatus> deviceStatus;
         try {
-            DeviceManagementDAOFactory.getConnection();
             for (Device device : allDevices) {
                 long dateDiff = 0;
                 int tenantId = this.getTenantId();
@@ -1227,10 +1226,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred in retrieving status history for a device in billing.";
             log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the data source";
-            log.info(msg, e);
             throw new DeviceManagementException(msg, e);
         }
         return totalCost;
