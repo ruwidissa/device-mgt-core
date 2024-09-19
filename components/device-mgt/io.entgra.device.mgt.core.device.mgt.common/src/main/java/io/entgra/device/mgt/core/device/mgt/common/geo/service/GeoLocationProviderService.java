@@ -20,11 +20,9 @@ package io.entgra.device.mgt.core.device.mgt.common.geo.service;
 
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfigurationException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

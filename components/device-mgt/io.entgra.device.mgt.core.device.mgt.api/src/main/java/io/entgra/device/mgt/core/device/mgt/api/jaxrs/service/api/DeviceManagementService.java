@@ -18,20 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Extension;
-import io.swagger.annotations.ExtensionProperty;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.ResponseHeader;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.Feature;
@@ -43,12 +34,17 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.device.mgt.common.search.PropertyMap;
 import io.entgra.device.mgt.core.device.mgt.common.search.SearchContext;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ApplicationList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationRequest;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.ResponseHeader;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
@@ -64,9 +60,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Device related REST-API. This can be used to manipulated device related details.
@@ -339,6 +333,12 @@ public interface DeviceManagementService {
                     required = false)
             @QueryParam("requireDeviceInfo")
                     boolean requireDeviceInfo,
+            @ApiParam(
+                    name = "tag",
+                    value = "Describes the tags associated with the enrolment",
+                    required = false)
+            @QueryParam("tag")
+                    List<String> tags,
             @ApiParam(
                     name = "offset",
                     value = "The starting pagination index for the complete list of qualified items.",

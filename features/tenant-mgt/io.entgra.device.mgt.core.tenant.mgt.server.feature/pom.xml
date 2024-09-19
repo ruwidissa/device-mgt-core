@@ -45,7 +45,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -91,7 +90,6 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <!--<bundleDef>{groupId}:{artifactId}:{version}</bundleDef>-->
                                 <bundleDef>
                                     io.entgra.device.mgt.core:io.entgra.device.mgt.core.tenant.mgt.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>

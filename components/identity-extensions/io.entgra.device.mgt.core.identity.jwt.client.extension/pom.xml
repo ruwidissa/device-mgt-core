@@ -31,9 +31,14 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Device Management JWT Client Extensions</name>
     <description>WSO2 Carbon - Device Management JWT Client Extensions</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
@@ -55,23 +60,15 @@
             <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.scannotation</groupId>
+            <groupId>io.entgra.org.scannotation</groupId>
             <artifactId>scannotation</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
         </dependency>
         <dependency>
@@ -121,8 +118,9 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -146,8 +144,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -157,21 +155,33 @@
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -185,35 +195,35 @@
                             io.entgra.device.mgt.core.identity.jwt.client.extension.*
                         </Export-Package>
                         <Import-Package>
+                            com.nimbusds.jose;version="[7.9,8)",
+                            com.nimbusds.jose.crypto;version="[7.9,8)",
+                            com.nimbusds.jwt;version="[7.9,8)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension,
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.dto,
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.exception,
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.service,
+                            javax.net.ssl,
+                            org.apache.commons.codec.binary;version="[1.4,2)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.apache.http;version="[4.4,5)",
+                            org.apache.http.client;version="[4.3,5)",
+                            org.apache.http.client.entity;version="[4.3,5)",
+                            org.apache.http.client.methods;version="[4.3,5)",
+                            org.apache.http.conn.socket;version="[4.3,5)",
+                            org.apache.http.conn.ssl;version="[4.3,5)",
+                            org.apache.http.impl.client;version="[4.3,5)",
+                            org.apache.http.message;version="[4.4,5)",
+                            org.apache.http.util;version="[4.4,5)",
+                            org.json.simple;version="[1.1,2)",
+                            org.json.simple.parser;version="[1.1,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.registry.core,
-                            org.wso2.carbon.registry.core.exceptions,
-                            org.wso2.carbon.registry.core.session,
-                            org.wso2.carbon.utils,
-                            org.apache.commons.logging,
-                            org.wso2.carbon.registry.core.*;resolution:=optional,
-                            org.wso2.carbon.registry.indexing.*; version="${carbon.registry.imp.pkg.version.range}",
-                            com.nimbusds.jwt.*;version="${nimbus.orbit.version.range}",
-                            com.nimbusds.jose.*;version="${nimbus.orbit.version.range}",
-                            javax.net.ssl,
-                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
-                            org.apache.http;version="${httpclient.version.range}",
-                            org.apache.http.client;version="${httpclient.version.range}",
-                            org.apache.http.message;version="${httpclient.version.range}",
-                            org.apache.http.client;version="${httpclient.version.range}",
-                            org.apache.http.conn.*;version="${httpclient.version.range}",
-                            org.apache.http.util;version="${httpclient.version.range}",
-                            org.apache.http.client.entity;version="${httpclient.version.range}",
-                            org.apache.http.client.methods;version="${httpclient.version.range}",
-                            org.apache.http.impl.client;version="${httpclient.version.range}",
-                            org.json.simple.*,
-                            org.wso2.carbon.core.util,
-                            javax.net.ssl,
-                            org.wso2.carbon.user.core.service,
-                            org.wso2.carbon.user.core.tenant,
-                            org.wso2.carbon.base
+                            org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.core.*; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.registry.indexing.*;version="${carbon.registry.package.import.version.range}",
+                            org.wso2.carbon.user.core.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -248,15 +258,21 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <argLine>
+                        --add-opens=java.xml/jdk.xml.internal=ALL-UNNAMED
+                        --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
+                    </argLine>
                     <systemPropertyVariables>
                         <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    
 </project>

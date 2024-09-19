@@ -17,6 +17,14 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceTypeManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
@@ -29,14 +37,6 @@ import org.testng.IObjectFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
-import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceTypeManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.core.Response;
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +48,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This class holds the unit tests for the class {@link DeviceTypeManagementService}
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils"})
 @PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class})
 public class DeviceTypeManagementServiceTest {
@@ -129,8 +129,9 @@ public class DeviceTypeManagementServiceTest {
         FeatureManager featureManager = Mockito.mock(FeatureManager.class);
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString())).thenReturn
                 (featureManager);
-        Mockito.when((featureManager).getFeatures(Mockito.anyString())).thenThrow(new DeviceManagementException());
-        Mockito.when((featureManager).getFeatures(Mockito.anyString(), Mockito.anyBoolean())).thenThrow(new DeviceManagementException());
+        Mockito.when(featureManager.getFeatures(Mockito.anyString())).thenThrow(new DeviceManagementException());
+        Mockito.when(featureManager.getFeatures(Mockito.anyString(), Mockito.anyBoolean())).thenThrow(new DeviceManagementException());
+        Mockito.when(featureManager.getFeatures(Mockito.any(), Mockito.anyBoolean())).thenThrow(new DeviceManagementException());
         Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, null, "false", MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),

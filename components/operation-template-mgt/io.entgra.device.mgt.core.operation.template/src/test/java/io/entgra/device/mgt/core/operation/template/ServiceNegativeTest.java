@@ -21,8 +21,8 @@ package io.entgra.device.mgt.core.operation.template;
 import io.entgra.device.mgt.core.operation.template.dto.OperationTemplate;
 import io.entgra.device.mgt.core.operation.template.exception.OperationTemplateMgtPluginException;
 import io.entgra.device.mgt.core.operation.template.impl.OperationTemplateServiceImpl;
-import io.entgra.device.mgt.core.operation.template.spi.OperationTemplateService;
 import io.entgra.device.mgt.core.operation.template.mock.BaseOperationTemplatePluginTest;
+import io.entgra.device.mgt.core.operation.template.spi.OperationTemplateService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeClass;
@@ -49,7 +49,7 @@ public class ServiceNegativeTest extends BaseOperationTemplatePluginTest {
     @Test(description = "This method tests Add Operation template under negative circumstances while missing " +
             "required fields",
             expectedExceptions = {OperationTemplateMgtPluginException.class},
-            expectedExceptionsMessageRegExp = "Invalid meter device subtype id: 0")
+            expectedExceptionsMessageRegExp = "Invalid device subtype id: 0")
     public void testAddOperationTemplates() throws OperationTemplateMgtPluginException {
 
         OperationTemplate operationTemplate = new OperationTemplate();

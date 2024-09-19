@@ -30,7 +30,7 @@
     <artifactId>certificate-mgt</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Certificate Management Component</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <modules>
         <module>io.entgra.device.mgt.core.certificate.mgt.core</module>
@@ -38,23 +38,4 @@
         <module>io.entgra.device.mgt.core.certificate.mgt.cert.admin.api</module>
     </modules>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.2</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

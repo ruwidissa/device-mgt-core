@@ -17,24 +17,19 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.review;
 
-import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
-import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
-import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import io.entgra.device.mgt.core.application.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.core.dao.ReviewDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ReviewManagementDAOException;
+import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
+import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;

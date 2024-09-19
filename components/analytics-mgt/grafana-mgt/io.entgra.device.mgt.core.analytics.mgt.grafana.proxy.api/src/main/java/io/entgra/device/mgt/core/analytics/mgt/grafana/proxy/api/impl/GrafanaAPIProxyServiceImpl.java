@@ -29,9 +29,9 @@ import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.bean.GrafanaPa
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.GrafanaConfiguration;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.GrafanaConfigurationManager;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception.MaliciousQueryAttempt;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

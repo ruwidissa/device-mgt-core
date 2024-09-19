@@ -19,10 +19,6 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.meta.data;
 
 import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
@@ -34,6 +30,10 @@ import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManageme
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.util.DeviceTypePluginConstants;
 import io.entgra.device.mgt.core.device.mgt.extensions.internal.DeviceTypeExtensionDataHolder;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 public class MetaRepositoryBasedLicenseManager implements LicenseManager {
 
@@ -107,13 +107,13 @@ public class MetaRepositoryBasedLicenseManager implements LicenseManager {
             } else {
                 metadataManagementService.createMetadata(metadata);
             }
-        } catch (MetadataManagementException e) {
-            String msg = "Error occurred while saving the licence value in meta data repository";
+        } catch (MetadataKeyAlreadyExistsException e) {
+            String msg = "Error occurred while saving the licence key and licence key exist.Licence Key: "
+                    + licenceKey;
             log.error(msg, e);
             throw new LicenseManagementException(msg, e);
-        } catch (MetadataKeyAlreadyExistsException e) {
-            String msg =
-                    "Error occurred while saving the licence key and licence key exist. Licence Key: " + licenceKey;
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while saving the licence value in meta data repository";
             log.error(msg, e);
             throw new LicenseManagementException(msg, e);
         }

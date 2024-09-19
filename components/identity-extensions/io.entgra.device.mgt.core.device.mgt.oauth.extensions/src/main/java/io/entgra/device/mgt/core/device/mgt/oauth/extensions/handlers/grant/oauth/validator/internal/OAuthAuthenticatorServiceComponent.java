@@ -21,22 +21,18 @@ package io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oau
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.oauth.extensions.authenticator" immediate="true"
- * @scr.reference name="identity.oauth2.validation.service"
- * interface="org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setOAuth2ValidationService"
- * unbind="unsetOAuth2ValidationService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oauth.validator.internal.OAuthAuthenticatorServiceComponent",
+        immediate = true)
 public class OAuthAuthenticatorServiceComponent {
 
     private static final Log log = LogFactory.getLog(OAuthAuthenticatorServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Starting Backend OAuthAuthenticator Framework Bundle");
@@ -44,6 +40,7 @@ public class OAuthAuthenticatorServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
@@ -54,6 +51,12 @@ public class OAuthAuthenticatorServiceComponent {
      * @param tokenValidationService An instance of OAuth2TokenValidationService.
      */
     @SuppressWarnings("unused")
+    @Reference(
+            name = "oauth2.token.validation.service",
+            service = org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOAuth2ValidationService")
     protected void setOAuth2ValidationService(OAuth2TokenValidationService tokenValidationService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting OAuth2TokenValidationService Service");

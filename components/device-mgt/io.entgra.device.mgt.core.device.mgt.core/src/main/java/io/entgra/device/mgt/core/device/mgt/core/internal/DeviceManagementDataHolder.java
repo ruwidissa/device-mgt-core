@@ -100,6 +100,7 @@ public class DeviceManagementDataHolder {
     private DeviceStatusManagementService deviceStatusManagementService;
     private APIApplicationServices apiApplicationServices;
     private PublisherRESTAPIServices publisherRESTAPIServices;
+    private DeviceManagementStartupHandler deviceManagementStartupHandler;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
@@ -126,18 +127,18 @@ public class DeviceManagementDataHolder {
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
-        this.setTenantManager(realmService);
+        setTenantManager(realmService != null ?
+                realmService.getTenantManager() : null);
     }
 
     public TenantManager getTenantManager() {
-        return tenantManager;
-    }
-
-    private void setTenantManager(RealmService realmService) {
-        if (realmService == null) {
-            throw new IllegalStateException("Realm service is not initialized properly");
+        if (tenantManager == null) {
+            throw new IllegalStateException("Tenant manager is not initialized properly");
         }
-        this.tenantManager = realmService.getTenantManager();
+        return tenantManager;    }
+
+    private void setTenantManager(TenantManager tenantManager) {
+        this.tenantManager = tenantManager;
     }
 
     public DeviceManagementProviderService getDeviceManagementProvider() {
@@ -456,5 +457,13 @@ public class DeviceManagementDataHolder {
 
     public void setGroupAccessAuthorizationService(GroupAccessAuthorizationService groupAccessAuthorizationService) {
         this.groupAccessAuthorizationService = groupAccessAuthorizationService;
+    }
+
+    public DeviceManagementStartupHandler getDeviceManagementStartupHandler() {
+        return deviceManagementStartupHandler;
+    }
+
+    public void setDeviceManagementStartupHandler(DeviceManagementStartupHandler deviceManagementStartupHandler) {
+        this.deviceManagementStartupHandler = deviceManagementStartupHandler;
     }
 }

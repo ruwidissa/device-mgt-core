@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao;
 
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Table;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception.DeviceTypeDeployerPayloadException;
+import org.testng.annotations.Test;
 
 /**
  * This class tests the negative scenarios related with {@link DeviceDAODefinition}

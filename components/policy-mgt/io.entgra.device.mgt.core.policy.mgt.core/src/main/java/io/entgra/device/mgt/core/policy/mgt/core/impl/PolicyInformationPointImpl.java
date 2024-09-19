@@ -18,9 +18,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.Feature;
@@ -31,16 +28,15 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
-import io.entgra.device.mgt.core.policy.mgt.common.FeatureManagementException;
-import io.entgra.device.mgt.core.policy.mgt.common.PIPDevice;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyFilter;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyInformationPoint;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
+import io.entgra.device.mgt.core.policy.mgt.common.*;
 import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.FeatureManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.FeatureManagerImpl;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.PolicyManagerImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 

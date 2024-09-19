@@ -19,6 +19,7 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
+import com.google.common.base.Strings;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
@@ -42,13 +43,32 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.SetReferenceTransformer;
 import org.wso2.carbon.user.api.*;
+import org.springframework.util.StringUtils;
+import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.registry.api.Registry;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.resource.services.utils.ChangeRolePermissionsUtil;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.Permission;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.constants.UserCoreErrorConstants.ErrorMessages;
 import org.wso2.carbon.user.mgt.UserRealmProxy;
 import org.wso2.carbon.user.mgt.common.UIPermissionNode;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
@@ -60,6 +80,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
 
 import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIMARY_USER_STORE;
 
@@ -124,7 +145,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         if (limit == 0){
             limit = Constants.DEFAULT_PAGE_LIMIT;
         }
-        if (domain != null && !domain.isEmpty()) {
+        if (!Strings.isNullOrEmpty(domain)) {
             username = domain + '/' + username;
         }
         Metadata metadata;
@@ -140,7 +161,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 decision = (boolean) jsonObject.get(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
             }
             if (decision) {
-                if (userStore == null || "".equals(userStore)){
+                if (Strings.isNullOrEmpty(userStore)){
                     userStore = PRIMARY_USER_STORE;
                 }
                 try {
@@ -406,6 +427,16 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     public Response addRole(RoleInfo roleInfo) {
         RequestValidationUtil.validateRoleDetails(roleInfo);
         RequestValidationUtil.validateRoleName(roleInfo.getRoleName());
+
+        String role;
+        String[] roles = roleInfo.getRoleName().split("/");
+
+        if (roles.length > 1) {
+            role = roleInfo.getRoleName().split("/")[1];
+        } else {
+            role = roleInfo.getRoleName().split("/")[0];
+        }
+
         try {
             String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
@@ -437,11 +468,11 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             }
             String stringUsers = new Gson().toJson(roleInfo.getUsers());
             log.info(
-                    "Role " + roleInfo.getRoleName().split("/")[1] + " created",
+                    "Role " + role + " created",
                     roleMgtContextBuilder
                             .setActionTag("ADD_ROLE")
                             .setUserStoreDomain(roleInfo.getRoleName().split("/")[0])
-                            .setRoleName(roleInfo.getRoleName().split("/")[1])
+                            .setRoleName(role)
                             .setUsers(stringUsers)
                             .setTenantID(tenantId)
                             .setTenantDomain(tenantDomain)
@@ -460,8 +491,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 errorCode = e.getMessage().split("-")[0].trim();
             }
             if (ErrorMessages.ERROR_CODE_ROLE_ALREADY_EXISTS.getCode().equals(errorCode)) {
-                String roleName = roleInfo.getRoleName().split("/")[1];
-                String msg = "Role already exists with name : " + roleName + ". Try with another role name.";
+                String msg = "Role already exists with name : " + role + ". Try with another role name.";
                 log.warn(msg);
                 return Response.status(Response.Status.CONFLICT).entity(msg).build();
             } else {
@@ -572,7 +602,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             if (newRoleName != null && !roleName.equals(newRoleName)) {
                 userStoreManager.updateRoleName(roleName, newRoleName);
             }
-            
+
             if (roleInfo.getUsers() != null) {
                 SetReferenceTransformer<String> transformer = new SetReferenceTransformer<>();
                 transformer.transform(Arrays.asList(userStoreManager.getUserListOfRole(newRoleName)),
@@ -592,12 +622,22 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 updatePermissions(roleDetails[roleDetails.length - 1], roleInfo, userRealm);
             }
             String stringUsers = new Gson().toJson(stringUserList);
+
+            String role;
+            String[] roles = roleInfo.getRoleName().split("/");
+
+            if (roles.length > 1) {
+                role = roleInfo.getRoleName().split("/")[1];
+            } else {
+                role = roleInfo.getRoleName().split("/")[0];
+            }
+
             log.info(
-                    "Role " + roleInfo.getRoleName().split("/")[1] + " updated",
+                    "Role " + role + " updated",
                     roleMgtContextBuilder
                             .setActionTag("UPDATE_ROLE")
                             .setUserStoreDomain(roleInfo.getRoleName().split("/")[0])
-                            .setRoleName(roleInfo.getRoleName().split("/")[1])
+                            .setRoleName(role)
                             .setUsers(stringUsers)
                             .setTenantID(tenantId)
                             .setTenantDomain(tenantDomain)
@@ -654,12 +694,21 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 log.debug("Deleting the role in user store");
             }
             DeviceMgtAPIUtils.getGroupManagementProviderService().deleteRoleAndRoleGroupMapping(roleName, roleToDelete, tenantId, userStoreManager, authorizationManager);
+            String role;
+            String[] roles = roleName.split("/");
+
+            if (roles.length > 1) {
+                role = roleName.split("/")[1];
+            } else {
+                role = roleName.split("/")[0];
+            }
+
             log.info(
-                    "Role " + roleName.split("/")[1] + " deleted",
+                    "Role " + role + " deleted",
                     roleMgtContextBuilder
                             .setActionTag("DELETE_ROLE")
                             .setUserStoreDomain(userStoreName)
-                            .setRoleName(roleName.split("/")[1])
+                            .setRoleName(role)
                             .setTenantID(String.valueOf(tenantId))
                             .setTenantDomain(tenantDomain)
                             .setUserName(userName)

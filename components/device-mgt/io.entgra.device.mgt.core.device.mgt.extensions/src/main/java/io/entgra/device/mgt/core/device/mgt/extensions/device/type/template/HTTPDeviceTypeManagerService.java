@@ -17,22 +17,13 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Feature;
 import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeDefinitionProvider;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceDetails;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Properties;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Features;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PolicyMonitoring;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.ProvisioningConfig;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PushNotificationProvider;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.ConfigProperties;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Property;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PullNotificationSubscriberConfig;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.*;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +68,9 @@ public class HTTPDeviceTypeManagerService extends DeviceTypeManagerService imple
                     if (feature.getCode() != null && feature.getName() != null) {
                         configFeature.setCode(feature.getCode());
                         configFeature.setDescription(feature.getDescription());
+                        if (feature.getTooltip() != null) {
+                            configFeature.setTooltip(feature.getTooltip());
+                        }
                         configFeature.setName(feature.getName());
                         if (feature.getMetadataEntries() != null && feature.getMetadataEntries().size() > 0) {
                             List<String> metaValues = new ArrayList<>();
@@ -84,6 +78,29 @@ public class HTTPDeviceTypeManagerService extends DeviceTypeManagerService imple
                                 metaValues.add(metadataEntry.getValue().toString());
                             }
                             configFeature.setMetaData(metaValues);
+                        }
+                        if (feature.getConfirmationTexts() != null) {
+                            List<String> confirmationTextValues = new ArrayList<>();
+                            Feature.ConfirmationTexts confirmationText = feature.getConfirmationTexts();
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmModalTitle());
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmModalText());
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmationTextDescribe());
+                            confirmationTextValues.add(confirmationText.getDeleteConfirmationText());
+                            confirmationTextValues.add(confirmationText.getCancelText());
+                            confirmationTextValues.add(confirmationText.getConfirmText());
+                            confirmationTextValues.add(confirmationText.getInputLabel());
+                            confirmationTextValues.add(confirmationText.getInputRequireMessage());
+                            configFeature.setConfirmationTexts(confirmationTextValues);
+                        }
+                        if (feature.getDangerZoneTooltipTexts() != null) {
+                            List<String> dangerZoneTextValues = new ArrayList<>();
+                            Feature.DangerZoneTooltipTexts dangerZoneText = feature.getDangerZoneTooltipTexts();
+                            dangerZoneTextValues.add(dangerZoneText.getToolTipTitle());
+                            dangerZoneTextValues.add(dangerZoneText.getToolTipPopConfirmText());
+                            dangerZoneTextValues.add(dangerZoneText.getConfirmText());
+                            dangerZoneTextValues.add(dangerZoneText.getCancelText());
+                            dangerZoneTextValues.add(dangerZoneText.getToolTipAvailable());
+                            configFeature.setDangerZoneTooltipTexts(dangerZoneTextValues);
                         }
                         featureList.add(configFeature);
                     }

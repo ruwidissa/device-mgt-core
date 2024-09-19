@@ -18,15 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.archival;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.archival.dao.*;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalDAO;
-import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalDestinationDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalSourceDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.archival.dao.DataDeletionDAO;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;

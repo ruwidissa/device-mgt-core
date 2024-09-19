@@ -19,12 +19,11 @@
 package io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal;
 
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 public class EmailSenderDataHolder {
 
-    private RegistryService registryService;
+//    private RegistryService registryService;
     private ConfigurationContextService configurationContextService;
     private EmailSenderService emailServiceProvider;
 
@@ -36,16 +35,16 @@ public class EmailSenderDataHolder {
         return thisInstance;
     }
 
-    public RegistryService getRegistryService() {
-        if (registryService == null) {
-            throw new IllegalStateException("Registry service is not initialized properly");
-        }
-        return registryService;
-    }
-
-    public void setRegistryService(RegistryService registryService) {
-        this.registryService = registryService;
-    }
+//    public RegistryService getRegistryService() {
+//        if (registryService == null) {
+//            throw new IllegalStateException("Registry service is not initialized properly");
+//        }
+//        return registryService;
+//    }
+//
+//    public void setRegistryService(RegistryService registryService) {
+//        this.registryService = registryService;
+//    }
 
     public ConfigurationContextService getConfigurationContextService() {
         if (configurationContextService == null) {

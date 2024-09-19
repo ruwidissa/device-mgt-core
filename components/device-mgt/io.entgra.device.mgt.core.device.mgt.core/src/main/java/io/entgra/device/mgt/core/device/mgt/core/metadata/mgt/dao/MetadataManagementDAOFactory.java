@@ -18,8 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
@@ -30,12 +28,14 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUti
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.impl.GenericMetadataDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.impl.OracleMetadataDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.impl.SQLServerMetadataDAOImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.List;
-import javax.sql.DataSource;
 
 /**
  * DAO factory class to be used in MetadataManagement related functionalities.

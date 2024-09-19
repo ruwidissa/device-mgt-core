@@ -18,8 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
@@ -28,6 +26,8 @@ import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceCon
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.tracker.TrackerDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

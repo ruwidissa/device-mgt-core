@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer;
 
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util.DeviceTypePluginConstants;
 import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
@@ -29,7 +30,6 @@ import org.wso2.carbon.application.deployer.CarbonApplication;
 import org.wso2.carbon.application.deployer.config.Artifact;
 import org.wso2.carbon.application.deployer.config.CappFile;
 import org.wso2.carbon.application.deployer.handler.AppDeploymentHandler;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util.DeviceTypePluginConstants;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -21,7 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.common.exceptions;
 /**
  * Custom exception class to be used in MetadataMgmt related functionalities.
  */
-public class MetadataKeyAlreadyExistsException extends Exception {
+public class MetadataKeyAlreadyExistsException extends MetadataManagementException {
 
     private static final long serialVersionUID = -1814347544027733436L;
     private String errorMessage;

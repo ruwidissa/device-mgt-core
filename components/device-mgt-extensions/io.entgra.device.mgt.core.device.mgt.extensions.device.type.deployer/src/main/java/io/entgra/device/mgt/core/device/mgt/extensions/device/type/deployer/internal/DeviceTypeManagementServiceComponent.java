@@ -21,34 +21,19 @@ package io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.int
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.application.deployer.handler.AppDeploymentHandler;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.internal.DeviceTypeManagementServiceComponent"
- * immediate="true"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="0..1"
- * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.internal.DeviceTypeManagementServiceComponent",
+        immediate = true)
 public class DeviceTypeManagementServiceComponent {
 
     private static final Log log = LogFactory.getLog(DeviceTypeManagementServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("Activating DeviceType Deployer Service Component");
@@ -56,13 +41,19 @@ public class DeviceTypeManagementServiceComponent {
 //        ctx.getBundleContext().registerService(AppDeploymentHandler.class.getName(), new DeviceTypeCAppDeployer(), null);
         DeviceTypeManagementDataHolder.getInstance().setBundleContext(ctx.getBundleContext());
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating DeviceType Deployer Service Component");
         }
     }
 
+    @Reference(
+            name = "configuration.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ConfigurationContextService");
@@ -79,6 +70,12 @@ public class DeviceTypeManagementServiceComponent {
         DeviceTypeManagementDataHolder.getInstance().setConfigurationContextService(null);
     }
 
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled()) {
             log.debug("RegistryService acquired");
@@ -90,6 +87,12 @@ public class DeviceTypeManagementServiceComponent {
         DeviceTypeManagementDataHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /* This is to avoid mobile device management component getting initialized before the underlying datasources
         are registered */

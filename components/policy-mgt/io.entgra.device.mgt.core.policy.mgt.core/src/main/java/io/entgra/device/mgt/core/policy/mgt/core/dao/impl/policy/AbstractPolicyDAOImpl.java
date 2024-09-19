@@ -19,9 +19,6 @@
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.policy;
 
 import com.google.gson.Gson;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
@@ -35,6 +32,9 @@ import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagerDAOException;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.util.PolicyManagementDAOUtil;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 import io.entgra.device.mgt.core.policy.mgt.core.util.SetReferenceTransformer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

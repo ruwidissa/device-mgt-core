@@ -31,14 +31,10 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Device Management Core</name>
     <description>WSO2 Carbon - Device Management Core</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -66,6 +62,14 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -77,45 +81,205 @@
                         <Bundle-Description>Device Management Core Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.device.mgt.core.internal</Private-Package>
                         <Import-Package>
-                            org.apache.axis2.*;version="${axis2.osgi.version.range}",
+                            com.fasterxml.jackson.databind;version="[2.14,3)",
+                            com.google.common.collect;version="[32.1,33)";resolution:=optional,
+                            com.google.common.reflect;version="[32.1,33)";resolution:=optional,
+                            com.google.gson;version="[2.9,3)",
+                            com.google.gson.reflect;version="[2.9,3)",
+                            io.entgra.device.mgt.core.apimgt.annotations;version="[5.0,6)",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api;version="[5.0,6)",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;version="[5.0,6)",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.app.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.app.mgt.android;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.app.mgt.ios;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.app.mgt.windows;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.authorization;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.configuration.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.cost.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.device.details;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.enrollment.notification;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.event.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.general;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.geo.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.group.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.invitation.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.license.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.metadata.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.notification.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.operation.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.otp.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.pull.notification;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.push.notification;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.report.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.roles.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.search;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.type.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.app.mgt.config,
+                            io.entgra.device.mgt.core.device.mgt.core.archival,
+                            io.entgra.device.mgt.core.device.mgt.core.archival.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.archival.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.cache,
+                            io.entgra.device.mgt.core.device.mgt.core.cache.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.common.exception,
+                            io.entgra.device.mgt.core.device.mgt.core.common.util,
+                            io.entgra.device.mgt.core.device.mgt.core.config,
+                            io.entgra.device.mgt.core.device.mgt.core.config.analytics,
+                            io.entgra.device.mgt.core.device.mgt.core.config.analytics.operation,
+                            io.entgra.device.mgt.core.device.mgt.core.config.archival,
+                            io.entgra.device.mgt.core.device.mgt.core.config.cache,
+                            io.entgra.device.mgt.core.device.mgt.core.config.datasource,
+                            io.entgra.device.mgt.core.device.mgt.core.config.enrollment.guide,
+                            io.entgra.device.mgt.core.device.mgt.core.config.geo.location,
+                            io.entgra.device.mgt.core.device.mgt.core.config.identity,
+                            io.entgra.device.mgt.core.device.mgt.core.config.keymanager,
+                            io.entgra.device.mgt.core.device.mgt.core.config.license,
+                            io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.documentation,
+                            io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.whitelabel,
+                            io.entgra.device.mgt.core.device.mgt.core.config.operation.timeout,
+                            io.entgra.device.mgt.core.device.mgt.core.config.pagination,
+                            io.entgra.device.mgt.core.device.mgt.core.config.permission,
+                            io.entgra.device.mgt.core.device.mgt.core.config.policy,
+                            io.entgra.device.mgt.core.device.mgt.core.config.pull.notification,
+                            io.entgra.device.mgt.core.device.mgt.core.config.push.notification,
+                            io.entgra.device.mgt.core.device.mgt.core.config.remote.session,
+                            io.entgra.device.mgt.core.device.mgt.core.config.status.task,
+                            io.entgra.device.mgt.core.device.mgt.core.config.task,
+                            io.entgra.device.mgt.core.device.mgt.core.config.tenant,
+                            io.entgra.device.mgt.core.device.mgt.core.config.ui,
+                            io.entgra.device.mgt.core.device.mgt.core.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.impl.device,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.impl.enrolment,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.impl.event,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.impl.geofence,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.impl.group,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.impl.tracker,
+                            io.entgra.device.mgt.core.device.mgt.core.device.details.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.dto,
+                            io.entgra.device.mgt.core.device.mgt.core.dto.event.config,
+                            io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.geo.geoHash,
+                            io.entgra.device.mgt.core.device.mgt.core.geo.task,
+                            io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.util,
+                            io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.util,
+                            io.entgra.device.mgt.core.device.mgt.core.notification.mgt.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.notification.mgt.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl.operation,
+                            io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.util,
+                            io.entgra.device.mgt.core.device.mgt.core.operation.mgt.util,
+                            io.entgra.device.mgt.core.device.mgt.core.operation.timeout.task,
+                            io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.otp.mgt.exception,
+                            io.entgra.device.mgt.core.device.mgt.core.otp.mgt.util,
+                            io.entgra.device.mgt.core.device.mgt.core.privacy,
+                            io.entgra.device.mgt.core.device.mgt.core.privacy.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.privacy.dao.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.report.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.report.mgt.config,
+                            io.entgra.device.mgt.core.device.mgt.core.search.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.search.mgt.dao,
+                            io.entgra.device.mgt.core.device.mgt.core.status.task,
+                            io.entgra.device.mgt.core.device.mgt.core.task,
+                            io.entgra.device.mgt.core.device.mgt.core.traccar.api.service,
+                            io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.impl,
+                            io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans,
+                            io.entgra.device.mgt.core.device.mgt.core.traccar.common.config,
+                            io.entgra.device.mgt.core.device.mgt.core.traccar.common.util,
+                            io.entgra.device.mgt.core.device.mgt.core.traccar.core.config,
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.notification.logger;version="[5.0,6)",
+                            io.entgra.device.mgt.core.notification.logger.impl;version="[5.0,6)",
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.transport.mgt.email.sender.core;version="[5.0,6)",
+                            io.entgra.device.mgt.core.transport.mgt.email.sender.core.service;version="[5.0,6)",
+                            io.swagger.annotations;version="[1.6,2)",
+                            javax.cache;version="[1.0,2)",
+                            javax.naming,
+                            javax.net.ssl,
+                            javax.servlet;version="[2.6,3)",
+                            javax.sql,
+                            javax.ws.rs,
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.bind.annotation;version="[0.0,1)",
+                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",
+                            javax.xml.stream;version="[1.0,2)",
+                            okhttp3,
+                            org.apache.axis2;version="[1.6,2)",
+                            org.apache.axis2.client;version="[1.6,2)",
+                            org.apache.axis2.context;version="[1.6,2)",
+                            org.apache.axis2.java.security;version="[1.6,2)",
+                            org.apache.axis2.transport.http;version="[1.6,2)",
+                            org.apache.catalina;version="${catalina.version.range}",
+                            org.apache.catalina.core;version="${catalina.version.range}",
+                            org.apache.commons.codec.binary;version="[1.4,2)",
+                            org.apache.commons.collections.map;version="[3.2,4)",
+                            org.apache.commons.httpclient;version="[3.1,4)",
+                            org.apache.commons.httpclient.protocol;version="[3.1,4)",
+                            org.apache.commons.io;version="[2.0,3)",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.lang3;version="[3.11,4)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.apache.commons.validator.routines;version="[1.7,2)",
+                            org.apache.http;version="[4.4,5)",
+                            org.apache.http.client.methods;version="[4.3,5)",
+                            org.apache.http.entity;version="[4.4,5)",
+                            org.apache.http.impl.client;version="[4.3,5)",
+                            org.apache.http.util;version="[4.4,5)",
+                            org.apache.solr.common;version="[8.11,9)",
+                            org.json;version="[3.0,4)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-                            javax.naming,
-                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            javax.servlet.*,
-                            org.xml.sax,
-                            javax.sql.*,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.core,
-                            org.wso2.carbon.utils.*,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            org.wso2.carbon.user.api,
-                            org.wso2.carbon.user.core.*,
-                            org.wso2.carbon.registry.core.service,
-                            org.wso2.carbon.registry.core,
-                            org.wso2.carbon.registry.core.exceptions,
-                            org.wso2.carbon.registry.core.session,
-                            org.wso2.carbon.registry.api,
-                            org.w3c.dom,
-                            org.wso2.carbon.identity.oauth.stub,
-                            org.wso2.carbon.identity.oauth.stub.dto,
-                            org.wso2.carbon.ndatasource.core,
-                            org.wso2.carbon.ntask.core.*,
-                            org.wso2.carbon.ntask.common,
-                            io.entgra.device.mgt.core.task.mgt.common.*,
-                            org.apache.commons.collections;version="${commons-collections.version.range}",
-                            io.entgra.device.mgt.core.email.sender.*,
-                            io.swagger.annotations.*;resolution:=optional,
-                            org.wso2.carbon,
-                            org.wso2.carbon.base,
-                            org.scannotation.*,
-                            org.wso2.carbon.event.processor.stub,
-                            io.entgra.device.mgt.core.identity.jwt.client.extension.service,
-                            org.apache.commons.codec.binary,
-                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon,
-                            io.entgra.device.mgt.core.device.mgt.extensions.logger.*,
-                            io.entgra.device.mgt.core.notification.logger.*
+                            org.scannotation;version="[1.0,2)",
+                            org.scannotation.archiveiterator;version="[1.0,2)",
+                            org.w3c.dom,org.wso2.carbon.base;version="[1.0,2)",
+                            org.wso2.carbon.caching.impl;version="[4.6,5)",
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.core;version="[4.8,5)",
+                            org.wso2.carbon.core.util;version="[4.8,5)",
+                            org.wso2.carbon.event.processor.stub;version="[2.3,3)",
+                            org.wso2.carbon.event.processor.stub.types;version="[2.3,3)",
+                            org.wso2.carbon.ndatasource.core;version="[4.8,5)",
+                            org.wso2.carbon.ntask.common;version="[4.9,5)",
+                            org.wso2.carbon.ntask.core;version="[4.9,5)",
+                            org.wso2.carbon.ntask.core.service;version="[4.9,5)",
+                            org.wso2.carbon.registry.api;version="[1.0,2)",
+                            org.wso2.carbon.registry.core;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.exceptions;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.service;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.session;version="[1.0,2)",
+                            org.wso2.carbon.stratos.common.beans;version="[4.7,5)",
+                            org.wso2.carbon.stratos.common.util;version="[4.7,5)",
+                            org.wso2.carbon.tenant.mgt.exception;version="[4.9,5)",
+                            org.wso2.carbon.tenant.mgt.services;version="[4.9,5)",
+                            org.wso2.carbon.user.api;version="[1.0,2)",
+                            org.wso2.carbon.user.core.config;version="[4.8,5)",
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.wso2.carbon.user.core.tenant;version="[4.8,5)",
+                            org.wso2.carbon.utils;version="[4.8,5)",
+                            org.wso2.carbon.utils.dbcreator;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.device.mgt.core.internal,
@@ -149,15 +313,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
 		<dependency>
-			<groupId>org.wso2.orbit.org.scannotation</groupId>
+			<groupId>io.entgra.org.scannotation</groupId>
 			<artifactId>scannotation</artifactId>
 		</dependency>
         <dependency>
@@ -165,8 +326,9 @@
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -187,8 +349,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -211,13 +373,15 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.tomcat.wso2</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>jdbc-pool</artifactId>
         </dependency>
         <dependency>
@@ -236,14 +400,6 @@
             <groupId>org.apache.ws.commons.axiom.wso2</groupId>
             <artifactId>axiom</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.apache.ws.commons.axiom.wso2</groupId>
-            <artifactId>axiom-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom.wso2</groupId>
-            <artifactId>axiom</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
@@ -253,11 +409,11 @@
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.tomcat</groupId>
+            <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
         </dependency>
 
@@ -324,10 +480,11 @@
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.multitenancy</groupId>
@@ -344,6 +501,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -361,10 +519,21 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
+<!--            <scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -372,6 +541,5 @@
             <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
         </dependency>
     </dependencies>
-
 </project>
 

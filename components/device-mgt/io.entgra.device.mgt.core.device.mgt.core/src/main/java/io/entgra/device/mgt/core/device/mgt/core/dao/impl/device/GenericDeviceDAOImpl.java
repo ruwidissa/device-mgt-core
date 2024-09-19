@@ -18,9 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.device;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Count;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
@@ -31,6 +28,9 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOExceptio
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,6 +71,8 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         boolean isSinceProvided = false;
         String serial = request.getSerialNumber();
         boolean isSerialProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             Connection conn = getConnection();
@@ -86,7 +88,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "e.IS_TRANSFERRED, " +
                     "e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, " +
-                    "e.ID AS ENROLMENT_ID " +
+                    "e.ID AS ENROLMENT_ID, " +
+                    "( SELECT GROUP_CONCAT(t.NAME ORDER BY t.NAME SEPARATOR ', ') " +
+                    "FROM DM_DEVICE_TAG_MAPPING dtm JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                    "WHERE dtm.ENROLMENT_ID = e.ID ) AS TAGS " +
                     "FROM DM_ENROLMENT e, " +
                     "(SELECT d.ID, " +
                     "d.DESCRIPTION, " +
@@ -162,7 +167,21 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 sql += buildStatusQuery(statusList);
                 isStatusProvided = true;
             }
-            sql = sql + " LIMIT ? OFFSET ?";
+            sql += " AND e.ID IN (" +
+                    "SELECT e.ID " +
+                    "FROM DM_ENROLMENT e " +
+                    "LEFT JOIN DM_DEVICE_TAG_MAPPING dtm ON e.ID = dtm.ENROLMENT_ID " +
+                    "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID ";
+
+            if (tagList != null && !tagList.isEmpty()) {
+                sql += " WHERE t.NAME IN (" + buildTagQuery(tagList);
+                sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ? ";
+                isTagsProvided = true;
+            } else {
+                sql += " GROUP BY e.ID ";
+            }
+            sql += ") ";
+            sql += " LIMIT ? OFFSET ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
@@ -198,13 +217,19 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                         stmt.setString(paramIdx++, status);
                     }
                 }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
+                }
                 stmt.setInt(paramIdx++, request.getRowCount());
                 stmt.setInt(paramIdx, request.getStartIndex());
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     devices = new ArrayList<>();
                     while (rs.next()) {
-                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs, true);
                         devices.add(device);
                     }
                     return devices;
@@ -667,6 +692,8 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         boolean isSinceProvided = false;
         String serial = request.getSerialNumber();
         boolean isSerialProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             Connection conn = getConnection();
@@ -682,7 +709,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "e.IS_TRANSFERRED, " +
                     "e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, " +
-                    "e.ID AS ENROLMENT_ID " +
+                    "e.ID AS ENROLMENT_ID, " +
+                    "( SELECT GROUP_CONCAT(t.NAME ORDER BY t.NAME SEPARATOR ', ') " +
+                    "FROM DM_DEVICE_TAG_MAPPING dtm JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                    "WHERE dtm.ENROLMENT_ID = e.ID ) AS TAGS " +
                     "FROM DM_ENROLMENT e, " +
                     "(SELECT gd.DEVICE_ID, " +
                     "gd.DESCRIPTION, " +
@@ -739,7 +769,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             //Filter Group with serial number or any Custom Property in DM_DEVICE_INFO
             if (serial != null || !request.getCustomProperty().isEmpty()) {
                 if (serial != null) {
-                    sql += "AND EXISTS (" +
+                    sql += " AND EXISTS (" +
                             "SELECT VALUE_FIELD " +
                             "FROM DM_DEVICE_INFO di " +
                             "WHERE di.DEVICE_ID = d1.DEVICE_ID " +
@@ -749,7 +779,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
                 if (!request.getCustomProperty().isEmpty()) {
                     for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
-                        sql += "AND EXISTS (" +
+                        sql += " AND EXISTS (" +
                                 "SELECT VALUE_FIELD " +
                                 "FROM DM_DEVICE_INFO di2 " +
                                 "WHERE di2.DEVICE_ID = d1.DEVICE_ID " +
@@ -757,6 +787,18 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                                 "AND di2.VALUE_FIELD LIKE ?)";
                     }
                 }
+            }
+            if (tagList != null && !tagList.isEmpty()) {
+                sql += " AND e.ID IN (" +
+                        "SELECT e.ID " +
+                        "FROM DM_ENROLMENT e " +
+                        "LEFT JOIN DM_DEVICE_TAG_MAPPING dtm ON e.ID = dtm.ENROLMENT_ID " +
+                        "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                        "WHERE t.NAME IN (" + buildTagQuery(tagList);
+                sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ? ) ";
+                isTagsProvided = true;
+            } else {
+                sql += " GROUP BY e.ID ";
             }
             sql = sql + " LIMIT ? OFFSET ?";
 
@@ -795,13 +837,19 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                         stmt.setString(paramIdx++, "%" + entry.getValue() + "%");
                     }
                 }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
+                }
                 stmt.setInt(paramIdx++, request.getRowCount());
                 stmt.setInt(paramIdx, request.getStartIndex());
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     devices = new ArrayList<>();
                     while (rs.next()) {
-                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs, true);
                         devices.add(device);
                     }
                     return devices;
@@ -1317,7 +1365,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 query += " AND i.VALUE_FIELD LIKE ?" ;
             }
             if (user != null && !user.isEmpty()) {
-                query += " AND e.OWNER = ?";
+                query += " AND e.OWNER LIKE ?";
                 isOwnerProvided = true;
             }
             if (status != null && !status.isEmpty()) {
@@ -1347,7 +1395,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 ps.setString(index++, EnrolmentInfo.Status.REMOVED.toString());
                 ps.setString(index++, EnrolmentInfo.Status.DELETED.toString());
                 if (isDeviceNameProvided) {
-                    ps.setString(index++, name + "%");
+                    ps.setString(index++, "%" + name + "%");
                 }
                 if (isOwnershipProvided) {
                     ps.setString(index++, ownership);
@@ -1356,7 +1404,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     ps.setString(index++, "%" + serial + "%");
                 }
                 if (isOwnerProvided) {
-                    ps.setString(index++, user);
+                    ps.setString(index++, "%" + user + "%");
                 }
                 if (isStatusProvided) {
                     for (String deviceStatus : status) {

@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant;
 
+import io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oauth.validator.LocalOAuthValidator;
+import io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oauth.validator.OAuthValidationResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oauth.validator.LocalOAuthValidator;
-import io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers.grant.oauth.validator.OAuthValidationResponse;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.oauth2.token.handlers.grant.AbstractAuthorizatio
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import java.rmi.RemoteException;
 
 /**

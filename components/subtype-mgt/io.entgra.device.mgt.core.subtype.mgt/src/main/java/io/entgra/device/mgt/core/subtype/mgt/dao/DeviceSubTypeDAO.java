@@ -18,8 +18,8 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.dao;
 
-import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtDAOException;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
+import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtDAOException;
 
 import java.util.List;
 

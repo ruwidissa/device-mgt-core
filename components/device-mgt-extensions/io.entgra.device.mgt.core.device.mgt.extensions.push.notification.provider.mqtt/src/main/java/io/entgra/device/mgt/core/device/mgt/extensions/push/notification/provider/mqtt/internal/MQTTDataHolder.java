@@ -18,7 +18,6 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal;
 
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 public class MQTTDataHolder {

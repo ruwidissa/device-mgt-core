@@ -28,12 +28,7 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dto.ServerContex
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

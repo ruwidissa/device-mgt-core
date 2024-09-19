@@ -18,8 +18,8 @@
 package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerService;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
@@ -30,33 +30,20 @@ import io.entgra.device.mgt.core.tenant.mgt.core.listener.DeviceMgtTenantListene
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.tenant.manager" immediate="true"
- * @scr.reference name="org.wso2.carbon.application.mgt.service"
- * interface="io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setApplicationManager"
- * unbind="unsetApplicationManager"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- */
-
+@Component(
+        name = "io.entgra.device.mgt.core.tenant.mgt.core.internal.TenantMgtServiceComponent",
+        immediate = true)
 @SuppressWarnings("unused")
 public class TenantMgtServiceComponent {
 
     private static final Log log = LogFactory.getLog(TenantManagerService.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             TenantManagerService tenantManagerService = new TenantManagerServiceImpl();
@@ -67,14 +54,6 @@ public class TenantMgtServiceComponent {
                     registerService(TenantManagerAdminService.class.getName(), tenantManagerAdminService, null);
             TenantManager tenantManager = new TenantManagerImpl();
             TenantMgtDataHolder.getInstance().setTenantManager(tenantManager);
-            WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
-            componentContext.getBundleContext().registerService(WhiteLabelManagementService.class.getName(),
-                    whiteLabelManagementService, null);
-            TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
-            DeviceStatusManagementService deviceStatusManagementService = new DeviceStatusManagementServiceImpl();
-            componentContext.getBundleContext().registerService(DeviceStatusManagementService.class.getName(),
-                    deviceStatusManagementService, null);
-            TenantMgtDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagementService);
             DeviceMgtTenantListener deviceMgtTenantListener = new DeviceMgtTenantListener();
             if(log.isDebugEnabled()) {
                 log.info("Tenant management listener is registering");
@@ -91,10 +70,57 @@ public class TenantMgtServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         // nothing to do
     }
 
+    @Reference(
+            name = "whiteLabelManagement.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetWhiteLabelManagementService"
+    )
+    protected void setWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("WhiteLabelManagementService is binding");
+        }
+        TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
+    }
+    protected void unsetWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("WhiteLabelManagementService is unbinding");
+        }
+        TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(null);
+    }
+
+    @Reference(
+            name = "deviceStatusManagement.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceStatusManagementService"
+    )
+    protected void setDeviceStatusManagementService(DeviceStatusManagementService deviceStatusManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("DeviceStatusManagementService is binding");
+        }
+        TenantMgtDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagementService);
+    }
+    protected void unsetDeviceStatusManagementService(DeviceStatusManagementService deviceStatusManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("DeviceStatusManagementService is unbinding");
+        }
+        TenantMgtDataHolder.getInstance().setDeviceStatusManagementService(null);
+    }
+
+    @Reference(
+            name = "application.mgr",
+            service = io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetApplicationManager")
     protected void setApplicationManager(ApplicationManager applicationManager) {
         if(log.isDebugEnabled()) {
             log.info("Application manager service is binding");
@@ -109,6 +135,12 @@ public class TenantMgtServiceComponent {
         TenantMgtDataHolder.getInstance().setApplicationManager(null);
     }
 
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if(log.isDebugEnabled()) {
             log.info("Realm Service service is binding");

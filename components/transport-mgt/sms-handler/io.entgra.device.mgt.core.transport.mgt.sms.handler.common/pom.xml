@@ -36,6 +36,14 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -49,7 +57,10 @@
                             io.entgra.device.mgt.core.transport.mgt.sms.handler.common.*
                         </Export-Package>
                         <Import-Package>
-                            io.swagger.annotations; version="${swagger.annotations.version}"; resolution:=optional,
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.bean,
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.exception,
+                            io.swagger.annotations;version="[1.6,2)",
+                            javax.xml.bind.annotation;version="[0.0,1)"
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -88,6 +99,11 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

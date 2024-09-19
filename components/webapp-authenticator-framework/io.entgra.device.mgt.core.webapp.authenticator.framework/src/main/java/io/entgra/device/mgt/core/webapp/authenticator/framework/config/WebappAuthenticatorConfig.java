@@ -17,12 +17,12 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.config;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationFrameworkUtil;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticatorFrameworkException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationFrameworkUtil;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticatorFrameworkException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

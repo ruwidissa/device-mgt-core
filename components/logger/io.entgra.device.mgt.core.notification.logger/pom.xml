@@ -33,8 +33,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -44,12 +45,16 @@
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-ext</artifactId>
+        </dependency>
     </dependencies>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<!--        <maven.compiler.source>8</maven.compiler.source>-->
+<!--        <maven.compiler.target>8</maven.compiler.target>-->
+<!--        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
     </properties>
 
     <build>
@@ -57,6 +62,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -69,10 +78,12 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Device Notification Logger Bundle</Bundle-Description>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.extensions.logger.*,
-                            org.apache.commons.logging;version="[1.2,2)",
-                            org.apache.log4j;version="[1.2,2)",
-                            org.wso2.carbon.context;version="[4.4,5)
+                            io.entgra.device.mgt.core.notification.logger,
+                            io.entgra.device.mgt.core.notification.logger.util,
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger.spi;version="[5.0,6)",
+                            org.slf4j,
+                            org.apache.commons.logging;version="[1.2,2)"
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.notification.logger.*
@@ -82,5 +93,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

@@ -19,18 +19,17 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocation;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.geo.geoHash.GeoHashGenerator;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

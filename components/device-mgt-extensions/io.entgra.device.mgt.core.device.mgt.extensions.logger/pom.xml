@@ -37,6 +37,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -50,7 +54,7 @@
                         <Bundle-Description>Entgra Logger Bundle</Bundle-Description>
                         <Import-Package>
                             io.entgra.device.mgt.core.device.mgt.extensions.logger,
-                            org.apache.commons.logging
+                            org.apache.commons.logging;version="[1.2,2)"
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.device.mgt.extensions.logger.*
@@ -63,8 +67,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -18,8 +18,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.cache;
 
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.util.List;
 

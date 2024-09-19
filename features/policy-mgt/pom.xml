@@ -32,7 +32,7 @@
     <artifactId>policy-mgt-feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Policy Management Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <modules>
         <module>io.entgra.device.mgt.core.policy.mgt.server.feature</module>

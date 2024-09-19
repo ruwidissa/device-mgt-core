@@ -18,7 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer;
 
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.DeviceTypePluginDeployer;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeConfigIdentifier;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.junit.Assert;
@@ -27,8 +27,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeConfigIdentifier;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;

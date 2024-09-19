@@ -21,14 +21,13 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.OTPEmailTypes;
-import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
-import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
-import io.entgra.device.mgt.core.device.mgt.config.api.beans.ErrorResponse;
-import io.entgra.device.mgt.core.device.mgt.config.api.service.DeviceManagementConfigService;
-import io.entgra.device.mgt.core.device.mgt.config.api.util.DeviceMgtAPIUtils;
 import org.apache.commons.logging.Log;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.operation.change.status.task.OperationConfigurationService;
+import io.entgra.device.mgt.core.device.mgt.core.operation.change.status.task.dto.OperationConfig;
+import io.entgra.device.mgt.core.device.mgt.core.operation.change.status.task.exceptions.OperationConfigAlreadyExistsException;
+import io.entgra.device.mgt.core.device.mgt.core.operation.change.status.task.exceptions.OperationConfigException;
+import io.entgra.device.mgt.core.device.mgt.core.operation.change.status.task.exceptions.OperationConfigNotFoundException;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -41,6 +40,13 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.general.TenantDetail;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.OTPEmailTypes;
+import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
+import io.entgra.device.mgt.core.device.mgt.config.api.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.config.api.service.DeviceManagementConfigService;
+import io.entgra.device.mgt.core.device.mgt.config.api.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
@@ -61,6 +67,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -313,4 +320,89 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
         return Response.status(Response.Status.OK).build();
     }
 
+    @GET
+    @Path("/operation-configuration")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getOperationConfiguration() {
+        OperationConfig config;
+        try {
+            config = OperationConfigurationService.getOperationConfig();
+        } catch (OperationConfigException e) {
+            String msg = "Error occurred getting operation configuration";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        if (config == null) {
+            String msg = "Operation configuration not provided";
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } else {
+            return Response.status(Response.Status.OK).entity(config).build();
+        }
+    }
+
+    @POST
+    @Path("/operation-configuration")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response addOperationConfiguration(OperationConfig config) {
+        try {
+            if (config != null) {
+                OperationConfigurationService.addOperationConfiguration(config);
+            } else {
+                String msg = "Operation configuration not provided";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
+        } catch (OperationConfigException e) {
+            String msg = "Error occurred adding operation configuration";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (OperationConfigAlreadyExistsException e) {
+            String msg = "Operation configuration already exists";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+        return Response.status(Response.Status.OK).entity(config).build();
+    }
+
+    @PUT
+    @Path("/operation-configuration")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response updateOperationConfiguration(OperationConfig config) {
+        try {
+            if (config != null) {
+                OperationConfigurationService.updateOperationConfiguration(config);
+            } else {
+                String msg = "Operation configuration body not provided";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
+        } catch (OperationConfigException e) {
+            String msg = "Error occurred adding operation configuration";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+        return Response.status(Response.Status.OK).entity(config).build();
+    }
+
+    @DELETE
+    @Path("/operation-configuration")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response deleteOperationConfiguration() {
+        String msg;
+        try {
+            OperationConfigurationService.deleteOperationConfiguration();
+        } catch (OperationConfigException e) {
+            msg = "Error occurred while deleting operation configuration";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (OperationConfigNotFoundException e) {
+            msg = "Operation configuration not provided";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        }
+        msg = "Operation configuration deleted successfully";
+        log.info(msg);
+        return Response.status(Response.Status.OK).entity(msg).build();
+    }
 }

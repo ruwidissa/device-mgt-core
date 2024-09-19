@@ -18,37 +18,33 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.internal;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.config.CertificateConfigurationManager;
+import io.entgra.device.mgt.core.certificate.mgt.core.config.CertificateManagementConfig;
+import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
 import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManagerImpl;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateMgtSchemaInitializer;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.device.mgt.core.certificate.mgt.core.config.CertificateConfigurationManager;
-import io.entgra.device.mgt.core.certificate.mgt.core.config.CertificateManagementConfig;
-import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.osgi.service.component.annotations.*;
 
-/**
- * @scr.component name="org.wso2.carbon.certificate.mgt" immediate="true"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.certificate.mgt.core.internal.CertificateManagementServiceComponent",
+        immediate = true)
 public class CertificateManagementServiceComponent {
 
     private static Log log = LogFactory.getLog(CertificateManagementServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -86,10 +82,17 @@ public class CertificateManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagerService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Device Management Service");

@@ -33,6 +33,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.List;
@@ -48,7 +49,7 @@ public class APIPublisherDataHolder {
     private RegistryService registryService;
     private boolean isServerStarted;
     private Stack<APIConfig> unpublishedApis = new Stack<>();
-    private Map<String, String> permScopeMapping;
+    private Map<String, String> permScopeMapping = new HashMap<>();
     private APIApplicationServices apiApplicationServices;
     private PublisherRESTAPIServices publisherRESTAPIServices;
     private MetadataManagementService metadataManagementService;

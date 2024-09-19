@@ -18,20 +18,16 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
+import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
-import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
+import org.apache.hc.core5.http.HttpStatus;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Cookie;
+import javax.servlet.http.*;
 import java.io.IOException;
 
 @MultipartConfig

@@ -27,13 +27,9 @@ import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtExcepti
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnAuthorizedException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Base64;
@@ -51,7 +47,9 @@ public class KeyManagerServiceImpl implements KeyManagerService {
         try {
             KeyMgtService keyMgtService = new KeyMgtServiceImpl();
             DCRResponse resp = keyMgtService.dynamicClientRegistration(dcrRequest.getApplicationName(), dcrRequest.getUsername(),
-                    dcrRequest.getGrantTypes(), dcrRequest.getCallBackUrl(), dcrRequest.getTags(), dcrRequest.getIsSaasApp(), dcrRequest.getValidityPeriod());
+                    dcrRequest.getGrantTypes(), dcrRequest.getCallBackUrl(), dcrRequest.getTags(),
+                    dcrRequest.getIsSaasApp(), dcrRequest.getValidityPeriod(), dcrRequest.getPassword(),
+                    dcrRequest.getSupportedGrantTypes(), dcrRequest.getCallbackUrl());
             return Response.status(Response.Status.CREATED).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

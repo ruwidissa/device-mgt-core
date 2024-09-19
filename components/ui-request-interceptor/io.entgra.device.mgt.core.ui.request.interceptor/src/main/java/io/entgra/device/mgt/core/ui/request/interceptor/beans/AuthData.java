@@ -19,6 +19,8 @@
 package io.entgra.device.mgt.core.ui.request.interceptor.beans;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class AuthData implements java.io.Serializable {
 
     private static final long serialVersionUID = -5156750882531944849L;
@@ -29,7 +31,7 @@ public class AuthData implements java.io.Serializable {
     private String clientId;
     private String clientSecret;
     private String encodedClientApp;
-    private String scope;
+    private JsonNode scope;
 
     public String getAccessToken() {
         return accessToken;
@@ -79,11 +81,11 @@ public class AuthData implements java.io.Serializable {
         this.encodedClientApp = encodedClientApp;
     }
 
-    public String getScope() {
+    public JsonNode getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    public void setScope(JsonNode scope) {
         this.scope = scope;
     }
 }

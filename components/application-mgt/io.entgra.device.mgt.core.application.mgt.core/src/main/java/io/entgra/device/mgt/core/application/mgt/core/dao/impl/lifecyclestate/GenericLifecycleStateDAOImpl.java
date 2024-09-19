@@ -17,21 +17,17 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.lifecyclestate;
 
-import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
-import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.AppLifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.core.dao.LifecycleStateDAO;
+import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.LifeCycleManagementDAOException;
+import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -278,7 +274,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(new Timestamp(rs.getLong("UPDATED_AT")));
+                lifecycleState.setUpdatedAt(rs.getLong("UPDATED_AT"));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
             }
         } catch (SQLException e) {
@@ -304,7 +300,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(new Timestamp(rs.getLong("UPDATED_AT") * 1000L));
+                lifecycleState.setUpdatedAt(rs.getLong("UPDATED_AT"));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
                 lifecycleStates.add(lifecycleState);
             }

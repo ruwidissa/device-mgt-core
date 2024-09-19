@@ -17,7 +17,8 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao;
 
-import io.entgra.device.mgt.core.application.mgt.common.*;
+import io.entgra.device.mgt.core.application.mgt.common.Filter;
+import io.entgra.device.mgt.core.application.mgt.common.ReleaseVersionInfo;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;
@@ -286,4 +287,6 @@ public interface ApplicationDAO {
      * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
      */
     void deleteApplicationsByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    List<ReleaseVersionInfo> getApplicationReleaseVersions(String uuid, int tenantId) throws ApplicationManagementDAOException;
 }

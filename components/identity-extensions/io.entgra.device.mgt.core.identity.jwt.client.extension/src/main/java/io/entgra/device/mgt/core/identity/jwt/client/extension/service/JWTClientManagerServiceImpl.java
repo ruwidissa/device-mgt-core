@@ -18,11 +18,6 @@
 
 package io.entgra.device.mgt.core.identity.jwt.client.extension.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.constant.JWTConstants;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
@@ -30,6 +25,11 @@ import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClie
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientConfigurationException;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 

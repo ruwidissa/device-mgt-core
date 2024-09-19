@@ -19,9 +19,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.search.mgt.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
@@ -33,21 +30,13 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.ApplicationDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.Constants;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.InvalidOperatorException;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.Processor;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.QueryBuilder;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.QueryHolder;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.ResultSetAggregator;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchMgtException;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.ValueType;
+import io.entgra.device.mgt.core.device.mgt.core.search.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.dao.SearchDAOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

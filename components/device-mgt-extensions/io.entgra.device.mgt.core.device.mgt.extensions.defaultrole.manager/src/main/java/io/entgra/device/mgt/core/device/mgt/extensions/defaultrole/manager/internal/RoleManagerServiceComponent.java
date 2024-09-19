@@ -19,35 +19,24 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.internal;
 
 import io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.DefaultRolesConfigManager;
+import io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.IoTSStartupHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.core.ServerStartupObserver;
-import io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.IoTSStartupHandler;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.role.manager.RoleManagerServiceComponent"
- * immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.internal.RoleManagerServiceComponent",
+        immediate = true)
 public class RoleManagerServiceComponent {
 
     private static final Log log = LogFactory.getLog(RoleManagerServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("Activating Role Management Service Component");
@@ -63,13 +52,19 @@ public class RoleManagerServiceComponent {
             log.error("Error occurred while activating Role Management Service Component", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Role Manager Service Component");
         }
     }
 
+    @Reference(
+            name = "configuration.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ConfigurationContextService");
@@ -90,6 +85,12 @@ public class RoleManagerServiceComponent {
      *
      * @param realmService An instance of RealmService
      */
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Realm Service");

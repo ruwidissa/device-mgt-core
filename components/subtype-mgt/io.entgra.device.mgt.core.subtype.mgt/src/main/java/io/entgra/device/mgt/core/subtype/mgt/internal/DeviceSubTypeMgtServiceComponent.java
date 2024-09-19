@@ -18,45 +18,29 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.internal;
 
-import io.entgra.device.mgt.core.subtype.mgt.impl.DeviceSubTypeServiceImpl;
-import io.entgra.device.mgt.core.subtype.mgt.spi.DeviceSubTypeService;
-import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAOFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAOFactory;
+import io.entgra.device.mgt.core.subtype.mgt.impl.DeviceSubTypeServiceImpl;
+import io.entgra.device.mgt.core.subtype.mgt.spi.DeviceSubTypeService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.subtype.mgt.internal.DeviceSubTypeMgtServiceComponent" immediate="true"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setRegistryService"
- * unbind="unsetRegistryService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.subtype.mgt.internal.DeviceSubTypeMgtServiceComponent",
+        immediate = true)
 public class DeviceSubTypeMgtServiceComponent {
 
     private static final Log log = LogFactory.getLog(DeviceSubTypeMgtServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
 
         if (log.isDebugEnabled()) {
@@ -80,7 +64,7 @@ public class DeviceSubTypeMgtServiceComponent {
             log.error("Error occurred while activating Device SubType Management Service Component", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Device SubType Management Service Component");
@@ -88,6 +72,12 @@ public class DeviceSubTypeMgtServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "data.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Device Management Service to Device SubType Mgt SC");
@@ -103,6 +93,12 @@ public class DeviceSubTypeMgtServiceComponent {
         DeviceSubTypeMgtDataHolder.getInstance().setDeviceManagementProviderService(null);
     }
 
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /* This is to avoid mobile device management component getting initialized before the underlying datasources
         are registered */
@@ -118,7 +114,12 @@ public class DeviceSubTypeMgtServiceComponent {
         }
     }
 
-
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled()) {
             log.debug("RegistryService set to Device SubType Mgt component");

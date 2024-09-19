@@ -18,11 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
-import org.h2.jdbcx.JdbcDataSource;
-import org.mockito.Mockito;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.wso2.carbon.base.MultitenantConstants;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -32,14 +27,15 @@ import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.conf
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Properties;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.exception.DeviceTypeConfigurationException;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceDAODefinition;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceTypeDAOHandler;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOImpl;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOManager;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.PropertyBasedPluginDAOImpl;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.*;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception.DeviceTypeDeployerPayloadException;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
 import io.entgra.device.mgt.core.device.mgt.extensions.utils.Utils;
+import org.h2.jdbcx.JdbcDataSource;
+import org.mockito.Mockito;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;

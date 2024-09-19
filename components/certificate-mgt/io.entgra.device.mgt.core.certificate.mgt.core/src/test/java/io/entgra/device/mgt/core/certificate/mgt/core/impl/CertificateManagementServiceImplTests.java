@@ -18,8 +18,20 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.impl;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.common.BaseDeviceManagementCertificateTest;
+import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
+import io.entgra.device.mgt.core.certificate.mgt.core.dto.CAStatus;
+import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
+import io.entgra.device.mgt.core.certificate.mgt.core.dto.SCEPResponse;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.CSRGenerator;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.DummyCertificate;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -33,20 +45,8 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.certificate.mgt.core.common.BaseDeviceManagementCertificateTest;
-import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
-import io.entgra.device.mgt.core.certificate.mgt.core.dto.CAStatus;
-import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
-import io.entgra.device.mgt.core.certificate.mgt.core.dto.SCEPResponse;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
-import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
-import sun.misc.BASE64Encoder;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +55,7 @@ import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -181,7 +182,6 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
 
     @Test(description = "This test case tests Signature verification of a Certificate against the keystore")
     public void testVerifySignature() throws KeystoreException, CertificateEncodingException, CMSException, IOException {
-        BASE64Encoder encoder = new BASE64Encoder();
         //generate and save a certificate in the keystore
         X509Certificate x509Certificate = managementService.generateX509Certificate();
         //Generate CMSdata
@@ -192,7 +192,7 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
         generator.addCertificates(store);
         CMSSignedData degenerateSd = generator.generate(new CMSAbsentContent());
         byte[] signature = degenerateSd.getEncoded();
-        boolean verifySignature = managementService.verifySignature(encoder.encode(signature));
+        boolean verifySignature = managementService.verifySignature(Base64.getEncoder().encodeToString(signature));
         Assert.assertNotNull(verifySignature);
         Assert.assertTrue(verifySignature);
         log.info("VerifySignature Test Successful");
@@ -264,11 +264,11 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
     @Test(description = "This test case tests generation of signed Certificate from a CSR")
     public void testGetSignedCertificateFromCSR() throws KeystoreException {
         CSRGenerator csrGeneration = new CSRGenerator();
-        BASE64Encoder encoder = new BASE64Encoder();
         // Generate key pair
         KeyPair keyPair = csrGeneration.generateKeyPair("RSA", 1024);
         byte[] csrData = csrGeneration.generateCSR("SHA256WithRSA", keyPair);
-        X509Certificate signedCertificateFromCSR = managementService.getSignedCertificateFromCSR(encoder.encode(csrData));
+        X509Certificate signedCertificateFromCSR = managementService.getSignedCertificateFromCSR(
+                Base64.getEncoder().encodeToString(csrData));
         Assert.assertNotNull(signedCertificateFromCSR);
         Assert.assertEquals(signedCertificateFromCSR.getType(), CertificateManagementConstants.X_509);
         log.info("GetSignedCertificateFromCSR Test Successful");
@@ -305,9 +305,8 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
     @Test(description = "This test case tests converting a pem file to X509 Certificate")
     public void testPemToX509Certificate() throws IOException, KeystoreException {
         File caCert = new File(CA_CERT_PEM);
-        BASE64Encoder encoder = new BASE64Encoder();
         byte[] caBytes = FileUtils.readFileToByteArray(caCert);
-        X509Certificate certificate = managementService.pemToX509Certificate(encoder.encode(caBytes));
+        X509Certificate certificate = managementService.pemToX509Certificate(Base64.getEncoder().encodeToString(caBytes));
         Assert.assertNotNull(certificate);
         Assert.assertEquals(certificate.getType(), CertificateManagementConstants.X_509);
         log.info("PemToX509Certificate Test Successful");
@@ -315,7 +314,6 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
 
     @Test(description = "This test case tests extracting Certificate from the header Signature")
     public void testExtractCertificateFromSignature() throws KeystoreException, CertificateEncodingException, CMSException, IOException, DeviceManagementException {
-        BASE64Encoder encoder = new BASE64Encoder();
         DeviceConfigurationManager.getInstance().initConfig();
         //generate and save a certificate in the keystore
         X509Certificate x509Certificate = managementService.generateX509Certificate();
@@ -327,7 +325,7 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
         generator.addCertificates(store);
         CMSSignedData degenerateSd = generator.generate(new CMSAbsentContent());
         byte[] signature = degenerateSd.getEncoded();
-        X509Certificate certificate = managementService.extractCertificateFromSignature(encoder.encode(signature));
+        X509Certificate certificate = managementService.extractCertificateFromSignature(Base64.getEncoder().encodeToString(signature));
         Assert.assertNotNull(certificate);
         Assert.assertEquals(certificate.getType(), CertificateManagementConstants.X_509);
         log.info("ExtractCertificateFromSignature Test Successful");

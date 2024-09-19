@@ -26,7 +26,7 @@ public class HandlerConstants {
     public static final String INTERNAL_TOKEN_ENDPOINT = "/token";
     public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
     public static final String AUTHORIZATION_ENDPOINT = "/oauth2/authorize";
-    public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/devportal/v2/applications/";
+    public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/devportal/v3/applications";
     public static final String IDENTITY_APP_MGT_ENDPOINT = "/services/IdentityApplicationManagementService.IdentityApplicationManagementServiceHttpsSoap11Endpoint";
     public static final String LOGIN_PAGE = "/login";
     public static final String SSO_LOGIN_CALLBACK = "/ssoLoginCallback";
@@ -43,6 +43,7 @@ public class HandlerConstants {
     public static final String SESSION_DEFAULT_AUTH_DATA_KEY = "defaultAuthInfo";
     public static final String UI_CONFIG_KEY = "ui-config";
     public static final String CALLBACK_URL_KEY = "callbackUrl";
+    public static final String GRANT_TYPE_KEY = "supportedGrantTypes";
     public static final String IS_ALLOWED_TO_ALL_DOMAINS_KEY = "isAllowedToAllDomains";
     public static final String JSESSIONID_KEY = "JSESSIONID";
     public static final String COMMON_AUTH_ID_KEY = "commonAuthId";
@@ -78,7 +79,7 @@ public class HandlerConstants {
 
     public static final String OTP_HEADER = "one-time-token";
 
-    public static final String AX_PREFIX = "ax2251:";
+    public static final String AX_PREFIX = "ax2245:";
     public static final String PAYLOADS_DIR = "repository/resources/payloads";
     public static final String SOAP_ACTION_HEADER = "SOAPAction";
     public static final String REFERER_HEADER = "Referer";

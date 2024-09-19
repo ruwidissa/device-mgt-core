@@ -18,11 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 /**
@@ -45,8 +41,10 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Operation", propOrder = {
-    "params",
-    "metadata"
+        "params",
+        "metadata",
+        "confirmationTexts",
+        "tooltipTexts"
 })
 public class Operation {
 
@@ -61,6 +59,28 @@ public class Operation {
 
     @XmlAttribute(name = "icon")
     private String icon;
+
+    @XmlElement(name = "tooltipTexts", required = false)
+    private DangerZoneTooltipTexts tooltipTexts;
+
+    @XmlElement(name = "confirmationTexts", required = false)
+    private ConfirmationTexts confirmationTexts;
+
+    public DangerZoneTooltipTexts getTooltipTexts() {
+        return tooltipTexts;
+    }
+
+    public void setTooltipTexts(DangerZoneTooltipTexts tooltipTexts) {
+        this.tooltipTexts = tooltipTexts;
+    }
+
+    public ConfirmationTexts getConfirmationTexts() {
+        return confirmationTexts;
+    }
+
+    public void setConfirmationTexts(ConfirmationTexts confirmationTexts) {
+        this.confirmationTexts = confirmationTexts;
+    }
 
     public Params getParams() {
         return params;

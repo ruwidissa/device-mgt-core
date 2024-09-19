@@ -20,28 +20,25 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
-/**
- * @scr.component name="internal.io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServiceComponent"
- * immediate="true"
- * @scr.reference name="user.apimanagerconfigurationservice.default"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setAPIManagerConfigurationService"
- * unbind="unsetAPIManagerConfigurationService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.apimgt.extension.rest.api.internal.APIManagerServiceComponent",
+        immediate = true)
 public class APIManagerServiceComponent {
 
     private static Log log = LogFactory.getLog(APIManagerServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Initializing publisher API extension bundle");
@@ -57,6 +54,10 @@ public class APIManagerServiceComponent {
             bundleContext.registerService(PublisherRESTAPIServices.class.getName(), publisherRESTAPIServices, null);
             APIManagerServiceDataHolder.getInstance().setPublisherRESTAPIServices(publisherRESTAPIServices);
 
+            ConsumerRESTAPIServices consumerRESTAPIServices = new ConsumerRESTAPIServicesImpl();
+            bundleContext.registerService(ConsumerRESTAPIServices.class.getName(), consumerRESTAPIServices, null);
+            APIManagerServiceDataHolder.getInstance().setConsumerRESTAPIServices(consumerRESTAPIServices);
+
             if (log.isDebugEnabled()) {
                 log.debug("API Application bundle has been successfully initialized");
             }
@@ -64,11 +65,17 @@ public class APIManagerServiceComponent {
             log.error("Error occurred while initializing API Application bundle", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
+    @Reference(
+            name = "apim.configuration.service",
+            service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService apiManagerConfigurationService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting API Manager Configuration Service");

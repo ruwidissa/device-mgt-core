@@ -61,10 +61,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
@@ -90,7 +90,10 @@ import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.OAuthUtils;
-import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.android.CustomApplication;
@@ -122,6 +125,8 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -776,14 +781,34 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         entry.getKey(), action, properties);
                 activityList.add(activity);
                 for (DeviceIdentifier identifier : deviceIdentifiers) {
-                    log.info(String.format("Web app %s triggered", action), appInstallLogContextBuilder.setAppId(String.valueOf(applicationDTO.getId())).setAppName(applicationDTO.getName()).setAppType(applicationDTO.getType()).setSubType(subType).setTenantId(tenantId).setTenantDomain(tenantDomain).setDevice(String.valueOf(identifier)).setUserName(username).setAction(action).build());
+                    log.info(String.format("Web app %s triggered", action), appInstallLogContextBuilder
+                            .setAppId(String.valueOf(applicationDTO.getId()))
+                            .setAppName(applicationDTO.getName())
+                            .setAppType(applicationDTO.getType())
+                            .setSubType(subType)
+                            .setTenantId(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setDevice(String.valueOf(identifier))
+                            .setUserName(username)
+                            .setAction(action)
+                            .build());
                 }
             }
         } else {
             Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action, properties);
             activityList.add(activity);
             for (DeviceIdentifier identifier : deviceIdentifiers) {
-                log.info(String.format("App %s triggered", action), appInstallLogContextBuilder.setAppId(String.valueOf(applicationDTO.getId())).setAppName(applicationDTO.getName()).setAppType(applicationDTO.getType()).setSubType(subType).setTenantId(tenantId).setTenantDomain(tenantDomain).setDevice(String.valueOf(identifier)).setUserName(username).setAction(action).build());
+                log.info(String.format("App %s triggered", action), appInstallLogContextBuilder
+                        .setAppId(String.valueOf(applicationDTO.getId()))
+                        .setAppName(applicationDTO.getName())
+                        .setAppType(applicationDTO.getType())
+                        .setSubType(subType)
+                        .setTenantId(tenantId)
+                        .setTenantDomain(tenantDomain)
+                        .setDevice(String.valueOf(identifier))
+                        .setUserName(username)
+                        .setAction(action)
+                        .build());
             }
         }
 
@@ -1369,7 +1394,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private CloseableHttpClient getHttpClient() throws ApplicationManagementException {
         try {
             SSLContextBuilder builder = new SSLContextBuilder();
-            builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+            builder.loadTrustMaterial(null, new TrustStrategy() {
+                        @Override
+                        public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                            return true;
+                        }
+                    });
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
             return HttpClients.custom().setSSLSocketFactory(sslsf).useSystemProperties().build();
         }  catch (NoSuchAlgorithmException e) {
@@ -1468,7 +1498,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppInstalledSubscribers(int offsetValue, int limitValue, String appUUID, String subType)
+    public PaginationResult getAppInstalledSubscribers(int offsetValue, int limitValue, String appUUID, String subType,
+                                                       Boolean uninstalled, String searchName)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1483,20 +1514,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
                 subscriptionList = subscriptionDAO
-                        .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId);
-                count = subscriptionDAO.getSubscribedUserCount(applicationReleaseId, tenantId);
-            } else {
-                if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                    subscriptionList = subscriptionDAO
-                            .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId);
-                    count = subscriptionDAO.getSubscribedRoleCount(applicationReleaseId, tenantId);
-                } else {
-                    if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                        subscriptionList = subscriptionDAO
-                                .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId);
-                        count = subscriptionDAO.getSubscribedGroupCount(applicationReleaseId, tenantId);
-                    }
-                }
+                        .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId, uninstalled, searchName);
+                count = subscriptionDAO.getSubscribedUserCount(applicationReleaseId, tenantId, uninstalled, searchName);
+            } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
+                subscriptionList = subscriptionDAO
+                        .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId, uninstalled, searchName);
+                count = subscriptionDAO.getSubscribedRoleCount(applicationReleaseId, tenantId, uninstalled, searchName);
+            } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                subscriptionList = subscriptionDAO
+                        .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId, uninstalled, searchName);
+                count = subscriptionDAO.getSubscribedGroupCount(applicationReleaseId, tenantId, uninstalled, searchName);
             }
 
             paginationResult.setData(subscriptionList);

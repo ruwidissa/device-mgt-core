@@ -18,6 +18,9 @@
 package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
@@ -35,6 +38,9 @@ public class APIApplicationManagerExtensionDataHolder {
     private TenantRegistryLoader tenantRegistryLoader;
     private TenantIndexingLoader indexLoader;
     private JWTClientManagerService jwtClientManagerService;
+    private ConsumerRESTAPIServices consumerRESTAPIServices;
+    private APIApplicationServices apiApplicationServices;
+    private MetadataManagementService metadataManagementService;
 
     private APIApplicationManagerExtensionDataHolder() {
     }
@@ -103,5 +109,29 @@ public class APIApplicationManagerExtensionDataHolder {
 
     public void setJwtClientManagerService(JWTClientManagerService jwtClientManagerService) {
         this.jwtClientManagerService = jwtClientManagerService;
+    }
+
+    public ConsumerRESTAPIServices getConsumerRESTAPIServices() {
+        return consumerRESTAPIServices;
+    }
+
+    public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        this.consumerRESTAPIServices = consumerRESTAPIServices;
+    }
+
+    public APIApplicationServices getApiApplicationServices() {
+        return apiApplicationServices;
+    }
+
+    public void setApiApplicationServices(APIApplicationServices apiApplicationServices) {
+        this.apiApplicationServices = apiApplicationServices;
+    }
+
+    public MetadataManagementService getMetadataManagementService() {
+        return metadataManagementService;
+    }
+
+    public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
+        this.metadataManagementService = metadataManagementService;
     }
 }

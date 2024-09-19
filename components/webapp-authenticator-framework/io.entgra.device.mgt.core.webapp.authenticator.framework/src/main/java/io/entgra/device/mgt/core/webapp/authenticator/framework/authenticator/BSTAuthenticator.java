@@ -17,6 +17,12 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXBuilder;
 import org.apache.axiom.om.util.StAXUtils;
@@ -27,14 +33,6 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.coyote.InputBuffer;
-import org.apache.tomcat.util.buf.ByteChunk;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -42,7 +40,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 public class BSTAuthenticator implements WebappAuthenticator {
 
@@ -146,30 +149,27 @@ public class BSTAuthenticator implements WebappAuthenticator {
 
     private String getBSTHeader(Request request) throws IOException, XMLStreamException {
         org.apache.coyote.Request coyoteReq = request.getCoyoteRequest();
-        InputBuffer buf = coyoteReq.getInputBuffer();
-        ByteChunk bc = new ByteChunk();
+        String securityHeader = coyoteReq.getHeader("Security");
 
-        buf.doRead(bc, coyoteReq);
-        try (InputStream is = new ByteArrayInputStream(getUTF8Bytes(bc.toString()))) {
+        if (securityHeader == null || securityHeader.isEmpty()) {
+            return null;
+        }
+
+        // Process the "Security" header value as needed
+        try (InputStream is = new ByteArrayInputStream(getUTF8Bytes(securityHeader))) {
             XMLStreamReader reader = StAXUtils.createXMLStreamReader(is);
             StAXBuilder builder = new StAXSOAPModelBuilder(reader);
             SOAPEnvelope envelope = (SOAPEnvelope) builder.getDocumentElement();
             envelope.build();
 
             SOAPHeader header = envelope.getHeader();
-            Iterator headerEls = header.getChildrenWithLocalName("Security");
+            Iterator headerEls = header.getChildrenWithLocalName("BinarySecurityToken");
             if (!headerEls.hasNext()) {
                 return null;
             }
-            OMElement securityHeader = (OMElement) headerEls.next();
-            Iterator securityHeaderEls = securityHeader.getChildrenWithLocalName("BinarySecurityToken");
-            if (!securityHeaderEls.hasNext()) {
-                return null;
-            }
-            OMElement bstHeader = (OMElement) securityHeaderEls.next();
+            OMElement bstHeader = (OMElement) headerEls.next();
             bstHeader.build();
             return bstHeader.getText();
         }
     }
-
 }

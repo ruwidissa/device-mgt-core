@@ -17,6 +17,10 @@
  */
 package io.entgra.device.mgt.core.apimgt.keymgt.extension;
 
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.Permission;
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagerService;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,22 +40,12 @@ import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.Permission;
-import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagerService;
-import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class KeyValidationHandler extends DefaultKeyValidationHandler {
 

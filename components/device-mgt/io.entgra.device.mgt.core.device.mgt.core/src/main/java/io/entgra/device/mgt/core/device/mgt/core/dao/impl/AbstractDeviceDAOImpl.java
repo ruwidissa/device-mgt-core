@@ -18,10 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import org.apache.commons.collections.map.SingletonMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
@@ -31,12 +27,16 @@ import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DevicePrope
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceMonitoringData;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
+import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -1030,6 +1030,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             Connection conn = getConnection();
@@ -1084,6 +1086,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 sql += buildStatusQuery(statusList);
                 isStatusProvided = true;
             }
+            if (tagList != null && !tagList.isEmpty()) {
+                sql += " AND e.ID IN ( " +
+                        "SELECT dtm.ENROLMENT_ID " +
+                        "FROM DM_DEVICE_TAG_MAPPING dtm " +
+                        "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                        "WHERE t.NAME IN (" + buildTagQuery(tagList);
+                sql += ") GROUP BY dtm.ENROLMENT_ID HAVING COUNT(DISTINCT t.NAME) = ? )";
+                isTagsProvided = true;
+            }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
@@ -1111,6 +1122,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     for (String status : statusList) {
                         stmt.setString(paramIdx++, status);
                     }
+                }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
                 }
 
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -1300,6 +1317,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             Connection conn = getConnection();
@@ -1342,6 +1361,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 sql += buildStatusQuery(statusList);
                 isStatusProvided = true;
             }
+            if (tagList != null && !tagList.isEmpty()) {
+                sql += " AND e.ID IN ( " +
+                        "SELECT dtm.ENROLMENT_ID " +
+                        "FROM DM_DEVICE_TAG_MAPPING dtm " +
+                        "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                        "WHERE t.NAME IN (" + buildTagQuery(tagList);
+                sql += ") GROUP BY dtm.ENROLMENT_ID HAVING COUNT(DISTINCT t.NAME) = ? )";
+                isTagsProvided = true;
+            }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
@@ -1367,6 +1395,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     for (String status : statusList) {
                         stmt.setString(paramIdx++, status);
                     }
+                }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
                 }
 
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -2940,6 +2974,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         statusList.stream().map(status -> "?").forEach(joiner::add);
 
         return joiner.toString();
+    }
+
+    protected String buildTagQuery(List<String> tagList)
+            throws DeviceManagementDAOException {
+        return String.join(", ", Collections.nCopies(tagList.size(), "?"));
     }
 
     public int getFunctioningDevicesInSystem() throws DeviceManagementDAOException {

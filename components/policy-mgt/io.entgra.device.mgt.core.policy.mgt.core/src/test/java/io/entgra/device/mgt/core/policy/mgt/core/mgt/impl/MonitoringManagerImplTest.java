@@ -18,6 +18,21 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManager;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
+import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationManagerImpl;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.policy.mgt.core.BasePolicyManagementDAOTest;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerServiceImpl;
@@ -42,21 +57,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.internal.collections.Pair;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManager;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
-import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationManagerImpl;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;

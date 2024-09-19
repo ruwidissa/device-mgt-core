@@ -198,14 +198,33 @@ public interface SubscriptionDAO {
      * @param offsetValue offset value for get paginated result
      * @param limitValue limit value for get paginated result
      * @param appReleaseId id of the application release.
+     * @param uninstalled a Boolean flag indicating the filter criteria for getting users:
+     *                    - `true` to get only unsubscribed users,
+     *                    - `false` to get only subscribed users,
+     *                    - `null` to get all users regardless of their unsubscription status.
+     * @param searchName an optional search term to filter the results by  username.
      * @return subscribedUsers - list of app subscribed users.
      * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
      */
     List<String> getAppSubscribedUsers(int offsetValue, int limitValue, int appReleaseId,
-                                       int tenantId)
+                                       int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException;
 
-    int getSubscribedUserCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
+    /**
+     * This method is used to get the count of users who are subscribed or unsubscribed to a specific application release.
+     *
+     * @param appReleaseId the ID of the application release for which the user count is to be retrieved.
+     * @param tenantId the ID of the current tenant.
+     * @param uninstalled a Boolean flag indicating the filter criteria for counting users:
+     *                    - `true` to count only unsubscribed users,
+     *                    - `false` to count only subscribed users,
+     *                    - `null` to count all users regardless of their unsubscription status.
+     * @param searchName an optional search term to filter the results by username.
+     * @return the count of users based on the specified criteria.
+     * @throws ApplicationManagementDAOException if an error occurs while establishing a database connection or executing the query.
+     */
+    int getSubscribedUserCount(int appReleaseId, int tenantId, Boolean uninstalled, String searchName)
+            throws ApplicationManagementDAOException;
 
     /**
      * This method is used to get the details of roles
@@ -214,14 +233,34 @@ public interface SubscriptionDAO {
      * @param offsetValue offset value for get paginated request.
      * @param limitValue limit value for get paginated request.
      * @param appReleaseId id of the application release.
+     * @param uninstalled a Boolean flag indicating the filter criteria for getting roles:
+     *                    - `true` to get only unsubscribed roles,
+     *                    - `false` to get only subscribed roles,
+     *                    - `null` to get all roles regardless of their unsubscription status.
+     * @param searchName an optional search term to filter the results by role name.
      * @return subscribedRoles - list of app subscribed roles.
      * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
      */
     List<String> getAppSubscribedRoles(int offsetValue, int limitValue, int appReleaseId,
-                                       int tenantId)
+                                       int tenantId, Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException;
 
-    int getSubscribedRoleCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
+    /**
+     * This method retrieves the count of roles subscribed to a given application release.
+     * The count can be filtered based on the unsubscription status.
+     *
+     * @param appReleaseId the ID of the application release for which the subscribed roles are counted.
+     * @param tenantId the ID of the current tenant.
+     * @param uninstalled a Boolean flag indicating the filter criteria for counting roles:
+     *                    - `true` to count only unsubscribed roles,
+     *                    - `false` to count only subscribed roles,
+     *                    - `null` to count all roles regardless of their unsubscription status.
+     * @param searchName an optional search term to filter the results by role name.
+     * @return the count of roles that match the specified criteria.
+     * @throws ApplicationManagementDAOException if there is an error while accessing the database or processing the request.
+     */
+    int getSubscribedRoleCount(int appReleaseId, int tenantId, Boolean uninstalled, String searchName)
+            throws ApplicationManagementDAOException;
 
     /**
      * This method is used to get the details of subscribed groups
@@ -230,13 +269,33 @@ public interface SubscriptionDAO {
      * @param offsetValue offset value for get paginated request.
      * @param limitValue limit value for get paginated request.
      * @param appReleaseId id of the application release.
+     * @param uninstalled a Boolean flag indicating the filter criteria for getting groups:
+     *                    - `true` to get only unsubscribed groups,
+     *                    - `false` to get only subscribed groups,
+     *                    - `null` to get all groups regardless of their unsubscription status.
+     * @param searchName an optional search term to filter the results by group name.
      * @return subscribedGroups - list of app subscribed groups.
      * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
      */
-    List<String> getAppSubscribedGroups(int offsetValue, int limitValue, int appReleaseId, int tenantId)
+    List<String> getAppSubscribedGroups(int offsetValue, int limitValue, int appReleaseId, int tenantId,
+                                        Boolean uninstalled, String searchName)
             throws ApplicationManagementDAOException;
 
-    int getSubscribedGroupCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
+    /**
+     * This method is used to get the count of subscribed groups
+     *
+     * @param tenantId id of the current tenant
+     * @param appReleaseId id of the application release.
+     * @param uninstalled a Boolean flag indicating the filter criteria for counting groups:
+     *                    - `true` to count only unsubscribed groups,
+     *                    - `false` to count only subscribed groups,
+     *                    - `null` to count all groups regardless of their unsubscription status.
+     * @param searchName an optional search term to filter the results by group name.
+     * @return subscribedGroups - list of app subscribed groups.
+     * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
+     */
+    int getSubscribedGroupCount(int appReleaseId, int tenantId,Boolean uninstalled, String searchName)
+            throws ApplicationManagementDAOException;
 
     /**
      * This method is used to get the details of subscribed groups

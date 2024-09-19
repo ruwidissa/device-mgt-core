@@ -17,9 +17,9 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework;
 
-import org.apache.catalina.connector.Request;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import org.apache.catalina.connector.Request;
 
 import java.util.Map;
 

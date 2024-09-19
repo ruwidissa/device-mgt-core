@@ -19,33 +19,22 @@
 package io.entgra.device.mgt.core.policy.decision.point.internal;
 
 import io.entgra.device.mgt.core.policy.decision.point.merged.MergedEvaluationPoint;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
+import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
-import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="org.wso2.carbon.policy.decision.MergedPolicyEvaluationServiceComponent" immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="org.wso2.carbon.devicemgt.policy.manager"
- * interface="io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setPolicyManagerService"
- * unbind="unsetPolicyManagerService"
- */
-
+@Component(
+        name = "io.entgra.device.mgt.core.policy.decision.point.internal.MergedPolicyEvaluationServiceComponent",
+        immediate = true)
 public class MergedPolicyEvaluationServiceComponent {
 
     private static Log log = LogFactory.getLog(MergedPolicyEvaluationServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Activating the policy evaluation bundle.");
@@ -59,6 +48,7 @@ public class MergedPolicyEvaluationServiceComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating the policy evaluation bundle.");
@@ -70,6 +60,12 @@ public class MergedPolicyEvaluationServiceComponent {
      *
      * @param realmService An instance of RealmService
      */
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
 
         if (log.isDebugEnabled()) {
@@ -90,6 +86,12 @@ public class MergedPolicyEvaluationServiceComponent {
         PolicyDecisionPointDataHolder.getInstance().setRealmService(null);
     }
 
+    @Reference(
+            name = "policy.mgt.service",
+            service = io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPolicyManagerService")
     protected void setPolicyManagerService(PolicyManagerService policyManagerService) {
         if (log.isDebugEnabled()) {
             log.debug("Unsetting PolicyManagerService Service");

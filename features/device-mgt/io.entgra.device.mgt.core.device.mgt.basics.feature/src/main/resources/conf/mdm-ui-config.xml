@@ -240,6 +240,7 @@
         <Scope>am:admin:store:app:review:update</Scope>
         <Scope>am:admin:store:app:sub:view</Scope>
         <Scope>am:admin:store:app:sub:modify</Scope>
+        <Scope>am:admin:store:app:release-versions:view</Scope>
         <Scope>dm:device-type:view</Scope>
         <Scope>and:enterprise:modify</Scope>
         <Scope>and:enterprise:view</Scope>
@@ -361,6 +362,7 @@
         <Scope>and:ops:change-lock-code</Scope>
         <Scope>and:ops:upgrade-firmware</Scope>
         <Scope>and:ops:send-notif</Scope>
+        <Scope>and:ops:secure-folder</Scope>
         <Scope>dm:geo:geo-fence:manage</Scope>
         <Scope>dm:whitelable:view</Scope>
         <Scope>dm:whitelable:update</Scope>

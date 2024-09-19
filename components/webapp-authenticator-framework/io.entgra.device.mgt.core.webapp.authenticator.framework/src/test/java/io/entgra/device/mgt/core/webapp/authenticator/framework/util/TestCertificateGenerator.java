@@ -18,6 +18,11 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.util;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
+import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CommonUtil;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -25,23 +30,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
-import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
-import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
-import io.entgra.device.mgt.core.certificate.mgt.core.util.CommonUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.security.auth.x500.X500Principal;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;

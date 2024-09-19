@@ -18,11 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.common;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class holds required parameters for a querying a paginated device response.
@@ -52,6 +48,7 @@ public class PaginationRequest {
     private Map<String, String> customProperty = new HashMap<>();
     private Map<String, Object> property = new HashMap<>();
     private List<String> statusList = new ArrayList<>();
+    private List<String> tags = new ArrayList<>();
     private OperationLogFilters operationLogFilters = new OperationLogFilters();
     private List<SortColumn> sortColumn = new ArrayList<>();
     private int deviceTypeId;
@@ -198,6 +195,14 @@ public class PaginationRequest {
     public void setSortColumn(List<SortColumn> sortColumn) { this.sortColumn = sortColumn; }
 
     public List<SortColumn> getSortColumn() { return sortColumn; }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
 
     /**
      * Convert SortColumns field parameter and splitting string into columnName and sortType

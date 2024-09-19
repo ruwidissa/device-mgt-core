@@ -17,12 +17,11 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework;
 
-import io.entgra.device.mgt.core.webapp.authenticator.framework.WebappAuthenticatorRepository;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.util.MalformedAuthenticator;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestWebappAuthenticator;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class WebappAuthenticatorRepositoryTest {
 

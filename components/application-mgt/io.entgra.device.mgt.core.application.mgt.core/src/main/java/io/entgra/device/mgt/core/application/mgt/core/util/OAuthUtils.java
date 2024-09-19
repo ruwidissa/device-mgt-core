@@ -18,17 +18,17 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApiRegistrationProfile;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -55,16 +55,18 @@ public class OAuthUtils {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(PrivilegedCarbonContext.
-                    getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName());
+            String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                    .getRealmConfiguration().getAdminUserName();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             APIManagementProviderService apiManagementProviderService = (APIManagementProviderService) ctx.
                     getOSGiService(APIManagementProviderService.class, null);
             apiApplicationKeyInfo = apiManagementProviderService.
                     generateAndRetrieveApplicationKeys(registrationProfile.getApplicationName(),
                             registrationProfile.getTags(), Constants.ApplicationInstall.DEFAULT_TOKEN_TYPE,
-                            null, registrationProfile.isAllowedToAllDomains(),
-                            Constants.ApplicationInstall.DEFAULT_VALIDITY_PERIOD);
+                            username, registrationProfile.isAllowedToAllDomains(),
+                            Constants.ApplicationInstall.DEFAULT_VALIDITY_PERIOD, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                                    .getRealmConfiguration().getAdminPassword(), null, null, null, false);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

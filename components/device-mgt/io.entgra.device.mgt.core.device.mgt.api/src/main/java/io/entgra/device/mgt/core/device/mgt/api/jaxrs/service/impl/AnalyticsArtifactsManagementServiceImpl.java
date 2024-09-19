@@ -17,23 +17,18 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.Attribute;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AdapterMappingConfiguration;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.MappingProperty;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AdapterConfiguration;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AdapterProperty;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.MessageFormat;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.SiddhiExecutionPlan;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.ArtifactAlreadyExistsException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.*;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.ErrorDTO;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.InvalidExecutionPlanException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.NotFoundException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.*;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.AnalyticsArtifactsManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.Adapter;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventStream;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Stub;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
 import org.wso2.carbon.event.publisher.stub.types.BasicOutputAdapterPropertyDto;
@@ -45,20 +40,10 @@ import org.wso2.carbon.event.receiver.stub.types.EventReceiverConfigurationDto;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
 import org.wso2.carbon.event.stream.stub.types.EventStreamAttributeDto;
 import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.user.api.UserStoreException;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Stub;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import javax.validation.Valid;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.rmi.RemoteException;
 import java.util.List;

@@ -22,7 +22,15 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ConflictException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceTypeDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.EnrollmentDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.ApplicationDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceStatusDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TenantDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.TagDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
@@ -119,13 +127,6 @@ import io.entgra.device.mgt.core.device.mgt.core.cache.impl.DeviceCacheManagerIm
 import io.entgra.device.mgt.core.device.mgt.core.common.Constants;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
-import io.entgra.device.mgt.core.device.mgt.core.dao.ApplicationDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceStatusDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceTypeDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.EnrollmentDAO;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
@@ -165,7 +166,18 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
@@ -185,6 +197,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private MetadataDAO metadataDAO;
     private final DeviceStatusDAO deviceStatusDAO;
     private final TenantDAO tenantDao;
+    private final TagDAO tagDAO;
     int count = 0;
 
     public DeviceManagementProviderServiceImpl() {
@@ -197,6 +210,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
         this.deviceStatusDAO = DeviceManagementDAOFactory.getDeviceStatusDAO();
         this.tenantDao = DeviceManagementDAOFactory.getTenantDAO();
+        this.tagDAO = DeviceManagementDAOFactory.getTagDAO();
 
         /* Registering a listener to retrieve events when some device management service plugin is installed after
          * the component is done getting initialized */
@@ -354,7 +368,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                         device.getType() + " upon the user '" + device.getEnrolmentInfo().getOwner() +
                                         "'");
                             }
-                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(existingDevice.getId())).setDeviceType(String.valueOf(existingDevice.getType())).setOwner(newEnrolmentInfo.getOwner()).setOwnership(String.valueOf(newEnrolmentInfo.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
+                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder
+                                    .setDeviceId(String.valueOf(existingDevice.getId()))
+                                    .setDeviceType(String.valueOf(existingDevice.getType()))
+                                    .setOwner(newEnrolmentInfo.getOwner())
+                                    .setOwnership(String.valueOf(newEnrolmentInfo.getOwnership()))
+                                    .setTenantID(String.valueOf(tenantId))
+                                    .setTenantDomain(tenantDomain)
+                                    .setUserName(userName)
+                                    .build());
                             status = true;
                         } else {
                             log.warn("Unable to update device enrollment for device : " + device.getDeviceIdentifier() +
@@ -5249,20 +5271,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void deleteDeviceDataByTenantDomain(String tenantDomain) throws DeviceManagementException {
-        int tenantId;
-        try{
-            TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
-            TenantInfoBean tenantInfoBean = tenantMgtAdminService.getTenant(tenantDomain);
-            tenantId = tenantInfoBean.getTenantId();
-
-        } catch (Exception e) {
-            String msg = "Error getting tenant ID from domain: "
-                    + tenantDomain;
-            log.error(msg);
-            throw new DeviceManagementException(msg, e);
-        }
-
+    public void deleteDeviceDataByTenantId(int tenantId) throws DeviceManagementException {
         try {
             DeviceManagementDAOFactory.beginTransaction();
 

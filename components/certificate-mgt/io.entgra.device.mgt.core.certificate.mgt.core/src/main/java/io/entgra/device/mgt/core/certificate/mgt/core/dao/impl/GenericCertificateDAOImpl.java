@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOException;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
+import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOUtil;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 

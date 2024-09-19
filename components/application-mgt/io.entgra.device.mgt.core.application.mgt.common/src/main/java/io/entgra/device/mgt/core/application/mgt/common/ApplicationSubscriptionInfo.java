@@ -21,7 +21,6 @@ package io.entgra.device.mgt.core.application.mgt.common;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ApplicationSubscriptionInfo {

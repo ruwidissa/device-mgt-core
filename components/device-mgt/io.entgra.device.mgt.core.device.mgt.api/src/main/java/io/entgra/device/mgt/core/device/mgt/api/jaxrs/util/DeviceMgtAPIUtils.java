@@ -19,11 +19,21 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderService;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
@@ -38,7 +48,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -65,7 +74,6 @@ import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.report.mgt.ReportManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceTypeGeneratorService;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
-import io.entgra.device.mgt.core.device.mgt.common.spi.TraccarManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
@@ -75,12 +83,12 @@ import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchManagerService
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyMonitoringTaskException;
+import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
+import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleService;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
@@ -89,17 +97,11 @@ import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceStub;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
 import org.wso2.carbon.identity.claim.metadata.mgt.dto.ClaimPropertyDTO;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.identity.user.store.count.AbstractCountRetrieverFactory;
 import org.wso2.carbon.identity.user.store.count.UserStoreCountRetriever;
 import org.wso2.carbon.identity.user.store.count.exception.UserStoreCounterException;
 import org.wso2.carbon.identity.user.store.count.jdbc.JDBCCountRetrieverFactory;
 import org.wso2.carbon.identity.user.store.count.jdbc.internal.InternalCountRetrieverFactory;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyMonitoringTaskException;
-import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
-import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager;
@@ -162,9 +164,12 @@ public class DeviceMgtAPIUtils {
     private static OTPManagementService otpManagementService;
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ApplicationManager applicationManager;
-
+    private static volatile APIApplicationServices apiApplicationServices;
+    private static volatile ConsumerRESTAPIServices consumerRESTAPIServices;
+    private static volatile APIManagementProviderService apiManagementProviderService;
     private static volatile APIPublisherService apiPublisher;
     private static volatile TenantManagerAdminService tenantManagerAdminService;
+    private static volatile TagManagementProviderService tagManagementService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -427,6 +432,63 @@ public class DeviceMgtAPIUtils {
         return otpManagementService;
     }
 
+    /**
+     * Initializing and accessing method for APIM Consumer REST API.
+     *
+     * @return ConsumerRESTAPIServices instance
+     * @throws IllegalStateException if ConsumerRESTAPIServices cannot be initialized
+     */
+    public static synchronized ConsumerRESTAPIServices getConsumerRESTAPIServices() {
+        if (consumerRESTAPIServices == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            consumerRESTAPIServices = (ConsumerRESTAPIServices) ctx.getOSGiService(ConsumerRESTAPIServices.class, null);
+            if (consumerRESTAPIServices == null) {
+                String msg = "Consumer Rest API service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return consumerRESTAPIServices;
+    }
+
+    /**
+     * Initializing and accessing method for APIM API application REST API.
+     *
+     * @return APIApplicationServices instance
+     * @throws IllegalStateException if APIApplicationServices cannot be initialized
+     */
+    public static synchronized APIApplicationServices getApiApplicationServices() {
+        if (apiApplicationServices == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            apiApplicationServices = (APIApplicationServices) ctx.getOSGiService(APIApplicationServices.class, null);
+            if (apiApplicationServices == null) {
+                String msg = "API application service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return apiApplicationServices;
+    }
+
+    /**
+     * Initializing and accessing method for API management Provider Service.
+     *
+     * @return APIManagementProviderService instance
+     * @throws IllegalStateException if APIManagementProviderService cannot be initialized
+     */
+    public static synchronized APIManagementProviderService getAPIManagementService() {
+        if (apiManagementProviderService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            apiManagementProviderService = (APIManagementProviderService) ctx.getOSGiService(APIManagementProviderService.class, null);
+            if (apiManagementProviderService == null) {
+                String msg = "API Management Provider service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return apiManagementProviderService;
+    }
+
     public static RegistryService getRegistryService() {
         RegistryService registryService;
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
@@ -503,6 +565,28 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException(msg);
         }
         return policyManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for TagManagementService.
+     *
+     * @return TagManagementService instance
+     * @throws IllegalStateException if TagManagementService cannot be initialized
+     */
+    public static TagManagementProviderService getTagManagementService() {
+        if (tagManagementService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (tagManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    tagManagementService = (TagManagementProviderService) ctx.getOSGiService(
+                            TagManagementProviderService.class, null);
+                    if (tagManagementService == null) {
+                        throw new IllegalStateException("Tag Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return tagManagementService;
     }
 
     public static PlatformConfigurationManagementService getPlatformConfigurationManagementService() {

@@ -18,15 +18,14 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt;
 
-import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationStrategy;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.MQTTDataHolder;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.util.MQTTAdapterConstants;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.event.output.adapter.core.internal.CarbonOutputEventAdapterService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;

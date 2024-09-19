@@ -96,6 +96,9 @@ public class Constants {
     public static final String MSI = "MSI";
     public static final String APPX = "APPX";
 
+    public static final String ENTERPRISE_APP_TYPE = "ENTERPRISE";
+    public static final String PUBLIC_APP_TYPE = "ENTERPRISE";
+
     private static final Map<String, String> AGENT_DATA = new HashMap<>();
     static {
         AGENT_DATA.put("android", "android-agent.apk");

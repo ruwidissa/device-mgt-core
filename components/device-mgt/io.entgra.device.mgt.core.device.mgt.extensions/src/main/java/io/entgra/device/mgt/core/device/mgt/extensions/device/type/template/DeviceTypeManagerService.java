@@ -17,11 +17,6 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
-import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDetails;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManager;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
 import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
@@ -29,6 +24,8 @@ import io.entgra.device.mgt.core.device.mgt.common.MonitoringOperation;
 import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.common.ProvisioningConfig;
 import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDetails;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManager;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
@@ -41,17 +38,13 @@ import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotific
 import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.ConfigProperties;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceStatusTaskConfiguration;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Feature;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PolicyMonitoring;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Property;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PullNotificationSubscriberConfig;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PushNotificationProvider;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.TaskConfiguration;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.*;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.policy.mgt.DefaultPolicyMonitoringManager;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.pull.notification.PullNotificationSubscriberLoader;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;

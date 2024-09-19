@@ -20,13 +20,20 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceStatusFilterService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -42,15 +49,14 @@ public class DeviceStatusFilterServiceImpl implements DeviceStatusFilterService 
     @GET
     @Path("/{deviceType}")
     public Response getDeviceStatusFilters(@PathParam("deviceType") String deviceType) {
-        List<String> result;
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             DeviceStatusManagementService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceStatusManagmentService();
-            result = deviceManagementProviderService.getDeviceStatusFilters(deviceType, tenantId);
-            if (result != null) {
-                return Response.status(Response.Status.OK).entity(result).build();
-            }
-            return Response.status(Response.Status.NO_CONTENT).entity(false).build();
+            return Response.status(Response.Status.OK).entity(deviceManagementProviderService
+                    .getDeviceStatusFilters(deviceType, CarbonContext.getThreadLocalCarbonContext().getTenantId())).build();
+        } catch (MetadataKeyNotFoundException e) {
+            String msg = "Couldn't find the device status filter details for device type: " + deviceType;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while getting device status filter of the tenant.";
             log.error(msg, e);

@@ -18,13 +18,13 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.subtype.mgt.dao.impl.DeviceSubTypeDAOImpl;
 import io.entgra.device.mgt.core.subtype.mgt.dao.impl.DeviceSubTypeMySQLDAOImpl;
+import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
-import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
-import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;

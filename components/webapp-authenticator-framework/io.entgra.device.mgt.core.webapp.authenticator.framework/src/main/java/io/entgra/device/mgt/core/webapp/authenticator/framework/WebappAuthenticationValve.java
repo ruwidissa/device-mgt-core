@@ -18,6 +18,9 @@
 package io.entgra.device.mgt.core.webapp.authenticator.framework;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer.PermissionAuthorizer;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer.WebappTenantAuthorizer;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -31,9 +34,6 @@ import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer.PermissionAuthorizer;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer.WebappTenantAuthorizer;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.InetAddress;

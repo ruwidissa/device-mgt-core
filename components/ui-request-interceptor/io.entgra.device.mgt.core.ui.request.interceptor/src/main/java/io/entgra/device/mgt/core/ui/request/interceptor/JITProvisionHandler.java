@@ -18,22 +18,13 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITData;
-import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
-import io.entgra.device.mgt.core.ui.request.interceptor.exceptions.JITEnrollmentException;
 import io.entgra.device.mgt.core.ui.request.interceptor.exceptions.JITProvisionException;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.core5.http.HttpStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

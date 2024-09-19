@@ -22,6 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 
 /**
  * DTO class to be used when registering an ApiM application.
@@ -42,6 +43,10 @@ public class RegistrationProfile {
     private boolean isAllowedToAllDomains;
     @XmlElement(required = false)
     private String validityPeriod;
+
+    private String callbackUrl;
+
+    private ArrayList<String> supportedGrantTypes;
 
     public String getApplicationName() {
         return applicationName;
@@ -89,5 +94,21 @@ public class RegistrationProfile {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getCallbackUrl() {
+        return callbackUrl;
+    }
+
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
+    }
+
+    public ArrayList<String> getSupportedGrantTypes() {
+        return supportedGrantTypes;
+    }
+
+    public void setSupportedGrantTypes(ArrayList<String> supportedGrantTypes) {
+        this.supportedGrantTypes = supportedGrantTypes;
     }
 }

@@ -18,20 +18,18 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
+import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -75,33 +73,35 @@ public class SsoLoginCallbackHandler extends HttpServlet {
         }
 
         String scope = session.getAttribute("scope").toString();
-
-        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT);
-        tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + session.getAttribute("encodedClientApp"));
-        tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
-
         String loginCallbackUrl = iotsCoreUrl + req.getContextPath() + HandlerConstants.SSO_LOGIN_CALLBACK;
 
         StringEntity tokenEPPayload = new StringEntity(
                 "grant_type=" + HandlerConstants.CODE_GRANT_TYPE + "&code=" + code + "&scope=" + scope +
                         "&redirect_uri=" + loginCallbackUrl,
                 ContentType.APPLICATION_FORM_URLENCODED);
-        tokenEndpoint.setEntity(tokenEPPayload);
-        ProxyResponse tokenResultResponse = HandlerUtil.execute(tokenEndpoint);
 
-        JsonParser jsonParser = new JsonParser();
-        JsonElement jTokenResult = jsonParser.parse(tokenResultResponse.getData());
-        if (jTokenResult.isJsonObject()) {
-            JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
+        ClassicHttpRequest tokenEndpoint = ClassicRequestBuilder.post(keyManagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT)
+                .setEntity(tokenEPPayload)
+                .setHeader(org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE, org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED.toString())
+                .setHeader(org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + session.getAttribute("encodedClientApp"))
+                .build();
+
+        ProxyResponse tokenResultResponse = HandlerUtil.execute(tokenEndpoint);
+        JsonNode jsonNode = tokenResultResponse.getData();
+
+        if (jsonNode != null) {
             AuthData authData = new AuthData();
             authData.setClientId(session.getAttribute("clientId").toString());
             authData.setClientSecret(session.getAttribute("clientSecret").toString());
             authData.setEncodedClientApp(session.getAttribute("encodedClientApp").toString());
-            authData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
-            authData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
-            authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
+            authData.setAccessToken(jsonNode.get("access_token").textValue());
+            authData.setRefreshToken(jsonNode.get("refresh_token").textValue());
+            authData.setScope(jsonNode.get("scope"));
             session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
             resp.sendRedirect(session.getAttribute("redirectUrl").toString());
+        } else {
+            log.error("Found empty response for token call.");
+            HandlerUtil.handleError(resp, HandlerConstants.INTERNAL_ERROR_CODE);
         }
     }
 }

@@ -19,12 +19,10 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.Feature;
@@ -36,30 +34,24 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelImageRequestPayload;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.Notification;
 import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ApplicationWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GeofenceWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OldPasswordResetWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyPayloadValidator;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 
 public class RequestValidationUtil {
 
@@ -489,6 +481,70 @@ public class RequestValidationUtil {
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request body is "
                             + "incorrect").build());
+        }
+    }
+
+    /**
+     * Validates the provided tag details to ensure that either a valid tagId or a non-empty tagName is provided,
+     * and that the tagInfo is not null. Throws InputValidationException if any of these conditions are not met.
+     *
+     * @param tagId the ID of the tag (must be greater than 0)
+     * @param tagName the name of the tag (must be non-empty if tagId is not provided)
+     * @param tagInfo the TagInfo object to validate (must not be null)
+     * @throws InputValidationException if neither a valid tagId nor a tagName is provided, or if tagInfo is null
+     */
+    public static void validateTagDetails(Integer tagId, String tagName, TagInfo tagInfo) {
+        if ((tagId == null || tagId <= 0) && StringUtils.isBlank(tagName)) {
+            String msg = "Either valid tagId or tagName must be provided.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build());
+        }
+        if (tagInfo == null) {
+            String msg = "Provided request body is empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request body is "
+                            + "empty").build());
+        }
+    }
+
+    /**
+     * Validates the provided list of TagInfo objects to ensure that it is not null.
+     * Throws InputValidationException if the list is null.
+     *
+     * @param tagInfo the list of TagInfo objects to validate (must not be null)
+     * @throws InputValidationException if the list is null
+     */
+    public static void validateTagListDetails(List<TagInfo> tagInfo) {
+        if (tagInfo == null) {
+            String msg = "Provided request body is empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request body is "
+                            + "empty").build());
+        }
+    }
+
+    /**
+     * Validates the provided TagMappingInfo object to ensure it is not null and contains valid
+     * device identifiers, device type, and tags. Throws InputValidationException if validation fails.
+     *
+     * @param tagMappingInfo the TagMappingInfo object to validate
+     * @throws InputValidationException if the tagMappingInfo or its required fields are invalid
+     */
+    public static void validateTagMappingDetails(TagMappingInfo tagMappingInfo) {
+        if (tagMappingInfo == null) {
+            String msg = "Provided request body is empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400L).setMessage("Request body is empty").build());
+        } else if (tagMappingInfo.getDeviceIdentifiers() == null || tagMappingInfo.getDeviceType() == null
+                || tagMappingInfo.getTags() == null) {
+            String msg = "Invalid tag mapping request body.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400L).setMessage("Invalid tag mapping request body").build());
         }
     }
 

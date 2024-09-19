@@ -18,8 +18,8 @@
 package io.entgra.device.mgt.core.notification.logger.util;
 
 import io.entgra.device.mgt.core.notification.logger.*;
-import org.apache.log4j.MDC;
-
+import org.slf4j.MDC;
+//
 public final class MDCContextUtil {
 
     public static void populateDeviceMDCContext(final DeviceLogContext mdcContext) {
@@ -54,7 +54,7 @@ public final class MDCContextUtil {
             MDC.put("IsUserRegistered", "Registered");
         }
         if (mdcContext.isDeviceRegistered()) {
-            MDC.put("IsDeviceRegistered", mdcContext.isDeviceRegistered());
+            MDC.put("IsDeviceRegistered", String.valueOf(mdcContext.isDeviceRegistered()));
         }
         if (mdcContext.getTenantDomain() != null) {
             MDC.put("TenantDomain", mdcContext.getTenantDomain());

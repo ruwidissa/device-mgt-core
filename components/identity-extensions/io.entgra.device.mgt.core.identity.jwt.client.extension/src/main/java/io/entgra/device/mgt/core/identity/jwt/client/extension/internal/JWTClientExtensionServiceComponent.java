@@ -17,53 +17,32 @@
  */
 package io.entgra.device.mgt.core.identity.jwt.client.extension.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientConfigurationException;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerServiceImpl;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;
+
 import java.io.IOException;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.identity.jwt.client.extension.internal.JWTClientExtensionServiceComponent"
- * immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRegistryService"
- * unbind="unsetRegistryService"
- * @scr.reference name="tenant.registryloader"
- * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTenantRegistryLoader"
- * unbind="unsetTenantRegistryLoader"
- * @scr.reference name="tenant.indexloader"
- * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setIndexLoader"
- * unbind="unsetIndexLoader"
- * @scr.reference name="realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.identity.jwt.client.extension.internal.JWTClientExtensionServiceComponent",
+        immediate = true)
 public class JWTClientExtensionServiceComponent {
 
     private static Log log = LogFactory.getLog(JWTClientExtensionServiceComponent.class);
 
+    //    private ServiceRegistration serviceRegistration = null;
+    @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Initializing jwt extension bundle");
@@ -82,10 +61,19 @@ public class JWTClientExtensionServiceComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        //do nothing
+        if (log.isDebugEnabled()) {
+            log.info("deactivating jwt extension bundle");
+        }
     }
 
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (registryService != null && log.isDebugEnabled()) {
             log.debug("Registry service initialized");
@@ -97,6 +85,12 @@ public class JWTClientExtensionServiceComponent {
         JWTClientExtensionDataHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+            name = "tenant.registry.loader",
+            service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantRegistryLoader")
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         JWTClientExtensionDataHolder.getInstance().setTenantRegistryLoader(tenantRegistryLoader);
     }
@@ -105,6 +99,12 @@ public class JWTClientExtensionServiceComponent {
         JWTClientExtensionDataHolder.getInstance().setTenantRegistryLoader(null);
     }
 
+    @Reference(
+            name = "tenant.index.loader",
+            service = org.wso2.carbon.registry.indexing.service.TenantIndexingLoader.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetIndexLoader")
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
         if (indexLoader != null && log.isDebugEnabled()) {
             log.debug("IndexLoader service initialized");
@@ -121,6 +121,12 @@ public class JWTClientExtensionServiceComponent {
      *
      * @param realmService An instance of RealmService
      */
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Realm Service");

@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.application.mgt.common.services;
 
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
+import io.entgra.device.mgt.core.application.mgt.common.ReleaseVersionInfo;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
@@ -28,7 +29,6 @@ import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
@@ -548,18 +548,26 @@ public interface ApplicationManager {
     void deleteApplicationDataOfTenant(int tenantId) throws ApplicationManagementException;
 
     /**
-     * Delete all application related data of a tenant by tenant Domain
+     * Delete all application related data of a tenant by tenant Id
      *
-     * @param tenantDomain Domain of the Tenant
+     * @param tenantId Id of the Tenant
      * @throws ApplicationManagementException thrown if an error occurs when deleting data
      */
-    void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException;
+    void deleteApplicationDataByTenantId(int tenantId) throws ApplicationManagementException;
 
     /**
-     * Delete all Application artifacts related to a tenant by Tenant Domain
+     * Delete all Application artifacts related to a tenant by Tenant Id
      *
-     * @param tenantDomain Domain of the Tenant
+     * @param tenantId Id of the Tenant
      * @throws ApplicationManagementException thrown if an error occurs when deleting app folders
      */
-    void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException;
+    void deleteApplicationArtifactsByTenantId(int tenantId) throws ApplicationManagementException;
+
+    /**
+     * Extract and retrieve application release version data for a given UUID
+     * @param uuid UUID of the application
+     * @return List of {@link ReleaseVersionInfo}
+     * @throws ApplicationManagementException throws when error encountered while retrieving data
+     */
+    List<ReleaseVersionInfo> getApplicationReleaseVersions(String uuid) throws ApplicationManagementException;
 }

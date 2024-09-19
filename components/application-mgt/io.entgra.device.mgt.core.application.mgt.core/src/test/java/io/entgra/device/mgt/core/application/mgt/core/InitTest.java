@@ -17,9 +17,9 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core;
 
-import org.testng.annotations.BeforeSuite;
 import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
+import org.testng.annotations.BeforeSuite;
 
 import java.io.File;
 

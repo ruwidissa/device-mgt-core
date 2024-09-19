@@ -18,45 +18,28 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
+import io.entgra.device.mgt.core.application.mgt.common.ReleaseVersionInfo;
 import io.entgra.device.mgt.core.application.mgt.common.exception.FileDownloaderServiceException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.FileTransferServiceException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.dao.*;
 import io.entgra.device.mgt.core.application.mgt.core.exception.*;
-import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
-import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstaller;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationSubscriptionType;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
 import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
+import io.entgra.device.mgt.core.application.mgt.common.Filter;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
+import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.Pagination;
 import io.entgra.device.mgt.core.application.mgt.common.config.RatingConfiguration;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationSubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
 import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
-import io.entgra.device.mgt.core.application.mgt.common.Filter;
 import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
@@ -71,18 +54,17 @@ import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.EntAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppReleaseWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ForbiddenException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.LifeCycleManagementDAOException;
@@ -90,24 +72,35 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundExceptio
 import io.entgra.device.mgt.core.application.mgt.core.exception.VisibilityManagementDAOException;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
+import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
-import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
-import javax.ws.rs.core.Response;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -1488,7 +1481,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             this.changeLifecycleState(applicationReleaseDTO, lifecycleChanger);
                         }
                     }
-                    if (applicationDTO.getType().equals("ENTERPRISE") || applicationDTO.getType().equals("PUBLIC") ) {
+                    if (Constants.ENTERPRISE_APP_TYPE.equals(applicationDTO.getType()) || Constants.PUBLIC_APP_TYPE.equals(applicationDTO.getType())) {
                         persistAppIconInfo(applicationReleaseDTO);
                     }
                     applicationReleaseEntities.add(applicationReleaseDTO);
@@ -1965,14 +1958,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
         List<Metadata> allMetadata;
         allMetadata = APIUtil.getMetadataManagementService().retrieveAllMetadata();
         if (allMetadata != null && !allMetadata.isEmpty()) {
-            for(Metadata metadata : allMetadata){
-                if(Constants.SHOW_ALL_ROLES.equals(metadata.getMetaKey())){
+            for (Metadata metadata : allMetadata) {
+                if (Constants.SHOW_ALL_ROLES.equals(metadata.getMetaKey())) {
                     String metaValue = metadata.getMetaValue();
                     if (metaValue != null) {
                         JSONObject jsonObject;
                         jsonObject = new JSONObject(metaValue);
-                        boolean isUserAbleToViewAllRoles = jsonObject.getBoolean(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
-                        return isUserAbleToViewAllRoles;
+                        return jsonObject.getBoolean(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
                     }
                 }
             }
@@ -4447,13 +4439,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException {
-        int tenantId;
+    public void deleteApplicationDataByTenantId(int tenantId) throws ApplicationManagementException {
         try {
-            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
-
             ConnectionManagerUtil.beginDBTransaction();
-
             vppApplicationDAO.deleteAssociationByTenant(tenantId);
             vppApplicationDAO.deleteVppUserByTenant(tenantId);
             vppApplicationDAO.deleteAssetsByTenant(tenantId);
@@ -4479,50 +4467,59 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
             String msg = "Error occurred while observing the database connection to delete applications for tenant with " +
-                    "domain: " + tenantDomain;
+                    "tenant ID: " + tenantId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Database access error is occurred when getting applications for tenant with domain: "
-                    + tenantDomain;
+            String msg = "Database access error is occurred when getting applications for tenant with tenant Id: "
+                    + tenantId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting life-cycle state data of application releases of the tenant"
-                    + " of domain: " + tenantDomain ;
+                    + " of id: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting reviews of application releases of the applications"
-                    + " of tenant of domain: " + tenantDomain ;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error getting tenant ID from domain: "
-                    + tenantDomain;
+                    + " of tenant of id: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
 
     @Override
-    public void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException {
-        int tenantId;
+    public void deleteApplicationArtifactsByTenantId(int tenantId) throws ApplicationManagementException {
         try {
-            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
             DataHolder.getInstance().getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
-        } catch (ApplicationStorageManagementException  e) {
-            String msg = "Error deleting app artifacts of tenant of domain: " + tenantDomain ;
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error deleting app artifacts of tenant of Id: " + tenantId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (TenantMgtException e) {
-            String msg = "Error getting tenant ID from domain: "
-                    + tenantDomain + " when trying to delete application artifacts of tenant";
+        }
+    }
+
+    /**
+     * Retrieve {@link ReleaseVersionInfo} for a given package name
+     * @param uuid UUID of the application release
+     * @return List of {@link ReleaseVersionInfo}
+     * @throws ApplicationManagementException throws when error encountered while retrieving data
+     */
+    @Override
+    public List<ReleaseVersionInfo> getApplicationReleaseVersions(String uuid) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return applicationDAO.getApplicationReleaseVersions(uuid, tenantId);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting available application releases for uuid : " + uuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 }

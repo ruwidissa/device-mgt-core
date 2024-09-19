@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.webapp.authenticator.framework.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Webapp Authenticator Framework Server Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains the core bundles required for Back-end Device Management functionality
     </description>
 
@@ -45,7 +45,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>

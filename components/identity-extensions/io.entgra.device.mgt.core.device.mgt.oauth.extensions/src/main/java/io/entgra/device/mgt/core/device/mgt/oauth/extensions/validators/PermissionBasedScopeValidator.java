@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.oauth.extensions.validators;
 
+import io.entgra.device.mgt.core.device.mgt.oauth.extensions.internal.OAuthExtensionsDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.oauth.extensions.internal.OAuthExtensionsDataHolder;
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;

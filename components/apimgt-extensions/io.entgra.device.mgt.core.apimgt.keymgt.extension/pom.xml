@@ -30,9 +30,14 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Key Management</name>
     <description>This module extends the API manager's key management.</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>commons-codec.wso2</groupId>
             <artifactId>commons-codec</artifactId>
@@ -50,18 +55,26 @@
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
+            <!--            <scope>provided</scope>-->
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.7</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -71,10 +84,41 @@
                         <Bundle-Description>API Management Application Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.apimgt.keymgt.extension.internal</Private-Package>
                         <Import-Packages>
-                            io.entgra.device.mgt.core.apimgt.application.extension,
-                            io.entgra.device.mgt.core.apimgt.application.extension.*,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            io.entgra.device.mgt.core.device.mgt.core.*
+                            com.google.gson;version="[2.9,3)",
+                            io.entgra.device.mgt.core.apimgt.keymgt.extension,
+                            io.entgra.device.mgt.core.apimgt.keymgt.extension.exception,
+                            io.entgra.device.mgt.core.apimgt.keymgt.extension.service,
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.config.keymanager;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="[5.0,6)",
+                            javax.cache;version="[1.0,2)",
+                            javax.net.ssl,okhttp3;version="[4.9,5)",
+                            org.apache.commons.lang;version="[2.4,3)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.json;version="[3.0,4)",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.apimgt.api;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.api.model;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.api.model.subscription;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl.caching;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl.dto;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl.factory;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl.jwt;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl.utils;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.keymgt;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.keymgt.handlers;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.keymgt.model;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.keymgt.model.entity;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.keymgt.service;version="[9.28,10)",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api,
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.user.api;version="[1.0,2)",
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.wso2.carbon.user.core.tenant;version="[4.8,5)",
+                            org.wso2.carbon.utils.multitenancy;version="[4.8,5)"
                         </Import-Packages>
                         <Export-Package>
                             !io.entgra.device.mgt.core.apimgt.keymgt.extension.internal,

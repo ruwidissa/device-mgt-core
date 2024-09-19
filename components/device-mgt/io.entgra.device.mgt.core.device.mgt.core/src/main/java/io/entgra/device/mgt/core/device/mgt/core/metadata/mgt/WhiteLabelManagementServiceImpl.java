@@ -19,26 +19,13 @@
 package io.entgra.device.mgt.core.device.mgt.core.metadata.mgt;
 
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.FileResponse;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.NotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelImage;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelImageRequestPayload;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelTheme;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
@@ -50,6 +37,14 @@ import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManage
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.util.MetadataConstants;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.util.WhiteLabelStorageUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.File;
 import java.io.IOException;

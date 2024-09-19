@@ -27,6 +27,8 @@ import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.Grafana
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception.GrafanaEnvVariablesNotDefined;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util.GrafanaConstants;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
+import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -37,8 +39,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
-import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;

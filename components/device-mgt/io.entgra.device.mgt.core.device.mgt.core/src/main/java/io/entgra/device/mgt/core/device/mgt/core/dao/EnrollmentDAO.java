@@ -24,7 +24,6 @@ import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo.Status;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
