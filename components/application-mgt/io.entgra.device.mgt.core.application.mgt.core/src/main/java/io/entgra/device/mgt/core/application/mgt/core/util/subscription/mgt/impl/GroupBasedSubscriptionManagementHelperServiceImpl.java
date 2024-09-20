@@ -121,13 +121,12 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
             } else {
                 groupDetailsDTO = groupManagementProviderService.getGroupDetailsWithDevices(subscriptionInfo.getIdentifier(),
                         applicationDTO.getDeviceTypeId(), deviceSubscriptionFilterCriteria.getOwner(), deviceSubscriptionFilterCriteria.getName(),
-                        deviceSubscriptionFilterCriteria.getDeviceStatus(), offset, limit);
-                List<Integer> paginatedDeviceIdsOwnByGroup = groupDetailsDTO.getDeviceIds();
+                        deviceSubscriptionFilterCriteria.getDeviceStatus(), -1, -1);
+                List<Integer> nonPaginatedDeviceIdsOwnByGroup = groupDetailsDTO.getDeviceIds();
 
                 deviceSubscriptionDTOS = subscriptionDAO.getSubscriptionDetailsByDeviceIds(applicationReleaseDTO.getId(),
-                        isUnsubscribe, tenantId, paginatedDeviceIdsOwnByGroup, dbSubscriptionStatus,
+                        isUnsubscribe, tenantId, nonPaginatedDeviceIdsOwnByGroup, dbSubscriptionStatus,
                         null, deviceSubscriptionFilterCriteria.getTriggeredBy(), -1, -1);
-
             }
             deviceCount = SubscriptionManagementHelperUtil.getTotalDeviceSubscriptionCount(deviceSubscriptionDTOS,
                     subscriptionInfo.getDeviceSubscriptionFilterCriteria(), applicationDTO.getDeviceTypeId());
