@@ -22,15 +22,15 @@
     <parent>
         <artifactId>device-mgt</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.device.mgt.config.api</artifactId>
     <packaging>war</packaging>
-    <name>Entgra Carbon - Mobile Device Management Configuration API</name>
-    <description>Entgra Carbon - Mobile Device Management Configuration API</description>
+    <name>Entgra Device Management - Device Management Configuration API</name>
+    <description>Entgra Device Management - Device Management Configuration API</description>
     <url>https://entgra.io</url>
 
     <build>

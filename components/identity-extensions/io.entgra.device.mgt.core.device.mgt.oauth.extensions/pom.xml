@@ -22,14 +22,14 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>identity-extensions</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.device.mgt.oauth.extensions</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - OAuth Extensions</name>
+    <name>Entgra Device Management - OAuth Extensions</name>
     <url>https://entgra.io</url>
 
     <dependencies>

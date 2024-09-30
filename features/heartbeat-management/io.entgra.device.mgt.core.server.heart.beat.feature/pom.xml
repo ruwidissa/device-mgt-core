@@ -22,14 +22,14 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>heart-beat-feature</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.server.heart.beat.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra IoT - Heart Beat Feature</name>
+    <name>Entgra Device Management - Heart Beat Feature</name>
     <url>http://entgra.io</url>
     <description>
         This feature bundles for the heart beat beacon for Entgra IoT Server

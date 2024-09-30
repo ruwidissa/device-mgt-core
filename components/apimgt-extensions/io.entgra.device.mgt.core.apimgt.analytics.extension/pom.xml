@@ -20,13 +20,13 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.apimgt.analytics.extension</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra - API mgt analytics extension</name>
+    <name>Entgra Device Management - API mgt analytics extension</name>
     <url>https://entgra.io</url>
 
     <dependencies>

@@ -21,15 +21,15 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>application-mgt</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra - Application Management Common</name>
-    <description>Entgra - Application Management Common</description>
+    <name>Entgra Device Management - Application Management Common</name>
+    <description>Entgra Device Management - Application Management Common</description>
     <url>https://entgra.io</url>
 
     <build>

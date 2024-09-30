@@ -23,11 +23,11 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>logger</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
-    <name>Entgra - Notification Logger</name>
+    <name>Entgra Device Management - Notification Logger</name>
     <packaging>bundle</packaging>
     <url>http://entgra.io</url>
 

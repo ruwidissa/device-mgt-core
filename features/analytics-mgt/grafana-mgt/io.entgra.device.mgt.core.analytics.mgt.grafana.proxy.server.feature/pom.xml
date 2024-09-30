@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>grafana-mgt-feature</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.server.feature</artifactId>
     <packaging>pom</packaging>
 
-    <name>Entgra - Grafana Management Server Feature</name>
+    <name>Entgra Device Management - Grafana Management Server Feature</name>
     <url>https://entgra.io</url>
     <description>This feature contains the core bundles required for Back-end Grafana Management functionality
     </description>

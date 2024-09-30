@@ -23,14 +23,14 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>jwt-client-feature</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - JWT Client Feature</name>
+    <name>Entgra Device Management - JWT Client Feature</name>
     <url>https://entgra.io</url>
     <description>This feature contains jwt client implementation from which we can get a access token using the jwt
         grant type handler

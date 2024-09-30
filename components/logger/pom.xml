@@ -20,15 +20,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>io.entgra.device.mgt.core.parent</artifactId>
+        <artifactId>device-mgt-core</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>logger</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra - Notification Logger Component</name>
+    <name>Entgra Device Management - Notification Logger Component</name>
     <url>http://entgra.io</url>
 
     <modules>

@@ -22,14 +22,14 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>device-mgt-extensions-feature</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra IoT - User store role mapper feature</name>
+    <name>Entgra Device Management - User store role mapper feature</name>
     <url>http://entgra.io</url>
     <description>
         This feature contains the core bundles required for user store role mapping functionality

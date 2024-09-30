@@ -20,15 +20,15 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>subtype-mgt</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.subtype.mgt</artifactId>
-    <name>Entgra IoT - Subtype Mgt Impl</name>
+    <name>Entgra Device Management - Subtype Mgt Impl</name>
     <packaging>bundle</packaging>
-    <description>Entgra IoT - Subtype Management Component Implementation</description>
+    <description>Entgra Device Management - Subtype Management Component Implementation</description>
     <url>http://entgra.io</url>
 
     <build>

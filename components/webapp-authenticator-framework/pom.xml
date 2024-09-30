@@ -21,8 +21,8 @@
 
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <artifactId>io.entgra.device.mgt.core.parent</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <artifactId>device-mgt-core</artifactId>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
     <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>webapp-authenticator-framework</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Webapp Authenticator Framework</name>
+    <name>Entgra Device Management - Webapp Authenticator Framework</name>
     <url>https://entgra.io</url>
 
     <modules>

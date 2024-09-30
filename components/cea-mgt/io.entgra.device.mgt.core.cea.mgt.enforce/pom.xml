@@ -22,15 +22,15 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>cea-mgt</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>io.entgra.device.mgt.core.cea.mgt.enforce</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
-    <name>Entgra IoT - CEA Management Enforcement Service</name>
-    <description>Entgra IoT - Conditional Email Access Management Enforcement Service</description>
+    <name>Entgra Device Management - CEA Management Enforcement Service</name>
+    <description>Entgra Device Management - Conditional Email Access Management Enforcement Service</description>
 
     <build>
         <plugins>
