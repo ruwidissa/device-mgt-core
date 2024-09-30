@@ -24,6 +24,7 @@ public class WhiteLabelTheme {
     private WhiteLabelImage logoIconImage;
     private String footerText;
     private String appTitle;
+    private String docUrl;
 
     public String getFooterText() {
         return footerText;
@@ -63,5 +64,13 @@ public class WhiteLabelTheme {
 
     public void setLogoIconImage(WhiteLabelImage logoIconImage) {
         this.logoIconImage = logoIconImage;
+    }
+
+    public String getDocUrl() {
+        return docUrl;
+    }
+
+    public void setDocUrl(String docUrl) {
+        this.docUrl = docUrl;
     }
 }

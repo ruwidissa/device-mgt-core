@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.authorization.GroupAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
@@ -335,15 +336,14 @@ public class DeviceManagementServiceComponent {
         bundleContext.registerService(MetadataManagementService.class.getName(), metadataManagementService, null);
 
         /* Registering Whitelabel Service */
-        WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
-        DeviceManagementDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
         try {
+            WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
+            DeviceManagementDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
             whiteLabelManagementService.addDefaultWhiteLabelThemeIfNotExist(tenantId);
-        } catch (Throwable e) {
-            log.error("Error occurred while adding default tenant white label theme", e);
-
+            bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
+        } catch (MetadataManagementException e) {
+            log.error("Error occurred while initializing the white label management service", e);
         }
-        bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
 
         /* Registering DeviceState Filter Service */
         DeviceStatusManagementService deviceStatusManagementService = new DeviceStatusManagementServiceImpl();

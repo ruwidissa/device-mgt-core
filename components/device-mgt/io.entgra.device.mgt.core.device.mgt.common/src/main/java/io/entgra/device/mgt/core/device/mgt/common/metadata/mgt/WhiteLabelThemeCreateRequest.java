@@ -24,6 +24,7 @@ public class WhiteLabelThemeCreateRequest {
     private WhiteLabelImageRequestPayload logoIcon;
     private String footerText;
     private String appTitle;
+    private String docUrl;
 
     public WhiteLabelImageRequestPayload getFavicon() {
         return favicon;
@@ -63,5 +64,13 @@ public class WhiteLabelThemeCreateRequest {
 
     public void setLogoIcon(WhiteLabelImageRequestPayload logoIcon) {
         this.logoIcon = logoIcon;
+    }
+
+    public String getDocUrl() {
+        return docUrl;
+    }
+
+    public void setDocUrl(String docUrl) {
+        this.docUrl = docUrl;
     }
 }
