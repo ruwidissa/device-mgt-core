@@ -36,6 +36,7 @@ import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManage
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.util.MetadataConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.lang.reflect.Type;
 import java.sql.SQLException;
@@ -80,7 +81,8 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     }
 
     @Override
-    public void resetToDefaultDeviceStatusFilter(int tenantId) throws MetadataManagementException {
+    public void resetToDefaultDeviceStatusFilter() throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.beginTransaction();
             Metadata defaultDeviceStatusMetadata = constructDeviceStatusMetadata(getDefaultDeviceStatus());
@@ -104,7 +106,8 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     }
 
     @Override
-    public void updateDefaultDeviceStatusFilters(int tenantId, String deviceType, List<String> deviceStatus) throws MetadataManagementException {
+    public void updateDefaultDeviceStatusFilters(String deviceType, List<String> deviceStatus) throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.beginTransaction();
             // Retrieve the current device status metadata
@@ -141,7 +144,8 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     }
 
     @Override
-    public boolean updateDefaultDeviceStatusCheck(int tenantId, boolean isChecked) throws MetadataManagementException {
+    public boolean updateDefaultDeviceStatusCheck(boolean isChecked) throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.beginTransaction();
             if (metadataDAO.isExist(tenantId, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY)) {
@@ -166,7 +170,8 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     }
 
     @Override
-    public List<AllowedDeviceStatus> getDeviceStatusFilters(int tenantId) throws MetadataManagementException {
+    public List<AllowedDeviceStatus> getDeviceStatusFilters() throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.openConnection();
             Metadata metadata = metadataDAO.getMetadata(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);
@@ -193,7 +198,8 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
 
     }
 
-    public List<String> getDeviceStatusFilters(String deviceType, int tenantId) throws MetadataManagementException {
+    public List<String> getDeviceStatusFilters(String deviceType) throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.openConnection();
             Metadata metadata = metadataDAO.getMetadata(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);

@@ -143,7 +143,6 @@
                             io.entgra.device.mgt.core.device.mgt.core.config.keymanager,
                             io.entgra.device.mgt.core.device.mgt.core.config.license,
                             io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt,
-                            io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.documentation,
                             io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.whitelabel,
                             io.entgra.device.mgt.core.device.mgt.core.config.operation.timeout,
                             io.entgra.device.mgt.core.device.mgt.core.config.pagination,
