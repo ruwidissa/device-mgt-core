@@ -55,12 +55,12 @@
                         <Private-Package>io.entgra.device.mgt.core.task.mgt.core.internal</Private-Package>
                         <Import-Package>
                             com.google.gson;version="[2.9,3)",
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception;version="[5.0,6)",
-                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service;version="[5.0,6)",
-                            io.entgra.device.mgt.core.task.mgt.common.bean;version="[5.0,6)",
-                            io.entgra.device.mgt.core.task.mgt.common.exception;version="[5.0,6)",
-                            io.entgra.device.mgt.core.task.mgt.common.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.task.mgt.common.bean;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.task.mgt.common.exception;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.task.mgt.common.spi;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.task.mgt.core.config,
                             io.entgra.device.mgt.core.task.mgt.core.config.datasource,
                             io.entgra.device.mgt.core.task.mgt.core.dao,

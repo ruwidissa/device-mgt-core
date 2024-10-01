@@ -54,13 +54,13 @@
                         <Bundle-Description>Policy Decision Point Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.policy.decision.point.internal</Private-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.policy.decision.point.internal,
                             io.entgra.device.mgt.core.policy.decision.point.merged,
                             io.entgra.device.mgt.core.policy.decision.point.simple,
-                            io.entgra.device.mgt.core.policy.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.policy.mgt.core;version="[5.0,6)",
+                            io.entgra.device.mgt.core.policy.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.policy.mgt.core;version="${io.entgra.device.mgt.core.version.range}",
                             org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",

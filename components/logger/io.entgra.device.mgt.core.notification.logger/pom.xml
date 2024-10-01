@@ -80,8 +80,8 @@
                         <Import-Package>
                             io.entgra.device.mgt.core.notification.logger,
                             io.entgra.device.mgt.core.notification.logger.util,
-                            io.entgra.device.mgt.core.device.mgt.extensions.logger;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.extensions.logger.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger.spi;version="${io.entgra.device.mgt.core.version.range}",
                             org.slf4j,
                             org.apache.commons.logging;version="[1.2,2)"
                         </Import-Package>

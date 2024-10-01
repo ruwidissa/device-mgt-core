@@ -55,8 +55,8 @@
                         <Bundle-Description>IoT - User Roles Management Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.internal</Private-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.bean;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.bean;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.exception;version="${io.entgra.device.mgt.core.version.range}",
                             javax.xml.bind;version="[0.0,1)",
                             javax.xml.bind.annotation;version="[0.0,1)",
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",

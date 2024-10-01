@@ -57,8 +57,8 @@
                         <Private-Package>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal
                         </Private-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon,
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config,
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource,
