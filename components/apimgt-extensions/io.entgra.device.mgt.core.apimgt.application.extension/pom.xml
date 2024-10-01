@@ -22,14 +22,14 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.apimgt.application.extension</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - API Application Management</name>
+    <name>Entgra Device Management - API Application Management</name>
     <description>This module provides capability to create api manager application.</description>
     <url>https://entgra.io</url>
 

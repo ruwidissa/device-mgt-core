@@ -19,15 +19,15 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>io.entgra.device.mgt.core.parent</artifactId>
+        <artifactId>device-mgt-core</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>ui-request-interceptor</artifactId>
-    <name>Entgra - UI Request Interceptor Servlet</name>
+    <name>Entgra Device Management - UI Request Interceptor Servlet</name>
     <description>
         Proxy servlet to handle requests generated from UI applications to communicate with backend
         APIs

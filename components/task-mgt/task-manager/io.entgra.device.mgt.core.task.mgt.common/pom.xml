@@ -20,15 +20,15 @@
     <parent>
         <artifactId>task-manager</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.task.mgt.common</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra IoT - Task Management Common</name>
-    <description>Entgra IoT - Task Management Common</description>
+    <name>Entgra Device Management - Task Management Common</name>
+    <description>Entgra Device Management - Task Management Common</description>
     <url>https://entgra.io</url>
 
     <build>
