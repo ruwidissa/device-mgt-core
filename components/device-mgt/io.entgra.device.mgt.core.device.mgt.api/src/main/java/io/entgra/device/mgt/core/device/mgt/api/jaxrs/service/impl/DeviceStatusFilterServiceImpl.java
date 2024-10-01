@@ -52,7 +52,7 @@ public class DeviceStatusFilterServiceImpl implements DeviceStatusFilterService 
         try {
             DeviceStatusManagementService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceStatusManagmentService();
             return Response.status(Response.Status.OK).entity(deviceManagementProviderService
-                    .getDeviceStatusFilters(deviceType, CarbonContext.getThreadLocalCarbonContext().getTenantId())).build();
+                    .getDeviceStatusFilters(deviceType)).build();
         } catch (MetadataKeyNotFoundException e) {
             String msg = "Couldn't find the device status filter details for device type: " + deviceType;
             log.error(msg, e);
@@ -65,7 +65,7 @@ public class DeviceStatusFilterServiceImpl implements DeviceStatusFilterService 
     }
 
     @GET
-    @Path("/is-enabled")
+    @Path("/device-status-check")
     @Override
     public Response getDeviceStatusCheck() {
         boolean result;
@@ -83,15 +83,14 @@ public class DeviceStatusFilterServiceImpl implements DeviceStatusFilterService 
 
     @Override
     @PUT
-    @Path("/toggle-device-status")
+    @Path("/device-status-check")
     public Response updateDeviceStatusCheck(
             @QueryParam("isEnabled")
             boolean isEnabled) {
         boolean result;
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             DeviceStatusManagementService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceStatusManagmentService();
-            result = deviceManagementProviderService.updateDefaultDeviceStatusCheck(tenantId, isEnabled);
+            result = deviceManagementProviderService.updateDefaultDeviceStatusCheck(isEnabled);
             if (result) {
                 return Response.status(Response.Status.OK).entity("Successfully updated device status check.").build();
             } else {
@@ -106,19 +105,31 @@ public class DeviceStatusFilterServiceImpl implements DeviceStatusFilterService 
 
     @Override
     @PUT
+    @Path("/{deviceType}")
     public Response updateDeviceStatusFilters(
-            @QueryParam("deviceType")
-            String deviceType,
-            @QueryParam("deviceStatus")
-            List<String> deviceStatus
+            @PathParam("deviceType") String deviceType,
+            @QueryParam("deviceStatus") List<String> deviceStatus
     ) {
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             DeviceStatusManagementService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceStatusManagmentService();
-            deviceManagementProviderService.updateDefaultDeviceStatusFilters(tenantId, deviceType, deviceStatus);
+            deviceManagementProviderService.updateDefaultDeviceStatusFilters(deviceType, deviceStatus);
             return Response.status(Response.Status.OK).entity("Successfully updated device status filters for " + deviceType).build();
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while updating device status for " + deviceType;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Override
+    public Response setDefaultStatusFilterData() {
+        DeviceStatusManagementService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceStatusManagmentService();
+        try {
+            deviceManagementProviderService.resetToDefaultDeviceStatusFilter();
+            return Response.status(Response.Status.OK).entity("Successfully updated device status filters to " +
+                    "default values that is configured in the product").build();
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while updating device status for default values that is configured in the product";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
