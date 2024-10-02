@@ -74,8 +74,12 @@ public class DeviceStatusFilterServiceImpl implements DeviceStatusFilterService 
             DeviceStatusManagementService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceStatusManagmentService();
             result = deviceManagementProviderService.getDeviceStatusCheck(tenantId);
             return Response.status(Response.Status.OK).entity(result).build();
+        } catch (MetadataKeyNotFoundException e) {
+            String msg = "Couldn't find the device status check metadata for tenant ID: " + tenantId;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
-            String msg = "Error occurred while getting device status filter of the tenant.";
+            String msg = "Error occurred while getting device status check for the tenant.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
