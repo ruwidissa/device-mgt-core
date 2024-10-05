@@ -54,11 +54,11 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Policy Management Common Bundle</Bundle-Description>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.group.mgt;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.dto;version="[5.0,6)"
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.group.mgt;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.dto;version="${io.entgra.device.mgt.core.version.range}"
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.policy.mgt.common.*

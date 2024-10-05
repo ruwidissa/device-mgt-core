@@ -54,7 +54,7 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>IoT Device Management State Engine Bundle</Bundle-Description>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.extensions.stateengine.dto,
                             io.entgra.device.mgt.core.device.mgt.extensions.stateengine.exception,
                             org.apache.commons.logging;version="[1.2,2)",

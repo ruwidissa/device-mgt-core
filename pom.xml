@@ -2137,6 +2137,7 @@
 
         <!-- Carbon Device Management -->
         <io.entgra.device.mgt.core.version>6.0.0-SNAPSHOT</io.entgra.device.mgt.core.version>
+        <io.entgra.device.mgt.core.version.range>[6.0.0, 7.0.0)</io.entgra.device.mgt.core.version.range>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.9.2</carbon.commons.version>
