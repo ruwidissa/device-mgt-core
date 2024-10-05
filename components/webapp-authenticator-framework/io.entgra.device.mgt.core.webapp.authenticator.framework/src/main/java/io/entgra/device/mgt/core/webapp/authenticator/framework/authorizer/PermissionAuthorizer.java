@@ -139,9 +139,7 @@ public class PermissionAuthorizer {
         } else {
             return WebappAuthenticator.Status.FAILURE;
         }
-
     }
-
 }
 
 

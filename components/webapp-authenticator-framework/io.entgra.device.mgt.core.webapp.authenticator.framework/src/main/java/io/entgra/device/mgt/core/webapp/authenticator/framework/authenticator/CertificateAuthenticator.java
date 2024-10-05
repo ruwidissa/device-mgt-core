@@ -21,13 +21,11 @@ package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
 import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPException;
-import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
-import io.entgra.device.mgt.core.certificate.mgt.core.scep.TenantedDeviceWrapper;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.Constants;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
 import org.apache.catalina.connector.Request;
@@ -45,9 +43,6 @@ public class CertificateAuthenticator implements WebappAuthenticator {
 
     private static final Log log = LogFactory.getLog(CertificateAuthenticator.class);
     private static final String CERTIFICATE_AUTHENTICATOR = "CertificateAuth";
-    private static final String MUTUAL_AUTH_HEADER = "mutual-auth-header";
-    private static final String PROXY_MUTUAL_AUTH_HEADER = "proxy-mutual-auth-header";
-    private static final String CERTIFICATE_VERIFICATION_HEADER = "Mdm-Signature";
     private static final String CLIENT_CERTIFICATE_ATTRIBUTE = "javax.servlet.request.X509Certificate";
 
     @Override
@@ -57,8 +52,9 @@ public class CertificateAuthenticator implements WebappAuthenticator {
 
     @Override
     public boolean canHandle(Request request) {
-        return request.getHeader(CERTIFICATE_VERIFICATION_HEADER) != null
-                || request.getHeader(MUTUAL_AUTH_HEADER) != null || request.getHeader(PROXY_MUTUAL_AUTH_HEADER) != null;
+        return request.getHeader(Constants.HTTPHeaders.CERTIFICATE_VERIFICATION_HEADER) != null
+                || request.getHeader(Constants.HTTPHeaders.MUTUAL_AUTH_HEADER) != null ||
+                request.getHeader(Constants.HTTPHeaders.PROXY_MUTUAL_AUTH_HEADER) != null;
     }
 
     @Override
@@ -73,12 +69,14 @@ public class CertificateAuthenticator implements WebappAuthenticator {
         try {
             // When there is a load balancer terminating mutual SSL, it should pass this header along and
             // as the value of this header, the client certificate subject dn should be passed.
-            if (request.getHeader(PROXY_MUTUAL_AUTH_HEADER) != null) {
+            if (request.getHeader(Constants.HTTPHeaders.PROXY_MUTUAL_AUTH_HEADER) != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("PROXY_MUTUAL_AUTH_HEADER " + request.getHeader(PROXY_MUTUAL_AUTH_HEADER));
+                    log.debug("PROXY_MUTUAL_AUTH_HEADER " +
+                            request.getHeader(Constants.HTTPHeaders.PROXY_MUTUAL_AUTH_HEADER));
                 }
                 CertificateResponse certificateResponse = AuthenticatorFrameworkDataHolder.getInstance().
-                        getCertificateManagementService().verifySubjectDN(request.getHeader(PROXY_MUTUAL_AUTH_HEADER));
+                        getCertificateManagementService().verifySubjectDN(request.getHeader(
+                                Constants.HTTPHeaders.PROXY_MUTUAL_AUTH_HEADER));
                 authenticationInfo = checkCertificateResponse(certificateResponse);
                 if (log.isDebugEnabled()) {
                     log.debug("Certificate Serial : " + certificateResponse.getSerialNumber()
@@ -86,7 +84,7 @@ public class CertificateAuthenticator implements WebappAuthenticator {
                             + " , username" + authenticationInfo.getUsername());
                 }
             }
-            else if (request.getHeader(MUTUAL_AUTH_HEADER) != null) {
+            else if (request.getHeader(Constants.HTTPHeaders.MUTUAL_AUTH_HEADER) != null) {
                 Object object = request.getAttribute(CLIENT_CERTIFICATE_ATTRIBUTE);
                 X509Certificate[] clientCertificate = null;
                 if (object instanceof  X509Certificate[]) {
@@ -101,13 +99,11 @@ public class CertificateAuthenticator implements WebappAuthenticator {
                     authenticationInfo.setStatus(Status.FAILURE);
                     authenticationInfo.setMessage("No client certificate is present");
                 }
-            } else if (request.getHeader(CERTIFICATE_VERIFICATION_HEADER) != null) {
-                String certHeader = request.getHeader(CERTIFICATE_VERIFICATION_HEADER);
+            } else if (request.getHeader(Constants.HTTPHeaders.CERTIFICATE_VERIFICATION_HEADER) != null) {
+                String certHeader = request.getHeader(Constants.HTTPHeaders.CERTIFICATE_VERIFICATION_HEADER);
                 if (certHeader != null &&
                     AuthenticatorFrameworkDataHolder.getInstance().getCertificateManagementService().
                             verifySignature(certHeader)) {
-                    AuthenticatorFrameworkDataHolder.getInstance().getCertificateManagementService().
-                            extractCertificateFromSignature(certHeader);
                     X509Certificate certificate =
                             AuthenticatorFrameworkDataHolder.getInstance().getCertificateManagementService().
                                     extractCertificateFromSignature(certHeader);
@@ -116,30 +112,37 @@ public class CertificateAuthenticator implements WebappAuthenticator {
 
                     if (challengeToken != null) {
                         challengeToken = challengeToken.substring(challengeToken.indexOf("(") + 1).trim();
-                        SCEPManager scepManager = AuthenticatorFrameworkDataHolder.getInstance().getScepManager();
                         DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
                         deviceIdentifier.setId(challengeToken);
                         deviceIdentifier.setType(DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_IOS);
-                        TenantedDeviceWrapper tenantedDeviceWrapper = scepManager.getValidatedDevice(deviceIdentifier);
-                        authenticationInfo.setTenantDomain(tenantedDeviceWrapper.getTenantDomain());
-                        // To make sure the tenant flow is not initiated in the valve as the
-                        // tenant flows are initiated at the API level on iOS
-                        authenticationInfo.setTenantId(-1);
-
-                        if (tenantedDeviceWrapper.getDevice() != null &&
-                            tenantedDeviceWrapper.getDevice().getEnrolmentInfo() != null) {
-
-                            EnrolmentInfo enrolmentInfo = tenantedDeviceWrapper.getDevice().getEnrolmentInfo();
-                            authenticationInfo.setUsername(enrolmentInfo.getOwner());
-                        }
+                        Utils.validateScepDevice(deviceIdentifier, authenticationInfo);
                         authenticationInfo.setStatus(Status.CONTINUE);
+                    } else {
+                        DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+                        String deviceId = Utils.getSubjectDnAttribute(certificate,
+                                Constants.Certificate.ORGANIZATION_ATTRIBUTE);
+                        if (deviceId == null) {
+                            authenticationInfo.setStatus(Status.FAILURE);
+                            return authenticationInfo;
+                        }
+                        deviceIdentifier.setId(deviceId);
+                        deviceIdentifier.setType(
+                                DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_WINDOWS);
+                        Utils.validateScepDevice(deviceIdentifier, authenticationInfo);
+                        authenticationInfo.setStatus(Status.SUCCESS);
                     }
                 }
             }
         } catch (KeystoreException e) {
-            log.error("KeystoreException occurred ", e);
+            String msg = "Error occurred while validating device client certificate.";
+            log.error(msg, e);
+            authenticationInfo.setStatus(Status.FAILURE);
+            authenticationInfo.setMessage(msg);
         } catch (SCEPException e) {
-            log.error("SCEPException occurred ", e);
+            String msg = "Error occurred while validating device identification.";
+            log.error(msg, e);
+            authenticationInfo.setStatus(Status.FAILURE);
+            authenticationInfo.setMessage(msg);
         }
         return authenticationInfo;
     }

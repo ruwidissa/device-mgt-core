@@ -823,8 +823,14 @@ public class CertificateGenerator {
             }
             String subjectDn = joiner.toString();
             X500Name issuerName = new X500Name(subjectDn);
+
             String commonName = certificationRequest.getSubject().getRDNs(BCStyle.CN)[0].getFirst()
                     .getValue().toString();
+            // CSR sent from a Windows device will have an '!' followed by the device ID in the CN
+            if (commonName.contains("!")) {
+                commonName = commonName.split("!")[1];
+            }
+
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             X500Name subjectName = new X500Name("O=" + commonName + " ,CN=" +
                     serialNumber + ", OU=tenant_" + tenantId);
