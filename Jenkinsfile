@@ -71,7 +71,7 @@ pipeline {
                     if (env.CHANGE_ID) {
                         def url = swaggerEndPoint.call()
                         echo "Fetching from URL: ${url}"
-                        withCredentials([usernamePassword(credentialsId: '4093a0bf-073a-4874-b929-be5b69273f4a', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        withCredentials([usernamePassword(credentialsId: 'entgra-gitea-credentials', passwordVariable: 'password', usernameVariable: 'username')]) {
                             def response = sh(script: """curl -X GET "${url}" -H 'accept: application/json' -u \$username:\$password""", returnStdout: true).trim()
                             echo "API Response: ${response}"
                             isPendingUpstreamDependenciesExists = sh(script: "echo '${response}' | jq 'contains({\"labels\": [{ \"name\": \"pending upstream\"}]})'", returnStdout: true).trim().toBoolean()
@@ -93,7 +93,7 @@ pipeline {
                         echo '[Jenkinsfile] Entering testing phase.'
                         try {
                             checkout scm
-                            withCredentials([usernamePassword(credentialsId: 'builder2-deployer', passwordVariable: 'password', usernameVariable: 'username')]) {
+                            withCredentials([usernamePassword(credentialsId: 'builder2-deployer-nexus', passwordVariable: 'password', usernameVariable: 'username')]) {
                                 sh """/opt/scripts/run-test.sh -u \$username -p \$password"""
                             }
                             currentBuild.result = 'SUCCESS'
@@ -134,7 +134,7 @@ pipeline {
             steps {
                 script {
                     if (true) {
-                        withCredentials([usernamePassword(credentialsId: '4093a0bf-073a-4874-b929-be5b69273f4a', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        withCredentials([usernamePassword(credentialsId: 'entgra-gitea-credentials', passwordVariable: 'password', usernameVariable: 'username')]) {
                             def url = swaggerEndPoint.call() + '/reviews'
                             echo "[Jenkinsfile] Notifying pull request build status to ${url}"
                             def response = sh(script: """curl -X POST "${url}" -H 'accept: application/json' -H 'Content-Type: application/json' -u \$username:\$password -d '{ "body": "${message}" }'""", returnStdout: true).trim()
