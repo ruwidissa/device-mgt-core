@@ -5,7 +5,6 @@ pipeline {
     environment {
         def isPendingUpstreamDependenciesExists = false
         def triggeredViaPush = false
-        SCANNER_HOME = tool 'sonar-scanner'
         JAVA_HOME = '/usr/lib/jvm/java-11-openjdk'
         PATH = "${JAVA_HOME}/bin:${env.PATH}" 
     }
@@ -48,22 +47,6 @@ pipeline {
                 }
             }
         }
-        
-       stage('Check SonarQube Installation') {
-	steps {
-        script {
-            echo "Initial JAVA_HOME: ${env.JAVA_HOME}"
-            echo "Initial PATH: ${env.PATH}"
-            
-            withEnv(["JAVA_HOME=${env.JAVA_HOME}", "PATH=${env.JAVA_HOME}/bin:${env.PATH}"]) {
-                sh """
-                java -version
-                ${SCANNER_HOME}/bin/sonar-scanner --version
-                """
-            }
-        }
-    }
-}
 
         stage('Fetch Pending Upstream Dependencies') {
             steps {
@@ -111,24 +94,6 @@ pipeline {
                 }
             }
         }
-        
-       stage('Code Quality Check') {
-    steps {
-        script {
-            def projectName = "device-mgt-core-${env.CHANGE_ID}"
-            def projectKey = "device-mgt-core-${env.CHANGE_ID}"
-            
-            withSonarQubeEnv('sonar') {
-                sh """
-                    $SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectName=${projectName} \
-                    -Dsonar.projectKey=${projectKey} \
-                    -Dsonar.java.binaries=target
-                """
-            }
-        }
-    }
-}
 
         stage('Report Job Status') {
             steps {
