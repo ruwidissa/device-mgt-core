@@ -48,6 +48,8 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.ws.rs.core.Response;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -503,31 +505,29 @@ public class APIUtil {
         applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
         applicationRelease.setRating(applicationReleaseDTO.getRating());
         applicationRelease.setIconPath(
-                basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName());
-
-        if (!StringUtils.isEmpty(applicationReleaseDTO.getBannerName())){
+                basePath + Constants.ICON_ARTIFACT + Constants.FILE_NAME_PARAM +
+                        URLEncoder.encode(applicationReleaseDTO.getIconName(), StandardCharsets.UTF_8));
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getBannerName())) {
             applicationRelease.setBannerPath(
-                    basePath + Constants.BANNER_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO
-                            .getBannerName());
+                    basePath + Constants.BANNER_ARTIFACT + Constants.FILE_NAME_PARAM +
+                            URLEncoder.encode(applicationReleaseDTO.getBannerName(), StandardCharsets.UTF_8));
         }
-
-        applicationRelease.setInstallerPath(constructInstallerPath(applicationReleaseDTO.getInstallerName(),
-                applicationReleaseDTO.getAppHashValue()));
-
+        applicationRelease.setInstallerPath(
+                constructInstallerPath(applicationReleaseDTO.getInstallerName(), applicationReleaseDTO.getAppHashValue()));
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
-            screenshotPaths
-                    .add(basePath + Constants.SCREENSHOT_ARTIFACT + 1 + Constants.FORWARD_SLASH + applicationReleaseDTO
-                            .getScreenshotName1());
+            screenshotPaths.add(
+                    basePath + Constants.SCREENSHOT_ARTIFACT + 1 + Constants.FILE_NAME_PARAM +
+                            URLEncoder.encode(applicationReleaseDTO.getScreenshotName1(), StandardCharsets.UTF_8));
         }
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName2())) {
-            screenshotPaths
-                    .add(basePath + Constants.SCREENSHOT_ARTIFACT + 2 + Constants.FORWARD_SLASH + applicationReleaseDTO
-                            .getScreenshotName2());
+            screenshotPaths.add(
+                    basePath + Constants.SCREENSHOT_ARTIFACT + 2 + Constants.FILE_NAME_PARAM +
+                            URLEncoder.encode(applicationReleaseDTO.getScreenshotName2(), StandardCharsets.UTF_8));
         }
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName3())) {
-            screenshotPaths
-                    .add(basePath + Constants.SCREENSHOT_ARTIFACT + 3 + Constants.FORWARD_SLASH + applicationReleaseDTO
-                            .getScreenshotName3());
+            screenshotPaths.add(
+                    basePath + Constants.SCREENSHOT_ARTIFACT + 3 + Constants.FILE_NAME_PARAM +
+                            URLEncoder.encode(applicationReleaseDTO.getScreenshotName3(), StandardCharsets.UTF_8));
         }
         applicationRelease.setScreenshots(screenshotPaths);
         return applicationRelease;
@@ -543,9 +543,12 @@ public class APIUtil {
     public static String constructInstallerPath(String installerName, String appHash) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         UrlValidator urlValidator = new UrlValidator();
-        String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + appHash + Constants.FORWARD_SLASH;
-        return urlValidator.isValid(installerName) ? installerName
-                : basePath + Constants.APP_ARTIFACT + Constants.FORWARD_SLASH + installerName;
+        String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH +
+                appHash + Constants.FORWARD_SLASH;
+        return urlValidator.isValid(installerName)
+                ? installerName
+                : basePath + Constants.APP_ARTIFACT + Constants.FILE_NAME_PARAM +
+                URLEncoder.encode(installerName, StandardCharsets.UTF_8);
     }
 
     public static String getArtifactDownloadBaseURL() throws ApplicationManagementException {
