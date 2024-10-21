@@ -151,9 +151,9 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
             if (metadataDAO.isExist(tenantId, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY)) {
                 // Add default device status check metadata entries
                 metadataDAO.updateMetadata(tenantId, constructDeviceStatusCheckMetadata(isChecked));
+                MetadataManagementDAOFactory.commitTransaction();
                 return true;
             }
-            MetadataManagementDAOFactory.commitTransaction();
         } catch (MetadataManagementDAOException e) {
             MetadataManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while updating device status check metadata entry.";
