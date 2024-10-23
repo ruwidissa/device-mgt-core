@@ -139,7 +139,7 @@ public class GenericCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 isCertificateUsernameProvided = true;
             }
 
-            query += "ORDER BY ID LIMIT ?,?";
+            query += "ORDER BY ID DESC LIMIT ?,?";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int paramIdx = 1;
