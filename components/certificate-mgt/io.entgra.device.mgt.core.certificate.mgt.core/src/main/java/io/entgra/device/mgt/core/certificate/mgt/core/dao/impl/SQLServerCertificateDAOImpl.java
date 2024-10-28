@@ -78,7 +78,7 @@ public class SQLServerCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 isCertificateUsernameProvided = true;
             }
 
-            query += "ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            query += "ORDER BY ID DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int paramIdx = 1;
