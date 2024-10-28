@@ -258,7 +258,7 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
                 if (installedApps.containsKey(newApp.getApplicationIdentifier())) {
                     Application oldApp = installedApps.get(newApp.getApplicationIdentifier());
                     if (oldApp.isActive() != newApp.isActive() || oldApp.getMemoryUsage() != newApp.getMemoryUsage()
-                            || !newApp.getVersion().equals(oldApp.getVersion())) {
+                            || !newApp.getVersion().equals(oldApp.getVersion()) || oldApp.isSystemApp() != newApp.isSystemApp()) {
                         newApp.setId(oldApp.getId());
                         appsToUpdate.put(newApp.getApplicationIdentifier(), newApp);
                     }

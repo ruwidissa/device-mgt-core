@@ -56,8 +56,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             conn = this.getConnection();
             stmt = conn.prepareStatement("INSERT INTO DM_APPLICATION (NAME, PLATFORM, " +
                     "CATEGORY, VERSION, TYPE, LOCATION_URL, IMAGE_URL, TENANT_ID, " +
-                    "APP_IDENTIFIER, MEMORY_USAGE, IS_ACTIVE, DEVICE_ID, ENROLMENT_ID) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "APP_IDENTIFIER, MEMORY_USAGE, IS_ACTIVE, DEVICE_ID, ENROLMENT_ID, IS_SYSTEM_APP) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             for (Application application : applications) {
                 stmt.setString(1, application.getName());
@@ -73,6 +73,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setBoolean(11, application.isActive());
                 stmt.setInt(12, deviceId);
                 stmt.setInt(13, enrolmentId);
+                stmt.setBoolean(14, application.isSystemApp());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -91,7 +92,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         try {
             conn = this.getConnection();
             stmt = conn.prepareStatement("UPDATE DM_APPLICATION SET NAME = ?, PLATFORM = ?, CATEGORY = ?, " +
-                    "VERSION = ?, TYPE = ?, LOCATION_URL = ?, IMAGE_URL = ?, MEMORY_USAGE = ?, IS_ACTIVE = ? " +
+                    "VERSION = ?, TYPE = ?, LOCATION_URL = ?, IMAGE_URL = ?, MEMORY_USAGE = ?, IS_ACTIVE = ?, IS_SYSTEM_APP = ? " +
                     "WHERE ID = ?");
 
             for (Application application : applications) {
@@ -104,7 +105,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setString(7, application.getImageUrl());
                 stmt.setInt(8, application.getMemoryUsage());
                 stmt.setBoolean(9, application.isActive());
-                stmt.setInt(10, application.getId());
+                stmt.setBoolean(10, application.isSystemApp());
+                stmt.setInt(11, application.getId());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -422,6 +424,46 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return application;
     }
 
+    private Application loadApplicationDetails(ResultSet rs) throws DeviceManagementDAOException {
+        ByteArrayInputStream bais;
+        ObjectInputStream ois;
+        Properties properties;
+
+        Application application = new Application();
+        try {
+            application.setId(rs.getInt("ID"));
+            application.setName(rs.getString("NAME"));
+            application.setType(rs.getString("TYPE"));
+
+            if (rs.getBytes("APP_PROPERTIES") != null) {
+                byte[] appProperties = rs.getBytes("APP_PROPERTIES");
+                bais = new ByteArrayInputStream(appProperties);
+
+                ois = new ObjectInputStream(bais);
+                properties = (Properties) ois.readObject();
+                application.setAppProperties(properties);
+            }
+            application.setCategory(rs.getString("CATEGORY"));
+            application.setImageUrl(rs.getString("IMAGE_URL"));
+            application.setLocationUrl(rs.getString("LOCATION_URL"));
+            application.setPlatform(rs.getString("PLATFORM"));
+            application.setVersion(rs.getString("VERSION"));
+            application.setMemoryUsage(rs.getInt("MEMORY_USAGE"));
+            application.setActive(rs.getBoolean("IS_ACTIVE"));
+            application.setSystemApp(rs.getBoolean("IS_SYSTEM_APP"));
+            application.setApplicationIdentifier(rs.getString("APP_IDENTIFIER"));
+
+        } catch (IOException e) {
+            throw new DeviceManagementDAOException("IO error occurred fetch at app properties", e);
+        } catch (ClassNotFoundException e) {
+            throw new DeviceManagementDAOException("Class not found error occurred fetch at app properties", e);
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("SQL error occurred fetch at application", e);
+        }
+
+        return application;
+    }
+
     @Override
     public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId)
             throws DeviceManagementDAOException{
@@ -565,6 +607,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "APP_PROPERTIES, " +
                 "MEMORY_USAGE, " +
                 "IS_ACTIVE, " +
+                "IS_SYSTEM_APP, " +
                 "TENANT_ID " +
                 "FROM DM_APPLICATION " +
                 "WHERE DEVICE_ID = ? AND " +
@@ -582,7 +625,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setInt(5, offset);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        application = loadApplication(rs);
+                        application = loadApplicationDetails(rs);
                         applicationList.add(application);
                     }
                 }
@@ -615,6 +658,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "APP_PROPERTIES, " +
                 "MEMORY_USAGE, " +
                 "IS_ACTIVE, " +
+                "IS_SYSTEM_APP, " +
                 "TENANT_ID " +
                 "FROM DM_APPLICATION " +
                 "WHERE DEVICE_ID = ? AND " +
@@ -628,7 +672,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setInt(3, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        application = loadApplication(rs);
+                        application = loadApplicationDetails(rs);
                         applicationList.add(application);
                     }
                 }

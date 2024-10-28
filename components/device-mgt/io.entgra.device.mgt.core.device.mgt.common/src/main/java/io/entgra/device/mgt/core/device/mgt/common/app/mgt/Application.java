@@ -54,6 +54,8 @@ public class Application implements Serializable {
     private int memoryUsage;
     @ApiModelProperty(name = "isActive", value = "Is the application actively running", required = true)
     private boolean isActive;
+    @ApiModelProperty(name = "isSystemApp", value = "Is the application a system app", required = true)
+    private boolean isSystemApp;
     @ApiModelProperty(name = "hourlyUsage", value = "App hourly usage")
     private long hourlyUsage;
     @ApiModelProperty(name = "dailyUsage", value = "App daily usage")
@@ -184,6 +186,14 @@ public class Application implements Serializable {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public boolean isSystemApp() {
+        return isSystemApp;
+    }
+
+    public void setSystemApp(boolean system) {
+        isSystemApp = system;
     }
 
     public long getHourlyUsage() {
