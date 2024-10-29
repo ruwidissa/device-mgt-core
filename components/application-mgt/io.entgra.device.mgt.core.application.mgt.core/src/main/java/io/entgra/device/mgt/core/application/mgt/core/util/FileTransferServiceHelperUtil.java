@@ -183,6 +183,15 @@ public class FileTransferServiceHelperUtil {
             return fileDescriptorResolvedFromRelease;
         }
 
+        String file = urlPathSegments[urlPathSegments.length - 1];
+        String query = downloadUrl.getQuery();
+        if (query != null && query.startsWith("fileName=")) {
+            String[] queryParts = query.split("=", 2);
+            if (queryParts.length > 1 && !queryParts[1].isEmpty()) {
+                file = queryParts[1];
+            }
+        }
+
         if (urlPathSegments.length < 2) {
             if (log.isDebugEnabled()) {
                 log.debug("URL patch segments contain less than 2 segments");
@@ -190,7 +199,6 @@ public class FileTransferServiceHelperUtil {
             return null;
         }
 
-        String file = urlPathSegments[urlPathSegments.length - 1];
         String artifactHolder = urlPathSegments[urlPathSegments.length - 2];
         try {
             FileDescriptor fileDescriptor = new FileDescriptor();
