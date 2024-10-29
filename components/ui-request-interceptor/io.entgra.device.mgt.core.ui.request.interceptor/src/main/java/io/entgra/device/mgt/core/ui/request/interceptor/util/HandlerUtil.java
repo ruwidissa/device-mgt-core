@@ -20,17 +20,16 @@ package io.entgra.device.mgt.core.ui.request.interceptor.util;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
+import io.entgra.device.mgt.core.ui.request.interceptor.beans.ErrorResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.LoginCache;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -227,14 +226,35 @@ public class HandlerUtil {
             proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil
                     .getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE));
         }
+        JsonNode dataNode = proxyResponse.getData();
+        String responseData = extractDataAsString(dataNode);
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         resp.setCharacterEncoding(Consts.UTF_8.name());
 
         proxyResponse.setExecutorResponse(null);
+        proxyResponse.setData(null);
+        ErrorResponse errorResponse = new ErrorResponse(
+                proxyResponse.getCode(),
+                responseData,
+                proxyResponse.getStatus()
+        );
         try (PrintWriter writer = resp.getWriter()) {
-            writer.write(gson.toJson(proxyResponse));
+            writer.write(gson.toJson(errorResponse));
         }
+    }
+
+    /**
+     * Extracts a string representation from the given JsonNode.
+     *
+     * @param dataNode the JsonNode from which to extract the string representation (can be null).
+     * @return the string representation of the JsonNode, or null if the dataNode is null.
+     */
+    private static String extractDataAsString(JsonNode dataNode) {
+        if (dataNode == null) {
+            return null;
+        }
+        return dataNode.isTextual() ? dataNode.asText() : dataNode.toString();
     }
 
     /**
@@ -772,9 +792,7 @@ public class HandlerUtil {
             try {
                 finalNode = objectMapper.readTree(content);
             } catch (JsonProcessingException e) {
-                ObjectNode objectNode = objectMapper.createObjectNode();
-                objectNode.put("message", content);
-                finalNode = objectMapper.valueToTree(objectNode);
+                finalNode = new TextNode(content);
             }
         }
         return finalNode;
