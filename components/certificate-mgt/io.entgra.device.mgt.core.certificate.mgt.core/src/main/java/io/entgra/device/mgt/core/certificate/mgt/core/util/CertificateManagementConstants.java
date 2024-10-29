@@ -35,6 +35,7 @@ public final class CertificateManagementConstants {
     public static final String DES_EDE = "DESede";
     public static final String CONF_LOCATION = "conf.location";
     public static final String DEFAULT_PRINCIPAL = "O=WSO2, OU=Mobile, C=LK";
+    public static final String ORG_UNIT_ATTRIBUTE = "OU=";
     public static final String RSA_PRIVATE_KEY_BEGIN_TEXT = "-----BEGIN RSA PRIVATE KEY-----\n";
     public static final String RSA_PRIVATE_KEY_END_TEXT = "-----END RSA PRIVATE KEY-----";
     public static final String EMPTY_TEXT = "";
