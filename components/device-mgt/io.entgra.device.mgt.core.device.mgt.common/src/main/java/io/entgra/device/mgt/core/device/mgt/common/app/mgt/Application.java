@@ -55,7 +55,7 @@ public class Application implements Serializable {
     @ApiModelProperty(name = "isActive", value = "Is the application actively running", required = true)
     private boolean isActive;
     @ApiModelProperty(name = "isSystemApp", value = "Is the application a system app", required = true)
-    private boolean isSystemApp;
+    private int isSystemApp;
     @ApiModelProperty(name = "hourlyUsage", value = "App hourly usage")
     private long hourlyUsage;
     @ApiModelProperty(name = "dailyUsage", value = "App daily usage")
@@ -188,11 +188,11 @@ public class Application implements Serializable {
         isActive = active;
     }
 
-    public boolean isSystemApp() {
+    public int isSystemApp() {
         return isSystemApp;
     }
 
-    public void setSystemApp(boolean system) {
+    public void setSystemApp(int system) {
         isSystemApp = system;
     }
 
