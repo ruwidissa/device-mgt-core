@@ -224,8 +224,21 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
         return deviceListOwnByRole.stream().map(Device::getId).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves the count of devices owned by users with a specific role and device type.
+     * This method requires that the database connection is already opened before being invoked.
+     * Ensure that {ConnectionManagerUtil.openDBConnection()} is called prior to executing this method.
+     *
+     * @param roleName the name of the role
+     * @param tenantId the ID of the tenant
+     * @param applicationReleaseDTO the ApplicationReleaseDTO object containing application details
+     * @return the count of device IDs owned by users with the specified role and device type
+     * @throws UserStoreException if an error occurs while accessing the user store
+     * @throws DeviceManagementException if an error occurs while retrieving device information
+     * @throws ApplicationManagementException if an error occurs while retrieving application details
+     */
     private int getDeviceIdsOwnByRoleWithType(String roleName, int tenantId, ApplicationReleaseDTO applicationReleaseDTO)
-            throws UserStoreException, DeviceManagementException {
+            throws UserStoreException, DeviceManagementException, ApplicationManagementException {
         UserStoreManager userStoreManager = DataHolder.getInstance().getRealmService()
                 .getTenantUserRealm(tenantId).getUserStoreManager();
         String[] usersWithRole = userStoreManager.getUserListOfRole(roleName);
@@ -236,21 +249,22 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error encountered while accessing application management data.";
             log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
+        DeviceManagementProviderService deviceManagementProviderService =
+                DataHolder.getInstance().getDeviceManagementService();
+        List<DeviceDetailsDTO> idsOwnByRole;
         for (String user : usersWithRole) {
             try {
-                List<DeviceDetailsDTO> idsOwnByRole = HelperUtil.getDeviceManagementProviderService()
+                idsOwnByRole = deviceManagementProviderService
                         .getDevicesByTenantId(tenantId, deviceTypeId, user, null);
                 if (idsOwnByRole != null) {
                     idCountOwnByRole += idsOwnByRole.size();
                 }
             } catch (DeviceManagementDAOException e) {
-                String msg = String.format("Error encountered while accessing device management data for user: %s", user);
+                String msg = "Error encountered while accessing device management data for user: "+ user;
                 log.error(msg, e);
-            } catch (Exception e) {
-                String msg = String.format("Unexpected error occurred for user: %s", user);
-                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
             }
         }
         return idCountOwnByRole;

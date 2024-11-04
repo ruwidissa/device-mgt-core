@@ -1590,20 +1590,23 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         int deviceCount = 0;
         try {
             Connection connection = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT COUNT(e.ID) AS COUNT " +
+            StringBuilder sql = new StringBuilder("SELECT COUNT(e.ID) AS COUNT " +
                     "FROM DM_GROUP d " +
                     "INNER JOIN DM_DEVICE_GROUP_MAP m ON d.ID = m.GROUP_ID " +
                     "INNER JOIN DM_ENROLMENT e ON m.DEVICE_ID = e.DEVICE_ID " +
                     "INNER JOIN DM_DEVICE r ON e.DEVICE_ID = r.ID " +
                     "WHERE d.TENANT_ID = ? " +
                     "AND d.GROUP_NAME = ? " +
-                    "AND r.DEVICE_TYPE_ID = ? " +
-                    "AND e.STATUS NOT IN ('REMOVED', 'DELETED')";
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    "AND e.STATUS NOT IN ('REMOVED', 'DELETED')");
+            if (deviceTypeId != 0) {
+                sql.append(" AND r.DEVICE_TYPE_ID = ?");
+            }
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString())) {
                 preparedStatement.setInt(1, tenantId);
                 preparedStatement.setString(2, groupName);
-                preparedStatement.setInt(3, deviceTypeId);
+                if (deviceTypeId != 0) {
+                    preparedStatement.setInt(3, deviceTypeId);
+                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         deviceCount = resultSet.getInt("COUNT");
