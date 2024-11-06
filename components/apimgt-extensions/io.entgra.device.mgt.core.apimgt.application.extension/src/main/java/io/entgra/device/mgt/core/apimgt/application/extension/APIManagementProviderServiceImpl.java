@@ -257,14 +257,12 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
             metadataManagementService.createMetadata(metaData);
             return apiApplicationKey;
-        } catch (MetadataManagementException e) {
-            String msg = "Error occurred while creating meta data for meta key: " + applicationName;
+        } catch (MetadataKeyAlreadyExistsException e) {
+            String msg = "Since meta key:" + applicationName + " already exists, meta data creating process failed.";
             log.error(msg, e);
             throw new APIManagerException(msg, e);
-        } catch (MetadataKeyAlreadyExistsException e) {
-            String msg =
-                    "Since meta key:" + applicationName + " already exists, meta data creating process " +
-                            "failed.";
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while creating meta data for meta key: " + applicationName;
             log.error(msg, e);
             throw new APIManagerException(msg, e);
         } catch (BadRequestException e) {

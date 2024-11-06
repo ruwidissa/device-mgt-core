@@ -22,14 +22,14 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>sms-handler-feature</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.transport.mgt.sms.handler.api.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra - SMS Handler API Feature</name>
+    <name>Entgra Device Management - SMS Handler API Feature</name>
     <url>https://entgra.io</url>
     <description>This feature contains the APIs required for SMS Handler</description>
 

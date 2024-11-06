@@ -489,4 +489,15 @@ public interface GroupDAO {
             throws GroupManagementDAOException;
 
     int getDeviceCount(String groupName, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Retrieves the count of devices for a specific group, device type, and tenant.
+     *
+     * @param groupName the name of the group
+     * @param deviceTypeId the ID of the device type (e.g., Android, iOS, Windows)
+     * @param tenantId the ID of the tenant
+     * @return the count of devices for the given group, device type, and tenant
+     * @throws GroupManagementDAOException if an error occurs during the retrieval of the device count
+     */
+    int getDeviceCountWithGroup(String groupName, int deviceTypeId, int tenantId) throws GroupManagementDAOException;
 }

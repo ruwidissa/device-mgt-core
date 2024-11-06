@@ -78,7 +78,7 @@ public class PostgreSQLCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 isCertificateUsernameProvided = true;
             }
 
-            query += "ORDER BY ID LIMIT ? OFFSET ?";
+            query += "ORDER BY ID DESC LIMIT ? OFFSET ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int paramIdx = 1;

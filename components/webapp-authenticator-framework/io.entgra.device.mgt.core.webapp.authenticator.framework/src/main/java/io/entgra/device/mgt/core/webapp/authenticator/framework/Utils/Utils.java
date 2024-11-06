@@ -18,6 +18,12 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.Utils;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPException;
+import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
+import io.entgra.device.mgt.core.certificate.mgt.core.scep.TenantedDeviceWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
@@ -26,6 +32,7 @@ import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oa
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidatorFactory;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -34,6 +41,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -151,10 +159,60 @@ public class Utils {
             String sysPropertyName = matchPattern.group(1);
             String sysPropertyValue = System.getProperty(sysPropertyName);
             if (sysPropertyValue != null && !sysPropertyName.isEmpty()) {
-                urlWithPlaceholders = urlWithPlaceholders.replaceAll("\\$\\{(" + sysPropertyName + ")\\}", sysPropertyValue);
+                urlWithPlaceholders = urlWithPlaceholders.replaceAll("\\$\\{(" + sysPropertyName + ")\\}",
+                        sysPropertyValue);
             }
         }
         return urlWithPlaceholders;
     }
 
+    /**
+     * Returns the value of the given attribute from the subject distinguished name. eg: "entgra.net"
+     * from "CN=entgra.net"
+     * @param requestCertificate {@link X509Certificate} that needs to extract an attribute from
+     * @param attribute the attribute name that needs to be extracted from the cert. eg: "CN="
+     * @return the value of the attribute
+     */
+    public static String getSubjectDnAttribute(X509Certificate requestCertificate, String attribute) {
+        String distinguishedName = requestCertificate.getSubjectDN().getName();
+        if (StringUtils.isNotEmpty(distinguishedName)) {
+            String[] dnSplits = distinguishedName.split(",");
+            for (String dnSplit : dnSplits) {
+                if (dnSplit.contains(attribute)) {
+                    String[] cnSplits = dnSplit.split("=");
+                    if (StringUtils.isNotEmpty(cnSplits[1])) {
+                        return cnSplits[1];
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check if the device identifier is valid and set the authentication info such as the tenant domain,
+     * tenant id and username of the enrolled device.
+     * @param deviceIdentifier {@link DeviceIdentifier} containing device id and type
+     * @param authenticationInfo {@link AuthenticationInfo} containing tenant and user details
+     * @throws SCEPException if the device or tenant does not exist
+     */
+    public static void validateScepDevice(DeviceIdentifier deviceIdentifier, AuthenticationInfo authenticationInfo)
+            throws SCEPException {
+        SCEPManager scepManager = AuthenticatorFrameworkDataHolder.getInstance().getScepManager();
+        TenantedDeviceWrapper tenantedDeviceWrapper = scepManager.getValidatedDevice(deviceIdentifier);
+        authenticationInfo.setTenantDomain(tenantedDeviceWrapper.getTenantDomain());
+        authenticationInfo.setTenantId(tenantedDeviceWrapper.getTenantId());
+
+        // To make sure the tenant flow is not initiated in the valve as the
+        // tenant flows are initiated at the API level on iOS
+        if (deviceIdentifier.getType().equals(DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_IOS)) {
+            authenticationInfo.setTenantId(-1);
+        }
+
+        if (tenantedDeviceWrapper.getDevice() != null &&
+                tenantedDeviceWrapper.getDevice().getEnrolmentInfo() != null) {
+            EnrolmentInfo enrolmentInfo = tenantedDeviceWrapper.getDevice().getEnrolmentInfo();
+            authenticationInfo.setUsername(enrolmentInfo.getOwner());
+        }
+    }
 }

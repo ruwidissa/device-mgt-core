@@ -22,15 +22,15 @@
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - XMPP Based Push Notification Provider Implementation</name>
-    <description>WSO2 Carbon - XMPP Based Push Notification Provider Implementation</description>
+    <name>Entgra Device Management - XMPP Based Push Notification Provider Implementation</name>
+    <description>Entgra Device Management - XMPP Based Push Notification Provider Implementation</description>
     <url>https://entgra.io</url>
 
     <dependencies>
@@ -135,11 +135,11 @@
                             io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp.*
                         </Export-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.operation.mgt;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.push.notification;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.operation.mgt;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.push.notification;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.service;version="${io.entgra.device.mgt.core.version.range}",
                             org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.wso2.carbon.event.output.adapter.core;version="[5.3,6)",

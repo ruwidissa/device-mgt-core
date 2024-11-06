@@ -22,14 +22,14 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>cea-mgt-feature</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.cea.mgt.server.feature</artifactId>
-    <name>Entgra IoT - CEA Management Server Feature</name>
-    <description>Entgra IoT - Conditional Email Access Management Server Feature</description>
+    <name>Entgra Device Management - CEA Management Server Feature</name>
+    <description>Entgra Device Management - Conditional Email Access Management Server Feature</description>
 
     <dependencies>
         <dependency>

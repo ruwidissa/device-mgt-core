@@ -37,6 +37,8 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -44,6 +46,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -61,6 +67,8 @@ public class LoginHandler extends HttpServlet {
     private static String uiConfigUrl;
     private static String iotCoreUrl;
     private static String kmManagerUrl;
+    private static String adminUsername;
+    private static String adminPassword;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -87,14 +95,14 @@ public class LoginHandler extends HttpServlet {
             LoginCache loginCache = HandlerUtil.getLoginCache(httpSession);
             OAuthAppCacheKey oAuthAppCacheKey = new OAuthAppCacheKey(applicationName, username);
             OAuthApp oAuthApp = loginCache.getOAuthAppCache(oAuthAppCacheKey);
-
             if (oAuthApp == null) {
+                initializeAdminCredentials();
                 ArrayList<String> supportedGrantTypes = new ArrayList<>();
                 supportedGrantTypes.add(HandlerConstants.PASSWORD_GRANT_TYPE);
                 supportedGrantTypes.add(HandlerConstants.REFRESH_TOKEN_GRANT_TYPE);
                 ClassicHttpRequest apiRegEndpoint = ClassicRequestBuilder.post(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT)
                         .setEntity(HandlerUtil.constructAppRegPayload(tags, applicationName,
-                                username, password, null, supportedGrantTypes))
+                                adminUsername, adminPassword, null, supportedGrantTypes))
                         .setHeader(org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE,
                                 org.apache.hc.core5.http.ContentType.APPLICATION_JSON.toString())
                         .setHeader(org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder().encodeToString((username + HandlerConstants.COLON + password).getBytes()))
@@ -143,6 +151,10 @@ public class LoginHandler extends HttpServlet {
             log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {
             log.error("Error occurred while parsing the response. ", e);
+        } catch (ParserConfigurationException e) {
+            log.error("Error while creating the document builder. ");
+        } catch (SAXException e) {
+            log.error("Error while parsing xml file. ", e);
         } catch (LoginException e) {
             log.error("Error occurred while getting token data. ", e);
         }
@@ -250,5 +262,22 @@ public class LoginHandler extends HttpServlet {
                 .setHeader(org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp)
                 .build();
         return HandlerUtil.execute(tokenEndpoint);
+    }
+
+    /**
+     * Initialize the admin credential variables
+     *
+     * @throws ParserConfigurationException - Throws when error occur during initializing the document builder
+     * @throws IOException                  - Throws when error occur during document parsing
+     * @throws SAXException                 - Throws when error occur during document parsing
+     */
+    private void initializeAdminCredentials() throws ParserConfigurationException, IOException, SAXException {
+        File userMgtConf = new File("repository/conf/user-mgt.xml");
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(userMgtConf);
+
+        adminUsername = doc.getElementsByTagName("UserName").item(0).getTextContent();
+        adminPassword = doc.getElementsByTagName("Password").item(0).getTextContent();
     }
 }

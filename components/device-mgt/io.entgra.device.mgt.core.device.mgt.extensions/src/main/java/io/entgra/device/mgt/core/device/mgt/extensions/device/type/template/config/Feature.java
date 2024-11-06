@@ -45,8 +45,11 @@ import java.util.List;
 @XmlType(name = "Feature", propOrder = {
     "name",
     "description",
+    "tooltip",
     "operation",
-    "metaData"
+    "metaData",
+    "confirmationTexts",
+    "dangerZoneTooltipTexts"
 })
 public class Feature {
 
@@ -55,6 +58,9 @@ public class Feature {
 
     @XmlElement(name = "Description", required = true)
     protected String description;
+
+    @XmlElement(name = "Tooltip", required = false)
+    protected String tooltip;
 
     @XmlElement(name = "Operation")
     protected Operation operation;
@@ -68,6 +74,12 @@ public class Feature {
     @XmlElementWrapper(name = "MetaData")
     @XmlElement(name = "Property", required = true)
     private List<String> metaData;
+
+    @XmlElement(name = "ConfirmationTexts", required = false)
+    private List<String> confirmationTexts;
+
+    @XmlElement(name = "DangerZoneTooltipTexts", required = false)
+    private List<String> dangerZoneTooltipTexts;
 
     /**
      * Gets the value of the name property.
@@ -116,6 +128,31 @@ public class Feature {
     public void setDescription(String value) {
         this.description = value;
     }
+
+    /**
+     * Gets the value of the tooltip property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getTooltip() {
+        return tooltip;
+    }
+
+    /**
+     * Sets the value of the tooltip property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setTooltip(String value) {
+        this.tooltip = value;
+    }
+
 
     /**
      * Gets the value of the operation property.
@@ -179,5 +216,21 @@ public class Feature {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<String> getConfirmationTexts() {
+        return confirmationTexts;
+    }
+
+    public void setConfirmationTexts(List<String> confirmationTexts) {
+        this.confirmationTexts = confirmationTexts;
+    }
+
+    public List<String> getDangerZoneTooltipTexts() {
+        return dangerZoneTooltipTexts;
+    }
+
+    public void setDangerZoneTooltipTexts(List<String> dangerZoneTooltipTexts) {
+        this.dangerZoneTooltipTexts = dangerZoneTooltipTexts;
     }
 }

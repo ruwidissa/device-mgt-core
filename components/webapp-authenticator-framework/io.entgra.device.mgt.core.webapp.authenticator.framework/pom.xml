@@ -21,15 +21,15 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>webapp-authenticator-framework</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.webapp.authenticator.framework</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Web Application Authenticator Framework Bundle</name>
-    <description>WSO2 Carbon - Web Application Authenticator Framework Bundle</description>
+    <name>Entgra Device Management - Web Application Authenticator Framework Bundle</name>
+    <description>Entgra Device Management - Web Application Authenticator Framework Bundle</description>
     <url>https://entgra.io</url>
 
     <build>
@@ -62,16 +62,16 @@
                             com.nimbusds.jose;version="[7.9,8)",
                             com.nimbusds.jose.crypto;version="[7.9,8)",
                             com.nimbusds.jwt;version="[7.9,8)",
-                            io.entgra.device.mgt.core.certificate.mgt.core.dto;version="[5.0,6)",
-                            io.entgra.device.mgt.core.certificate.mgt.core.exception;version="[5.0,6)",
-                            io.entgra.device.mgt.core.certificate.mgt.core.scep;version="[5.0,6)",
-                            io.entgra.device.mgt.core.certificate.mgt.core.service;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.spi;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.certificate.mgt.core.dto;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.certificate.mgt.core.exception;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.certificate.mgt.core.scep;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.certificate.mgt.core.service;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.spi;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.util;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth,
                             io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer,
                             io.entgra.device.mgt.core.webapp.authenticator.framework.config,

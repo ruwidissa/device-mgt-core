@@ -160,9 +160,9 @@
     </RemoteSessionConfiguration>
     <DefaultGroupsConfiguration>BYOD,COPE</DefaultGroupsConfiguration>
     <MetaDataConfiguration>
-        <DocConfiguration>
+        <WhiteLabelConfiguration>
             <DocUrl>https://docs.entgra.io/uem/6.0.0</DocUrl>
-        </DocConfiguration>
+        </WhiteLabelConfiguration>
     </MetaDataConfiguration>
 </DeviceMgtConfiguration>
 

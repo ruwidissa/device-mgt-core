@@ -60,8 +60,53 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
 
     private final MetadataDAO metadataDAO;
 
-    public WhiteLabelManagementServiceImpl() {
+    public WhiteLabelManagementServiceImpl() throws MetadataManagementException {
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
+        initializeWhiteLabelThemes();
+    }
+
+    /**
+     * Initializes white label theme for a tenant by retrieving white label metadata and updating it if necessary.
+     * If the white label metadata is found and the DocUrl is missing,it updates the metadata with the default value
+     * for DocUrl.
+     *
+     * @throws MetadataManagementException if an error occurs while managing metadata or transactions.
+     */
+    private void initializeWhiteLabelThemes() throws MetadataManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        WhiteLabelTheme defaultTheme = getDefaultWhiteLabelTheme();
+        Metadata whiteLabelMetadata = getWhiteLabelMetaData(tenantId);
+        if (whiteLabelMetadata != null) {
+            WhiteLabelTheme whiteLabelTheme = new Gson().fromJson(whiteLabelMetadata.getMetaValue(),
+                    WhiteLabelTheme.class);
+            if (whiteLabelTheme.getDocUrl() == null) {
+                whiteLabelTheme.setDocUrl(defaultTheme.getDocUrl());
+                Metadata updatedMetadata = constructWhiteLabelThemeMetadata(whiteLabelTheme);
+                try {
+                    MetadataManagementDAOFactory.beginTransaction();
+                    metadataDAO.updateMetadata(tenantId, updatedMetadata);
+                    MetadataManagementDAOFactory.commitTransaction();
+                    if (log.isDebugEnabled()) {
+                        log.debug("WhiteLabel theme's DocUrl was missing and has been updated to the default value " +
+                                "for tenant: " + tenantId);
+                    }
+                } catch (MetadataManagementDAOException e) {
+                    MetadataManagementDAOFactory.rollbackTransaction();
+                    String msg = "Error occurred while fetching white label metadata for tenant: " + tenantId;
+                    log.error(msg, e);
+                    throw new MetadataManagementException(msg, e);
+                } catch (TransactionManagementException e) {
+                    String msg = "Transaction failed while updating white label theme for tenant: "
+                            + tenantId;
+                    log.error(msg, e);
+                    throw new MetadataManagementException(msg, e);
+                } finally {
+                    MetadataManagementDAOFactory.closeConnection();
+                }
+            }
+        } else {
+            addDefaultWhiteLabelThemeIfNotExist(tenantId);
+        }
     }
 
     @Override
@@ -126,9 +171,9 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     /**
      * Useful to get white label image file response from provided url
      */
-    private FileResponse getImageFileResponseFromUrl(String url) throws IOException, NotFoundException  {
+    private FileResponse getImageFileResponseFromUrl(String url) throws IOException, NotFoundException {
         FileResponse fileResponse = new FileResponse();
-        try(CloseableHttpClient client = HttpClients.createDefault()) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet imageGetRequest = new HttpGet(url);
             HttpResponse response = client.execute(imageGetRequest);
             InputStream imageStream = response.getEntity().getContent();
@@ -184,6 +229,16 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     /**
+     * Get default metaDataConfiguration DocUrl from config
+     */
+    private String getDefaultDocUrl() {
+        MetaDataConfiguration metaDataConfiguration = DeviceConfigurationManager.getInstance().
+                getDeviceManagementConfig().getMetaDataConfiguration();
+        WhiteLabelConfiguration whiteLabelConfiguration = metaDataConfiguration.getWhiteLabelConfiguration();
+        return whiteLabelConfiguration.getDocUrl();
+    }
+
+    /**
      * Construct and return default whitelabel detail bean {@link WhiteLabelImage}
      */
     private WhiteLabelTheme getDefaultWhiteLabelTheme() {
@@ -193,11 +248,13 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         WhiteLabelImage logo = constructDefaultLogoImage();
         WhiteLabelImage logoIcon = constructDefaultLogoIconImage();
         WhiteLabelTheme defaultTheme = new WhiteLabelTheme();
+        String docUrl = getDefaultDocUrl();
         defaultTheme.setFooterText(footerText);
         defaultTheme.setAppTitle(appTitle);
         defaultTheme.setLogoImage(logo);
         defaultTheme.setLogoIconImage(logoIcon);
         defaultTheme.setFaviconImage(favicon);
+        defaultTheme.setDocUrl(docUrl);
         return defaultTheme;
     }
 
@@ -338,9 +395,9 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
      * those can be passed to this method in order to restore.
      *
      * @param existingFavicon existing favicon image file
-     * @param existingLogo existing logo image file
+     * @param existingLogo    existing logo image file
      */
-    private void restoreWhiteLabelImages(File existingFavicon, File existingLogo,  File existingLogoIcon, int tenantId)
+    private void restoreWhiteLabelImages(File existingFavicon, File existingLogo, File existingLogoIcon, int tenantId)
             throws MetadataManagementException {
         WhiteLabelStorageUtil.deleteWhiteLabelImageForTenantIfExists(tenantId);
         if (existingFavicon != null) {
@@ -359,7 +416,7 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
      * For example if the provided white label image is of URL type it doesn't need to be stored
      *
      * @param whiteLabelImage image to be stored
-     * @param imageName (i.e: FAVICON)
+     * @param imageName       (i.e: FAVICON)
      */
     private void storeWhiteLabelImageIfRequired(WhiteLabelImageRequestPayload whiteLabelImage,
                                                 WhiteLabelImage.ImageName imageName, int tenantId)
@@ -386,6 +443,7 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         whiteLabelTheme.setLogoIconImage(logoIconImage);
         whiteLabelTheme.setFooterText(whiteLabelThemeCreateRequest.getFooterText());
         whiteLabelTheme.setAppTitle(whiteLabelThemeCreateRequest.getAppTitle());
+        whiteLabelTheme.setDocUrl(whiteLabelThemeCreateRequest.getDocUrl());
         return whiteLabelTheme;
     }
 
@@ -418,6 +476,38 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         return metadata;
     }
 
+    /**
+     * updates the given WhiteLabelTheme with default value for docUrl
+     *
+     * @param whiteLabelTheme the WhiteLabelTheme to be updated with defaults if necessary.
+     * @param tenantId        the ID of the tenant whose metadata is being updated.
+     * @throws MetadataManagementException exception for an error occurs during the update or transaction commit.
+     */
+    private void updateWhiteLabelThemeWithDefaults(WhiteLabelTheme whiteLabelTheme, int tenantId)
+            throws MetadataManagementException {
+        WhiteLabelTheme defaultTheme = getDefaultWhiteLabelTheme();
+        if (whiteLabelTheme.getDocUrl() == null) {
+            whiteLabelTheme.setDocUrl(defaultTheme.getDocUrl());
+        }
+        Metadata updatedMetadata = constructWhiteLabelThemeMetadata(whiteLabelTheme);
+        try {
+            MetadataManagementDAOFactory.beginTransaction();
+            metadataDAO.updateMetadata(tenantId, updatedMetadata);
+            MetadataManagementDAOFactory.commitTransaction();
+        } catch (MetadataManagementDAOException e) {
+            MetadataManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while updating metadata for tenant: " + tenantId;
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while committing the transaction for tenant: " + tenantId;
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        } finally {
+            MetadataManagementDAOFactory.closeConnection();
+        }
+    }
+
     @Override
     public WhiteLabelTheme getWhiteLabelTheme(String tenantDomain) throws MetadataManagementException, DeviceManagementException {
         int tenantId = DeviceManagerUtil.getTenantId(tenantDomain);
@@ -435,17 +525,22 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
                 throw new MetadataManagementException(msg);
             }
         }
-        return new Gson().fromJson(metadata.getMetaValue(), WhiteLabelTheme.class);
+        WhiteLabelTheme whiteLabelTheme = new Gson().fromJson(metadata.getMetaValue(), WhiteLabelTheme.class);
+        if (whiteLabelTheme.getDocUrl() == null) {
+            updateWhiteLabelThemeWithDefaults(whiteLabelTheme, tenantId);
+        }
+        return whiteLabelTheme;
     }
 
     /**
      * Load White label Meta Data for given tenant Id.
+     *
      * @param tenantId Id of the tenant
      * @return {@link Metadata}
      * @throws MetadataManagementException if an error occurred while getting Meta-Data info from Database for a
-     * given tenant ID.
+     *                                     given tenant ID.
      */
-    private Metadata getWhiteLabelMetaData (int tenantId) throws MetadataManagementException {
+    private Metadata getWhiteLabelMetaData(int tenantId) throws MetadataManagementException {
         try {
             MetadataManagementDAOFactory.openConnection();
             return metadataDAO.getMetadata(tenantId, MetadataConstants.WHITELABEL_META_KEY);

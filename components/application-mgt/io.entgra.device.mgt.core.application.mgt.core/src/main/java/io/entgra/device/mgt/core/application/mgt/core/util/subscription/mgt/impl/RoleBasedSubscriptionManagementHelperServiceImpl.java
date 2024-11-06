@@ -40,6 +40,7 @@ import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.SubscriptionManagementHelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.service.SubscriptionManagementHelperService;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -210,7 +211,8 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
         for (String user : usersWithRole) {
             PaginationRequest paginationRequest = new PaginationRequest(-1, -1);
             paginationRequest.setOwner(user);
-            paginationRequest.setStatusList(Arrays.asList("ACTIVE", "INACTIVE", "UNREACHABLE"));
+            paginationRequest.setStatusList(Arrays.asList(EnrolmentInfo.Status.ACTIVE.name(),
+                    EnrolmentInfo.Status.INACTIVE.name(),EnrolmentInfo.Status.UNREACHABLE.name()));
             PaginationResult ownDeviceIds = HelperUtil.getDeviceManagementProviderService().
                     getAllDevicesIdList(paginationRequest);
             if (ownDeviceIds.getData() != null) {

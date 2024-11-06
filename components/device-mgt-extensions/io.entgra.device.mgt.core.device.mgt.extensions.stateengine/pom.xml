@@ -22,15 +22,15 @@
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.stateengine</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra IoT - State Engine </name>
-    <description>Entgra IoT - State Engine Components</description>
+    <name>Entgra Device Management - State Engine </name>
+    <description>Entgra Device Management - State Engine Components</description>
     <url>http://entgra.io</url>
 
     <build>
@@ -54,7 +54,7 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>IoT Device Management State Engine Bundle</Bundle-Description>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.extensions.stateengine.dto,
                             io.entgra.device.mgt.core.device.mgt.extensions.stateengine.exception,
                             org.apache.commons.logging;version="[1.2,2)",

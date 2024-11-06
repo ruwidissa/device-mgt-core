@@ -104,6 +104,13 @@ public class HandlerUtil {
                 final HttpEntity responseEntity = response.getEntity();
                 ProxyResponse handlerResponse = new ProxyResponse();
                 int statusCode = response.getCode();
+                if (statusCode == 204) {
+                    handlerResponse.setCode(statusCode);
+                    handlerResponse.setStatus(ProxyResponse.Status.SUCCESS);
+                    handlerResponse.setExecutorResponse("SUCCESS");
+                    handlerResponse.setHeaders(response.getHeaders());
+                    return handlerResponse;
+                }
                 if (responseEntity == null) {
                     log.error("Received null response for http request : " + httpRequest.getMethod() + " " + httpRequest.getRequestUri());
                     handlerResponse.setCode(HandlerConstants.INTERNAL_ERROR_CODE);

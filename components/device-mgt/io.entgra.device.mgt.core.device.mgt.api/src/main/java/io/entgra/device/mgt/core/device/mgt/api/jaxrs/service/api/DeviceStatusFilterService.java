@@ -115,7 +115,7 @@ public interface DeviceStatusFilterService {
             required = true) @PathParam ("device-type") String deviceType);
 
     @GET
-    @Path("/is-enabled")
+    @Path("/device-status-check")
     @ApiOperation(
             httpMethod = HTTPConstants.HEADER_GET,
             value = "Get device status filter",
@@ -155,7 +155,7 @@ public interface DeviceStatusFilterService {
     Response getDeviceStatusCheck();
 
     @PUT
-    @Path("/toggle-device-status")
+    @Path("/device-status-check")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = HTTPConstants.HEADER_POST,
@@ -201,6 +201,7 @@ public interface DeviceStatusFilterService {
             @QueryParam("isEnabled") boolean isEnabled);
 
     @PUT
+    @Path("/{deviceType}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = HTTPConstants.HEADER_POST,
@@ -243,10 +244,51 @@ public interface DeviceStatusFilterService {
                     name = "deviceType",
                     value = "The device type for which you want to update device status filters.",
                     required = true)
-            @QueryParam("deviceType") String deviceType,
+            @PathParam ("deviceType") String deviceType,
             @ApiParam(
                     name = "deviceStatus",
                     value = "A list of device status values to update for the given device type.",
                     required = true)
             @QueryParam("deviceStatus") List<String> deviceStatus);
+
+    @POST
+    @Path("/default")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_POST,
+            value = "Add Default Device status filters",
+            notes = "Add Default Device status filters",
+            tags = "Tenant Metadata Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devicestatusfilter:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully add default device status filters.",
+                            response = Response.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. " +
+                                    "\n Server error occurred while adding default device status filters.",
+                            response = ErrorResponse.class)
+            })
+    Response setDefaultStatusFilterData();
 }

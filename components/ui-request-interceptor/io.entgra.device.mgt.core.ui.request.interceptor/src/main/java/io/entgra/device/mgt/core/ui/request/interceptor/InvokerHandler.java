@@ -27,8 +27,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 
 import javax.servlet.annotation.MultipartConfig;
@@ -37,6 +39,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
 
 @MultipartConfig
@@ -183,9 +186,24 @@ public class InvokerHandler extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         try {
+            String jsonPayload = null;
+            if (req.getContentLength() > 0) {
+                StringBuilder jsonBuilder = new StringBuilder();
+                String line;
+                try (BufferedReader reader = req.getReader()) {
+                    while ((line = reader.readLine()) != null) {
+                        jsonBuilder.append(line);
+                    }
+                }
+                jsonPayload = jsonBuilder.toString();
+            }
             if (validateRequest(req, resp)) {
                 ClassicHttpRequest deleteRequest = ClassicRequestBuilder.delete(HandlerUtil.generateBackendRequestURL(req,
                         apiEndpoint)).build();
+                if (jsonPayload != null && !jsonPayload.isEmpty()) {
+                    StringEntity entity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);
+                    deleteRequest.setEntity(entity);
+                }
                 HandlerUtil.copyRequestHeaders(req, deleteRequest, false);
                 deleteRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(deleteRequest);

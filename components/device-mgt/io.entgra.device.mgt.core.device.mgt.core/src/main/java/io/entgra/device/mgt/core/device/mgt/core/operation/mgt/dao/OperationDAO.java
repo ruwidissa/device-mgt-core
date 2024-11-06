@@ -61,6 +61,9 @@ public interface OperationDAO {
     boolean updateOperationStatus(int enrolmentId, int operationId,Operation.Status status)
             throws OperationManagementDAOException;
 
+    int updateOperationByDeviceTypeAndInitialStatus(String deiceType, String initialStatus, String requiredStatus)
+            throws OperationManagementDAOException;
+
     void updateEnrollmentOperationsStatus(int enrolmentId, String operationCode, Operation.Status existingStatus,
                                           Operation.Status newStatus) throws OperationManagementDAOException;
 

@@ -21,14 +21,14 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - API Key Management</name>
+    <name>Entgra Device Management - API Key Management</name>
     <description>This module extends the API manager's key management.</description>
     <url>https://entgra.io</url>
 
@@ -88,10 +88,10 @@
                             io.entgra.device.mgt.core.apimgt.keymgt.extension,
                             io.entgra.device.mgt.core.apimgt.keymgt.extension.exception,
                             io.entgra.device.mgt.core.apimgt.keymgt.extension.service,
-                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.config;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.config.keymanager;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.config;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.config.keymanager;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             javax.cache;version="[1.0,2)",
                             javax.net.ssl,okhttp3;version="[4.9,5)",
                             org.apache.commons.lang;version="[2.4,3)",

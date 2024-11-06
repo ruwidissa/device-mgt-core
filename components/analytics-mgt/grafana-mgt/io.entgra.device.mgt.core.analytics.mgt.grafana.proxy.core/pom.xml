@@ -22,15 +22,15 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>grafana-mgt</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra - Grafana API Handler Core</name>
-    <description>Entgra - Grafana API Handler Core</description>
+    <name>Entgra Device Management - Grafana API Handler Core</name>
+    <description>Entgra Device Management - Grafana API Handler Core</description>
     <url>http://entgra.io</url>
 
     <build>
@@ -83,7 +83,7 @@
                         <Import-Package>
                             com.google.common.cache;version="[32.1,33)";resolution:=optional,
                             com.google.gson;version="[2.9,3)",
-                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.bean,
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config,
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.xml.bean,
@@ -96,16 +96,16 @@
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.query,
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.query.encoder,
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util,
-                            io.entgra.device.mgt.core.application.mgt.common.exception;version="[5.0,6)",
-                            io.entgra.device.mgt.core.application.mgt.core.config;version="[5.0,6)",
-                            io.entgra.device.mgt.core.application.mgt.core.util;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.common.util;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.config;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.config.datasource;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.dao;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.report.mgt.config;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.report.mgt.dao.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common.exception;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.application.mgt.core.config;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.application.mgt.core.util;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.common.util;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.config;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.config.datasource;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.dao;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.report.mgt.config;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.report.mgt.dao.common;version="${io.entgra.device.mgt.core.version.range}",
                             javax.xml.bind;version="[0.0,1)",
                             javax.xml.bind.annotation;version="[0.0,1)",
                             javax.xml.parsers,

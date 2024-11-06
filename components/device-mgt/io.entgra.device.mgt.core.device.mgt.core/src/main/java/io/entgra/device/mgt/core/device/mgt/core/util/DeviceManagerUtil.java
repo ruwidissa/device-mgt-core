@@ -20,7 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.core.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
-import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.documentation.DocConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.whitelabel.WhiteLabelConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -1289,7 +1289,7 @@ public final class DeviceManagerUtil {
      */
     public static String getDocUrl() {
         DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-        DocConfiguration docConfiguration = deviceManagementConfig.getMetaDataConfiguration().getDocConfiguration();
-        return docConfiguration.getDocUrl();
+        WhiteLabelConfiguration whiteLabelConfig = deviceManagementConfig.getMetaDataConfiguration().getWhiteLabelConfiguration();
+        return whiteLabelConfig.getDocUrl();
     }
 }
