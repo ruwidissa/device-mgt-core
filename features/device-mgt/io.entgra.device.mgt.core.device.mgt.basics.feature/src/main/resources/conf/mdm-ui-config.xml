@@ -427,6 +427,12 @@
         <Scope>dm:admin:cea:sync</Scope>
         <Scope>am:pub:app:upload</Scope>
         <Scope>dm:devices:ops:status:update</Scope>
+        <Scope>tm:tags:view</Scope>
+        <Scope>tm:tags:create</Scope>
+        <Scope>tm:tags:update</Scope>
+        <Scope>tm:tags:delete</Scope>
+        <Scope>tm:tags:mapping:create</Scope>
+        <Scope>tm:tags:mapping:delete</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
