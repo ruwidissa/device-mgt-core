@@ -427,6 +427,9 @@
         <Scope>dm:admin:cea:sync</Scope>
         <Scope>am:pub:app:upload</Scope>
         <Scope>dm:devices:ops:status:update</Scope>
+        <Scope>tm:tags:mapping:create</Scope>
+        <Scope>tm:tags:mapping:delete</Scope>
+        <Scope>perm:rmr:admin:view-last-profile-reading</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
