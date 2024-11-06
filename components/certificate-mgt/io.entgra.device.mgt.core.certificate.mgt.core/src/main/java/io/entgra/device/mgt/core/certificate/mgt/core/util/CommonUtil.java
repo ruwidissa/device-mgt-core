@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.certificate.mgt.core.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
@@ -67,5 +68,25 @@ public class CommonUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * Checks if the organizational unit (OU) attribute has a valid tenant id in order to verify that it is
+     * a SCEP certificate. eg: OU=tenant_1
+     * <br/><br/>
+     * Refer to engineering mail SCEP implementation for Android
+     * @param orgUnit organizational unit (OU) of the certificate
+     * @return true if it is a valid SCEP org unit else false
+     */
+    public static boolean isScepOrgUnit(String orgUnit) {
+        if (StringUtils.isNotEmpty(orgUnit)) {
+            if (orgUnit.contains(CertificateManagementConstants.ORG_UNIT_TENANT_PREFIX)) {
+                String[] orgUnitArray = orgUnit.split(("_"));
+                if (orgUnitArray.length > 1) {
+                    return NumberUtils.isNumber(orgUnitArray[1]);
+                }
+            }
+        }
+        return false;
     }
 }
