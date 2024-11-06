@@ -32,6 +32,9 @@ public final class Constants {
         public static final String HEADER_HTTP_ACCEPT = "Accept";
         public static final String HEADER_HTTP_AUTHORIZATION = "Authorization";
         public static final String ONE_TIME_TOKEN_HEADER = "one-time-token";
+        public static final String MUTUAL_AUTH_HEADER = "mutual-auth-header";
+        public static final String PROXY_MUTUAL_AUTH_HEADER = "proxy-mutual-auth-header";
+        public static final String CERTIFICATE_VERIFICATION_HEADER = "Mdm-Signature";
     }
 
     public static final class ContentTypes {
@@ -52,5 +55,13 @@ public final class Constants {
         public static final String WRITE = "write";
         public static final String DELETE = "delete";
         public static final String ACTION = "action";
+    }
+
+    public static final class Certificate {
+        private Certificate() {
+            throw new AssertionError();
+        }
+
+        public static final String ORGANIZATION_ATTRIBUTE = "O=";
     }
 }

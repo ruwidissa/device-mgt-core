@@ -19,9 +19,7 @@ package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerService;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
@@ -56,14 +54,6 @@ public class TenantMgtServiceComponent {
                     registerService(TenantManagerAdminService.class.getName(), tenantManagerAdminService, null);
             TenantManager tenantManager = new TenantManagerImpl();
             TenantMgtDataHolder.getInstance().setTenantManager(tenantManager);
-            WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
-            componentContext.getBundleContext().registerService(WhiteLabelManagementService.class.getName(),
-                    whiteLabelManagementService, null);
-            TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
-            DeviceStatusManagementService deviceStatusManagementService = new DeviceStatusManagementServiceImpl();
-            componentContext.getBundleContext().registerService(DeviceStatusManagementService.class.getName(),
-                    deviceStatusManagementService, null);
-            TenantMgtDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagementService);
             DeviceMgtTenantListener deviceMgtTenantListener = new DeviceMgtTenantListener();
             if(log.isDebugEnabled()) {
                 log.info("Tenant management listener is registering");
@@ -83,6 +73,46 @@ public class TenantMgtServiceComponent {
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         // nothing to do
+    }
+
+    @Reference(
+            name = "whiteLabelManagement.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetWhiteLabelManagementService"
+    )
+    protected void setWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("WhiteLabelManagementService is binding");
+        }
+        TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
+    }
+    protected void unsetWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("WhiteLabelManagementService is unbinding");
+        }
+        TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(null);
+    }
+
+    @Reference(
+            name = "deviceStatusManagement.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceStatusManagementService"
+    )
+    protected void setDeviceStatusManagementService(DeviceStatusManagementService deviceStatusManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("DeviceStatusManagementService is binding");
+        }
+        TenantMgtDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagementService);
+    }
+    protected void unsetDeviceStatusManagementService(DeviceStatusManagementService deviceStatusManagementService) {
+        if(log.isDebugEnabled()) {
+            log.info("DeviceStatusManagementService is unbinding");
+        }
+        TenantMgtDataHolder.getInstance().setDeviceStatusManagementService(null);
     }
 
     @Reference(

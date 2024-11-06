@@ -17,18 +17,19 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>io.entgra.device.mgt.core.parent</artifactId>
+        <artifactId>device-mgt-core</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>analytics-mgt</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra - Analytics Management Component</name>
+    <name>Entgra Device Management - Analytics Management Component</name>
     <url>http://entgra.io</url>
 
     <modules>

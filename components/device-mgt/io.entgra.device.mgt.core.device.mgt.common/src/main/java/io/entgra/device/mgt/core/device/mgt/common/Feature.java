@@ -59,6 +59,13 @@ public class Feature implements Serializable {
     private String description;
 
     @ApiModelProperty(
+            name = "tooltip",
+            value = "Provides a tooltip for the features.",
+            required = false
+    )
+    private String tooltip;
+
+    @ApiModelProperty(
             name = "type",
             value = "Type of the feature.",
             required = true
@@ -85,6 +92,20 @@ public class Feature implements Serializable {
             required = true
     )
     private List<MetadataEntry> metadataEntries;
+
+    @ApiModelProperty(
+            name = "confirmationTexts",
+            value = "Disenroll delete confirmation modal texts.",
+            required = false
+    )
+    private ConfirmationTexts confirmationTexts;
+
+    @ApiModelProperty(
+            name = "dangerZoneTooltipTexts",
+            value = "Danger zone tooltip texts.",
+            required = false
+    )
+    private DangerZoneTooltipTexts dangerZoneTooltipTexts;
 
     @XmlElement
     public int getId() {
@@ -139,6 +160,16 @@ public class Feature implements Serializable {
         this.description = description;
     }
 
+    @XmlElement
+    public String getTooltip() {
+        return tooltip;
+    }
+
+    public void setTooltip(String tooltip) {
+        this.tooltip = tooltip;
+    }
+
+
     @XmlAttribute
     public String getType() {
         return type;
@@ -154,6 +185,24 @@ public class Feature implements Serializable {
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
+    }
+
+    @XmlElement
+    public ConfirmationTexts getConfirmationTexts() {
+        return confirmationTexts;
+    }
+
+    public void setConfirmationTexts(ConfirmationTexts confirmationTexts) {
+        this.confirmationTexts = confirmationTexts;
+    }
+
+    @XmlElement
+    public DangerZoneTooltipTexts getDangerZoneTooltipTexts() {
+        return dangerZoneTooltipTexts;
+    }
+
+    public void setDangerZoneTooltipTexts(DangerZoneTooltipTexts dangerZoneTooltipTexts) {
+        this.dangerZoneTooltipTexts = dangerZoneTooltipTexts;
     }
 
     public static class MetadataEntry implements Serializable {
@@ -184,6 +233,138 @@ public class Feature implements Serializable {
 
         public void setValue(Object value) {
             this.value = value;
+        }
+    }
+
+    public static class ConfirmationTexts implements Serializable {
+        private int id;
+        private String deleteConfirmModalTitle;
+        private String deleteConfirmModalText;
+        private String deleteConfirmationTextDescribe;
+        private String deleteConfirmationText;
+        private String cancelText;
+        private String confirmText;
+        private String inputLabel;
+        private String inputRequireMessage;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getCancelText() {
+            return cancelText;
+        }
+
+        public void setCancelText(String cancelText) {
+            this.cancelText = cancelText;
+        }
+
+        public String getConfirmText() {
+            return confirmText;
+        }
+
+        public void setConfirmText(String confirmText) {
+            this.confirmText = confirmText;
+        }
+
+        public String getInputLabel() {
+            return inputLabel;
+        }
+
+        public void setInputLabel(String inputLabel) {
+            this.inputLabel = inputLabel;
+        }
+
+        public String getInputRequireMessage() {
+            return inputRequireMessage;
+        }
+
+        public void setInputRequireMessage(String inputRequireMessage) {
+            this.inputRequireMessage = inputRequireMessage;
+        }
+
+        public String getDeleteConfirmModalTitle() {
+            return deleteConfirmModalTitle;
+        }
+
+        public void setDeleteConfirmModalTitle(String deleteConfirmModalTitle) {
+            this.deleteConfirmModalTitle = deleteConfirmModalTitle;
+        }
+
+        public String getDeleteConfirmModalText() {
+            return deleteConfirmModalText;
+        }
+
+        public void setDeleteConfirmModalText(String deleteConfirmModalText) {
+            this.deleteConfirmModalText = deleteConfirmModalText;
+        }
+
+        public String getDeleteConfirmationTextDescribe() {
+            return deleteConfirmationTextDescribe;
+        }
+
+        public void setDeleteConfirmationTextDescribe(String deleteConfirmationTextDescribe) {
+            this.deleteConfirmationTextDescribe = deleteConfirmationTextDescribe;
+        }
+
+        public String getDeleteConfirmationText() {
+            return deleteConfirmationText;
+        }
+
+        public void setDeleteConfirmationText(String deleteConfirmationText) {
+            this.deleteConfirmationText = deleteConfirmationText;
+        }
+    }
+
+    public static class DangerZoneTooltipTexts implements Serializable {
+        private String toolTipTitle;
+        private String toolTipPopConfirmText;
+        private String confirmText;
+        private String cancelText;
+        private String toolTipAvailable;
+
+        public String getToolTipAvailable() {
+            return toolTipAvailable;
+        }
+
+        public void setToolTipAvailable(String toolTipAvailable) {
+            this.toolTipAvailable = toolTipAvailable;
+        }
+
+        public String getToolTipTitle() {
+            return toolTipTitle;
+        }
+
+        public void setToolTipTitle(String toolTipTitle) {
+            this.toolTipTitle = toolTipTitle;
+        }
+
+        public String getToolTipPopConfirmText() {
+            return toolTipPopConfirmText;
+        }
+
+        public void setToolTipPopConfirmText(String toolTipPopConfirmText) {
+            this.toolTipPopConfirmText = toolTipPopConfirmText;
+        }
+
+        public String getConfirmText() {
+            return confirmText;
+        }
+
+        public void setConfirmText(String confirmText) {
+            this.confirmText = confirmText;
+        }
+
+        public String getCancelText() {
+            return cancelText;
+        }
+
+        public void setCancelText(String cancelText) {
+            this.cancelText = cancelText;
         }
     }
 }

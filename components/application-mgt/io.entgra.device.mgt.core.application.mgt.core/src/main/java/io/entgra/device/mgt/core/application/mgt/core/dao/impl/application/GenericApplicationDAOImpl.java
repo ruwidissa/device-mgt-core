@@ -2075,7 +2075,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                         releaseVersionInfo = new ReleaseVersionInfo();
                         releaseVersionInfo.setVersion(resultSet.getString("VERSION"));
                         releaseVersionInfo.setReleaseType(resultSet.getString("RELEASE_TYPE"));
-                        releaseVersionInfo.setRating(resultSet.getString("RATING"));
+                        releaseVersionInfo.setRating(resultSet.getDouble("RATING"));
                         releaseVersionInfo.setState(resultSet.getString("CURRENT_STATE"));
                         releaseVersionInfo.setUuid(resultSet.getString("UUID"));
                         releaseVersionInfos.add(releaseVersionInfo);

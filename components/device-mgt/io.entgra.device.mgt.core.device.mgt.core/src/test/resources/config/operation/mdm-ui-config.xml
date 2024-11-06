@@ -343,7 +343,7 @@
         <Scope>and:ops:lock-devices</Scope>
         <Scope>and:ops:unlock-devices</Scope>
         <Scope>and:ops:location</Scope>
-        <Scope>and:ops:clear-password</Scope>
+        <Scope>and:ops:clear-pwd</Scope>
         <Scope>and:ops:control-camera</Scope>
         <Scope>and:ops:enterprise-wipe</Scope>
         <Scope>and:ops:wipe</Scope>
@@ -356,7 +356,7 @@
         <Scope>and:ops:send-app-restrictions</Scope>
         <Scope>and:ops:file-transfer</Scope>
         <Scope>and:ops:set-webclip</Scope>
-        <Scope>and:ops:password-policy</Scope>
+        <Scope>and:ops:pwd-policy</Scope>
         <Scope>and:ops:change-lock-code</Scope>
         <Scope>and:ops:upgrade-firmware</Scope>
         <Scope>and:ops:send-notif</Scope>

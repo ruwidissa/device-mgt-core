@@ -546,14 +546,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
 
             int updatedRows = enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
-            boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
-            boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(device.getType(),
-                    device.getEnrolmentInfo().getStatus().name(),tenantId);
-            if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)){
-                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
-            } else if (updatedRows ==1 && isEnableDeviceStatusCheck && isValidState ) {
-                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
-            }
+            addDeviceStatus(deviceStatusManagementService, tenantId, updatedRows, device.getEnrolmentInfo(),
+                    device.getType());
 
             DeviceManagementDAOFactory.commitTransaction();
             log.info("Device enrollment modified successfully",
@@ -672,13 +666,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
                     .getInstance().getDeviceStatusManagementService();
             int updatedRows = enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
-            boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
-            boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(device.getType(),device.getEnrolmentInfo().getStatus().name(),tenantId);
-            if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)){
-                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
-            } else if (updatedRows ==1 && isEnableDeviceStatusCheck && isValidState ) {
-                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
-            }
+            addDeviceStatus(deviceStatusManagementService, tenantId, updatedRows, device.getEnrolmentInfo(), device.getType());
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceId);
 
@@ -1176,50 +1164,57 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     public double generateCost(List<Device> allDevices, Timestamp startDate, Timestamp endDate,  Cost tenantCost, List<Device> deviceStatusNotAvailable, double totalCost) throws DeviceManagementException {
         List<DeviceStatus> deviceStatus;
-        for (Device device : allDevices) {
-            long dateDiff = 0;
-            deviceStatus = getDeviceStatusHistoryInsideTransaction(device, null, endDate, true);
-            if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
-                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
-                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
+        try {
+            for (Device device : allDevices) {
+                long dateDiff = 0;
+                int tenantId = this.getTenantId();
+                deviceStatus = deviceStatusDAO.getStatus(device.getId(), tenantId, null, endDate, true);
+                if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
+                    if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
+                            dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
+                        }
+                    } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        dateDiff = endDate.getTime() - startDate.getTime();
                     }
-                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    dateDiff = endDate.getTime() - startDate.getTime();
-                }
-            } else {
-                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
-                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                } else {
+                    if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
+                            dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                        }
+                    } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                     }
-                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                }
+
+                // Convert dateDiff to days as a decimal value
+                double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
+
+                if (dateDiffInDays % 1 >= 0.9) {
+                    dateDiffInDays = Math.ceil(dateDiffInDays);
+                }
+
+                long dateInDays = (long) dateDiffInDays;
+                double cost = 0;
+                if (tenantCost != null) {
+                    cost = (tenantCost.getCost() / 365) * dateInDays;
+                }
+                totalCost += cost;
+                device.setCost(Math.round(cost * 100.0) / 100.0);
+                long totalDays = dateInDays + device.getDaysUsed();
+                device.setDaysUsed((int) totalDays);
+                if (deviceStatus.isEmpty()) {
+                    deviceStatusNotAvailable.add(device);
                 }
             }
-
-            // Convert dateDiff to days as a decimal value
-            double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
-
-            if (dateDiffInDays % 1 >= 0.9) {
-                dateDiffInDays = Math.ceil(dateDiffInDays);
-            }
-
-            long dateInDays = (long) dateDiffInDays;
-            double cost = 0;
-            if (tenantCost != null) {
-                cost = (tenantCost.getCost() / 365) * dateInDays;
-            }
-            totalCost += cost;
-            device.setCost(Math.round(cost * 100.0) / 100.0);
-            long totalDays = dateInDays + device.getDaysUsed();
-            device.setDaysUsed((int) totalDays);
-            if (deviceStatus.isEmpty()) {
-                deviceStatusNotAvailable.add(device);
-            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred in retrieving status history for a device in billing.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         }
         return totalCost;
     }
@@ -2227,33 +2222,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } catch (Exception e) {
             String msg = "Error occurred in setStatus for device :" + device.getDeviceIdentifier();
             log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } finally {
-            DeviceManagementDAOFactory.closeConnection();
-        }
-    }
-
-    /*
-    This is just to avoid breaking the billing functionality as it required to call getDeviceStatusHistory method
-    without transaction handling.
-     */
-    private List<DeviceStatus> getDeviceStatusHistoryInsideTransaction(
-            Device device, Date fromDate, Date toDate, boolean billingStatus)
-            throws DeviceManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("get status history of device: " + device.getDeviceIdentifier());
-        }
-        try {
-            DeviceManagementDAOFactory.getConnection();
-            int tenantId = this.getTenantId();
-            return deviceStatusDAO.getStatus(device.getId(), tenantId, fromDate, toDate, billingStatus);
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred in retrieving status history for device :" + device.getDeviceIdentifier();
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the data source";
-            log.info(msg, e);
             throw new DeviceManagementException(msg, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
@@ -3495,17 +3463,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String type = deviceIdentifier.getType();
             DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
                     .getInstance().getDeviceStatusManagementService();
-            DeviceManagementDAOFactory.commitTransaction();
             if (updatedRows > 0) {
                 isUpdatedEnrollment = true;
             }
-            boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
-            boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(type, enrolmentInfo.getStatus().name(), tenantId);
-            if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)) {
-                enrollmentDAO.addDeviceStatus(enrolmentInfo.getId(), enrolmentInfo.getStatus());
-            } else if (updatedRows == 1 && isEnableDeviceStatusCheck && isValidState) {
-                enrollmentDAO.addDeviceStatus(enrolmentInfo.getId(), enrolmentInfo.getStatus());
-            }
+            addDeviceStatus(deviceStatusManagementService, tenantId, updatedRows, enrolmentInfo, type);
+            DeviceManagementDAOFactory.commitTransaction();
 
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
@@ -3523,6 +3485,24 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         return isUpdatedEnrollment;
     }
 
+    /**
+     * Save the status according to status check(allowed device status)
+     * Before invoking this method the calling function should have started a transaction
+     * @param deviceStatusManagementService instance of deviceStatusManagementService
+     * @param tenantId ID of the tenant
+     * @param updatedRows number of updated rows
+     * @param enrolmentInfo enrollment info of the device
+     * @param type type of the device
+     */
+    private void addDeviceStatus(DeviceStatusManagementService deviceStatusManagementService, int tenantId,
+                                 int updatedRows,EnrolmentInfo enrolmentInfo,String type)
+            throws MetadataManagementException, DeviceManagementDAOException {
+        boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
+        boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(type, enrolmentInfo.getStatus().name(), tenantId);
+        if (updatedRows == 1 && (!isEnableDeviceStatusCheck || isValidState)) {
+            enrollmentDAO.addDeviceStatus(enrolmentInfo.getId(), enrolmentInfo.getStatus());
+        }
+    }
 
     private int getTenantId() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -4543,13 +4523,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                         DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
                                 .getInstance().getDeviceStatusManagementService();
                         int updatedRows = enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
-                        boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
-                        boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(type, String.valueOf(EnrolmentInfo.Status.REMOVED),tenantId);
-                        if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)){
-                            enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
-                        } else if (updatedRows ==1 && isEnableDeviceStatusCheck && isValidState ) {
-                            enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
-                        }
+                        addDeviceStatus(deviceStatusManagementService, tenantId, updatedRows, device.getEnrolmentInfo(),
+                                type);
                     } catch (DeviceManagementDAOException e) {
                         DeviceManagementDAOFactory.rollbackTransaction();
                         String msg = "Error occurred while dis-enrolling device: " +

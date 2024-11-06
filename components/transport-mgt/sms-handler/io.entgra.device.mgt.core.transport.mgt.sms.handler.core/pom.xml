@@ -22,15 +22,15 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>sms-handler</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.transport.mgt.sms.handler.core</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra - SMS Handler Core</name>
-    <description>Entgra - SMS Handler Core</description>
+    <name>Entgra Device Management - SMS Handler Core</name>
+    <description>Entgra Device Management - SMS Handler Core</description>
     <url>http://entgra.io</url>
 
     <build>
@@ -81,12 +81,12 @@
                         <Bundle-Description>SMS Management Core Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.transport.mgt.sms.handler.core.internal</Private-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.util;version="[5.0,6)",
-                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.bean;version="[5.0,6)",
-                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.config;version="[5.0,6)",
-                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.exception;version="[5.0,6)",
-                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.util;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.bean;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.config;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.exception;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.transport.mgt.sms.handler.common.spi;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.transport.mgt.sms.handler.core.config,
                             javax.xml.bind;version="[0.0,1)",
                             org.apache.commons.lang;version="[2.6,3)",

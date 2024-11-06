@@ -26,6 +26,16 @@ public class WhiteLabelConfiguration {
     private String footerText;
     private String appTitle;
     private WhiteLabelImages whiteLabelImages;
+    private String docUrl;
+
+    @XmlElement(name = "DocUrl", required = true)
+    public String getDocUrl() {
+        return docUrl;
+    }
+
+    public void setDocUrl(String docUrl) {
+        this.docUrl = docUrl;
+    }
 
     @XmlElement(name = "FooterText", required = true)
     public String getFooterText() {

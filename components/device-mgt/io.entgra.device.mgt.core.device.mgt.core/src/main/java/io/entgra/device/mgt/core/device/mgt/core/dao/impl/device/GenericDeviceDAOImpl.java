@@ -250,11 +250,11 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             Connection conn = getConnection();
             String sql = "SELECT d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "DATE_OF_LAST_UPDATE, " +
                     "TIMESTAMPDIFF(DAY, ?, DATE_OF_ENROLMENT) as DAYS_SINCE_ENROLLED " +
@@ -291,12 +291,12 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             conn = this.getConnection();
             String sql = "select d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
                     "DATE_OF_LAST_UPDATE, " +
-                    "d1.LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "TIMESTAMPDIFF(DAY, DATE_OF_LAST_UPDATE, DATE_OF_ENROLMENT) AS DAYS_USED " +
                     "from DM_DEVICE d, DM_ENROLMENT e " +
@@ -336,11 +336,11 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             conn = this.getConnection();
             String sql = "select d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "DATE_OF_LAST_UPDATE, " +
                     "TIMESTAMPDIFF(DAY, ?, ?) as DAYS_SINCE_ENROLLED " +
@@ -377,12 +377,12 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             conn = this.getConnection();
             String sql = "select d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
                     "DATE_OF_LAST_UPDATE, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "TIMESTAMPDIFF(DAY, DATE_OF_LAST_UPDATE,  ?) AS DAYS_USED " +
                     "from DM_DEVICE d, DM_ENROLMENT e " +
@@ -425,9 +425,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             conn = this.getConnection();
             String sql = "SELECT " +
                     "DM_DEVICE.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "DM_DEVICE.NAME AS DEVICE_NAME, " +
                     "DEVICE_TYPE, " +
                     "DM_ENROLMENT.ID AS ENROLMENT_ID, " +
@@ -1365,7 +1365,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 query += " AND i.VALUE_FIELD LIKE ?" ;
             }
             if (user != null && !user.isEmpty()) {
-                query += " AND e.OWNER = ?";
+                query += " AND e.OWNER LIKE ?";
                 isOwnerProvided = true;
             }
             if (status != null && !status.isEmpty()) {
@@ -1395,7 +1395,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 ps.setString(index++, EnrolmentInfo.Status.REMOVED.toString());
                 ps.setString(index++, EnrolmentInfo.Status.DELETED.toString());
                 if (isDeviceNameProvided) {
-                    ps.setString(index++, name + "%");
+                    ps.setString(index++, "%" + name + "%");
                 }
                 if (isOwnershipProvided) {
                     ps.setString(index++, ownership);
@@ -1404,7 +1404,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     ps.setString(index++, "%" + serial + "%");
                 }
                 if (isOwnerProvided) {
-                    ps.setString(index++, user);
+                    ps.setString(index++, "%" + user + "%");
                 }
                 if (isStatusProvided) {
                     for (String deviceStatus : status) {

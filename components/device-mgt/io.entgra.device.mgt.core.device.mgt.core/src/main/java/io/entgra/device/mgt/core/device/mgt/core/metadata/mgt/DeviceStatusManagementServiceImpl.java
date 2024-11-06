@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.core.metadata.mgt;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.AllowedDeviceStatus;
@@ -35,6 +36,7 @@ import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManage
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.util.MetadataConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.lang.reflect.Type;
 import java.sql.SQLException;
@@ -42,12 +44,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 public class DeviceStatusManagementServiceImpl implements DeviceStatusManagementService {
 
     private static final Log log = LogFactory.getLog(DeviceStatusManagementServiceImpl.class);
 
     private final MetadataDAO metadataDAO;
+    private static final Gson gson = new Gson();
 
     public DeviceStatusManagementServiceImpl() {
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
@@ -57,12 +59,11 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     public void addDefaultDeviceStatusFilterIfNotExist(int tenantId) throws MetadataManagementException {
         try {
             MetadataManagementDAOFactory.beginTransaction();
-            if (!metadataDAO.isExist(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY) && !metadataDAO.isExist(tenantId, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY)) {
-                Metadata defaultDeviceStatusMetadata = constructDeviceStatusMetadata(getDefaultDeviceStatus());
-                Metadata defaultDeviceStatusCheckMetadata = constructDeviceStatusCheckMetadata(getDefaultDeviceStatusCheck());
-                // Add default device status and device status check metadata entries
-                addMetadataEntry(tenantId, defaultDeviceStatusMetadata, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);
-                addMetadataEntry(tenantId, defaultDeviceStatusCheckMetadata, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY);
+            if (!metadataDAO.isExist(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY)) {
+                metadataDAO.addMetadata(tenantId, constructDeviceStatusMetadata(getDefaultDeviceStatus()));
+            }
+            if (!metadataDAO.isExist(tenantId, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY)) {
+                metadataDAO.addMetadata(tenantId, constructDeviceStatusCheckMetadata(getDefaultDeviceStatusCheck()));
             }
             MetadataManagementDAOFactory.commitTransaction();
         } catch (MetadataManagementDAOException e) {
@@ -80,18 +81,38 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     }
 
     @Override
-    public void resetToDefaultDeviceStausFilter() throws MetadataManagementException {
-
+    public void resetToDefaultDeviceStatusFilter() throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            MetadataManagementDAOFactory.beginTransaction();
+            Metadata defaultDeviceStatusMetadata = constructDeviceStatusMetadata(getDefaultDeviceStatus());
+            Metadata defaultDeviceStatusCheckMetadata = constructDeviceStatusCheckMetadata(getDefaultDeviceStatusCheck());
+            // Add default device status and device status check metadata entries
+            metadataDAO.addMetadata(tenantId, defaultDeviceStatusMetadata);
+            metadataDAO.addMetadata(tenantId, defaultDeviceStatusCheckMetadata);
+            MetadataManagementDAOFactory.commitTransaction();
+        } catch (MetadataManagementDAOException e) {
+            MetadataManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while inserting default device status metadata entries.";
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while starting the transaction to reset default device status filters.";
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        } finally {
+            MetadataManagementDAOFactory.closeConnection();
+        }
     }
 
     @Override
-    public void updateDefaultDeviceStatusFilters(int tenantId, String deviceType, List<String> deviceStatus) throws MetadataManagementException {
+    public void updateDefaultDeviceStatusFilters(String deviceType, List<String> deviceStatus) throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.beginTransaction();
             // Retrieve the current device status metadata
             Metadata metadata = metadataDAO.getMetadata(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);
             if (metadata != null) {
-                Gson gson = new Gson();
                 Type listType = new TypeToken<List<AllowedDeviceStatus>>() {
                 }.getType();
                 List<AllowedDeviceStatus> currentStatusList = gson.fromJson(metadata.getMetaValue(), listType);
@@ -105,7 +126,7 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
                     }
                 }
                 metadata.setMetaValue(gson.toJson(currentStatusList));
-                updateMetadataEntry(tenantId, metadata, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);
+                metadataDAO.updateMetadata(tenantId, metadata);
             }
             MetadataManagementDAOFactory.commitTransaction();
         } catch (MetadataManagementDAOException e) {
@@ -123,17 +144,16 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     }
 
     @Override
-    public boolean updateDefaultDeviceStatusCheck(int tenantId, boolean isChecked) throws MetadataManagementException {
-        boolean success = false;
+    public boolean updateDefaultDeviceStatusCheck(boolean isChecked) throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.beginTransaction();
             if (metadataDAO.isExist(tenantId, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY)) {
-                Metadata isDeviceStatusChecked = constructDeviceStatusCheckMetadata(isChecked);
                 // Add default device status check metadata entries
-                updateMetadataEntry(tenantId, isDeviceStatusChecked, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY);
-                success = true;
+                metadataDAO.updateMetadata(tenantId, constructDeviceStatusCheckMetadata(isChecked));
+                MetadataManagementDAOFactory.commitTransaction();
+                return true;
             }
-            MetadataManagementDAOFactory.commitTransaction();
         } catch (MetadataManagementDAOException e) {
             MetadataManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while updating device status check metadata entry.";
@@ -146,19 +166,24 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
         } finally {
             MetadataManagementDAOFactory.closeConnection();
         }
-        return success;
+        return false;
     }
 
     @Override
-    public List<AllowedDeviceStatus> getDeviceStatusFilters(int tenantId) throws MetadataManagementException {
+    public List<AllowedDeviceStatus> getDeviceStatusFilters() throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.openConnection();
             Metadata metadata = metadataDAO.getMetadata(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);
-            Gson gson = new Gson();
-            Type listType = new TypeToken<List<AllowedDeviceStatus>>() {}.getType();
-            List<AllowedDeviceStatus> statusList = gson.fromJson(metadata.getMetaValue(), listType);
-
-            return statusList;
+            if (metadata == null) {
+                String msg =
+                        "Couldn't find the meta data value for meta key: " + MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY;
+                log.error(msg);
+                throw new MetadataKeyNotFoundException(msg);
+            }
+            Type listType = new TypeToken<List<AllowedDeviceStatus>>() {
+            }.getType();
+            return gson.fromJson(metadata.getMetaValue(), listType);
         } catch (MetadataManagementDAOException e) {
             String msg = "Error occurred while retrieving device status meta data for tenant:" + tenantId;
             log.error(msg, e);
@@ -173,12 +198,19 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
 
     }
 
-    public List<String> getDeviceStatusFilters(String deviceType, int tenantId) throws MetadataManagementException {
+    public List<String> getDeviceStatusFilters(String deviceType) throws MetadataManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             MetadataManagementDAOFactory.openConnection();
             Metadata metadata = metadataDAO.getMetadata(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);
-            Gson gson = new Gson();
-            Type listType = new TypeToken<List<AllowedDeviceStatus>>() {}.getType();
+            if (metadata == null) {
+                String msg = "Couldn't find the meta details of meta Key: "
+                        + MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY + " and tenant Id: " + tenantId;
+                log.error(msg);
+                throw new MetadataKeyNotFoundException(msg);
+            }
+            Type listType = new TypeToken<List<AllowedDeviceStatus>>() {
+            }.getType();
             List<AllowedDeviceStatus> statusList = gson.fromJson(metadata.getMetaValue(), listType);
 
             for (AllowedDeviceStatus status : statusList) {
@@ -207,6 +239,12 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
         try {
             MetadataManagementDAOFactory.openConnection();
             Metadata metadata = metadataDAO.getMetadata(tenantId, MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY);
+            if (metadata == null) {
+                String msg = "Couldn't find the meta data value for meta key: "
+                        + MetadataConstants.IS_DEVICE_STATUS_CHECK_META_KEY + " and tenant Id: " + tenantId;
+                log.error(msg);
+                throw new MetadataKeyNotFoundException(msg);
+            }
             String metaValue = metadata.getMetaValue();
             return Boolean.parseBoolean(metaValue);
         } catch (MetadataManagementDAOException e) {
@@ -227,8 +265,13 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
         try {
             MetadataManagementDAOFactory.openConnection();
             Metadata metadata = metadataDAO.getMetadata(tenantId, MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY);
+            if (metadata == null) {
+                String msg = "Couldn't find the meta data value for meta key: "
+                        + MetadataConstants.ALLOWED_DEVICE_STATUS_META_KEY + " and tenant Id: " + tenantId;
+                log.error(msg);
+                throw new MetadataKeyNotFoundException(msg);
+            }
 
-            Gson gson = new Gson();
             Type listType = new TypeToken<List<AllowedDeviceStatus>>() {
             }.getType();
             List<AllowedDeviceStatus> statusList = gson.fromJson(metadata.getMetaValue(), listType);
@@ -254,22 +297,13 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
         }
     }
 
-    private void addMetadataEntry(int tenantId, Metadata metadata, String key) throws MetadataManagementDAOException {
-        metadataDAO.addMetadata(tenantId, metadata);
-        if (log.isDebugEnabled()) {
-            log.debug(key + " metadata entry has been inserted successfully");
-        }
-    }
-
-    private void updateMetadataEntry(int tenantId, Metadata metadata, String key) throws MetadataManagementDAOException {
-        metadataDAO.updateMetadata(tenantId, metadata);
-        if (log.isDebugEnabled()) {
-            log.debug(key + " metadata entry has been updated successfully");
-        }
-    }
-
+    /**
+     * To construct device status Meta data by using received device status items
+     *
+     * @param deviceStatusItems {@link List<DeviceStatusItem>}
+     * @return {@link Metadata}
+     */
     private Metadata constructDeviceStatusMetadata(List<DeviceStatusItem> deviceStatusItems) {
-        Gson gson = new Gson();
         String deviceStatusItemsJsonString = gson.toJson(deviceStatusItems);
 
         Metadata metadata = new Metadata();
@@ -279,6 +313,12 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
         return metadata;
     }
 
+    /**
+     * To construct device status check Meta data to either enable it or disable it.
+     *
+     * @param deviceStatusCheck True or False
+     * @return {@link Metadata}
+     */
     private Metadata constructDeviceStatusCheckMetadata(boolean deviceStatusCheck) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("deviceStatusCheck", String.valueOf(deviceStatusCheck));
@@ -289,6 +329,11 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
         return metadata;
     }
 
+    /**
+     * Get default list of device status items from the configuration.
+     *
+     * @return List of device status items
+     */
     private List<DeviceStatusItem> getDefaultDeviceStatus() {
         DeviceStatusConfigurations deviceStatusConfigurations = UIConfigurationManager.getInstance().getUIConfig().getDeviceStatusConfigurations();
         List<DeviceStatusItem> deviceStatusItems = new ArrayList<>();
@@ -305,6 +350,11 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
         return deviceStatusItems;
     }
 
+    /**
+     * Get Default device status check from the configuration.
+     *
+     * @return default status check value, it will be either 'True' or 'False'
+     */
     private boolean getDefaultDeviceStatusCheck() {
         DeviceStatusConfigurations deviceStatusConfigurations = UIConfigurationManager.getInstance().getUIConfig().getDeviceStatusConfigurations();
         boolean deviceStatusCheck = false;

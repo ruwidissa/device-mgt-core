@@ -17,21 +17,22 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>heartbeat-management</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra - Heartbeat Beacon</name>
-    <description>Entgra - Server Startup and Heartbeat Monitoring Component</description>
-    <url>http://www.entgra.io</url>
+    <name>Entgra Device Management - Heartbeat Beacon</name>
+    <description>Entgra Server Startup and Heartbeat Monitoring Component</description>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>
@@ -53,10 +54,11 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Server Startup Heart Beat Beacon Bundle</Bundle-Description>
-                        <Private-Package>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal</Private-Package>
+                        <Private-Package>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal
+                        </Private-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon,
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config,
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource,

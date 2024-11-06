@@ -141,6 +141,11 @@ public class Constants {
     }
 
     /**
+     * Query parameter for specifying the filename in the App artifact URL.
+     */
+    public static final String FILE_NAME_PARAM = "?fileName=";
+
+    /**
      * Directory name of the icon artifact that are saved in the file system.
      */
     public static final String ICON_ARTIFACT = "icon";

@@ -1498,7 +1498,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppInstalledSubscribers(int offsetValue, int limitValue, String appUUID, String subType)
+    public PaginationResult getAppInstalledSubscribers(int offsetValue, int limitValue, String appUUID, String subType,
+                                                       Boolean uninstalled, String searchName)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1513,20 +1514,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
                 subscriptionList = subscriptionDAO
-                        .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId);
-                count = subscriptionDAO.getSubscribedUserCount(applicationReleaseId, tenantId);
-            } else {
-                if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                    subscriptionList = subscriptionDAO
-                            .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId);
-                    count = subscriptionDAO.getSubscribedRoleCount(applicationReleaseId, tenantId);
-                } else {
-                    if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                        subscriptionList = subscriptionDAO
-                                .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId);
-                        count = subscriptionDAO.getSubscribedGroupCount(applicationReleaseId, tenantId);
-                    }
-                }
+                        .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId, uninstalled, searchName);
+                count = subscriptionDAO.getSubscribedUserCount(applicationReleaseId, tenantId, uninstalled, searchName);
+            } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
+                subscriptionList = subscriptionDAO
+                        .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId, uninstalled, searchName);
+                count = subscriptionDAO.getSubscribedRoleCount(applicationReleaseId, tenantId, uninstalled, searchName);
+            } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                subscriptionList = subscriptionDAO
+                        .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId, uninstalled, searchName);
+                count = subscriptionDAO.getSubscribedGroupCount(applicationReleaseId, tenantId, uninstalled, searchName);
             }
 
             paginationResult.setData(subscriptionList);

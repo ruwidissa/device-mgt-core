@@ -196,10 +196,10 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
 
             APIPublisherDataHolder.getInstance().setPermScopeMapping(permScopeMap);
             log.info(Constants.PERM_SCOPE_MAPPING_META_KEY + "entry updated successfully");
-        } catch (MetadataManagementException e) {
-            log.error("Error encountered while updating permission scope mapping metadata with default scopes");
         } catch (MetadataKeyAlreadyExistsException e) {
             log.error("Metadata entry already exists for " + Constants.PERM_SCOPE_MAPPING_META_KEY);
+        } catch (MetadataManagementException e) {
+            log.error("Error encountered while updating permission scope mapping metadata with default scopes");
         }
     }
 }

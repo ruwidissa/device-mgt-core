@@ -21,15 +21,15 @@
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra IoT - Logger Impl</name>
-    <description>Entgra IoT - Entgra Logger Implementation</description>
+    <name>Entgra Device Management - Logger Impl</name>
+    <description>Entgra Device Management - Entgra Logger Implementation</description>
     <url>http://entgra.io</url>
 
     <build>

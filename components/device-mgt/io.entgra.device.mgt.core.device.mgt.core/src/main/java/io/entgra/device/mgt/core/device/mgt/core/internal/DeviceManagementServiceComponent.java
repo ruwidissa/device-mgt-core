@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.authorization.GroupAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
@@ -259,8 +260,10 @@ public class DeviceManagementServiceComponent {
         TenantCreateObserver listener = new TenantCreateObserver();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
 
-        UserRoleCreateObserver userRoleCreateObserver = new UserRoleCreateObserver();
-        bundleContext.registerService(ServerStartupObserver.class.getName(), userRoleCreateObserver, null);
+        /* Registering Device Management Startup Handler */
+        DeviceManagementStartupHandler deviceManagementStartupHandler = new DeviceManagementStartupHandler();
+        DeviceManagementDataHolder.getInstance().setDeviceManagementStartupHandler(deviceManagementStartupHandler);
+        bundleContext.registerService(ServerStartupObserver.class.getName(), deviceManagementStartupHandler, null);
 
         /* Registering Device Management Service */
         DeviceManagementProviderService deviceManagementProvider = new DeviceManagementProviderServiceImpl();
@@ -333,26 +336,25 @@ public class DeviceManagementServiceComponent {
         bundleContext.registerService(MetadataManagementService.class.getName(), metadataManagementService, null);
 
         /* Registering Whitelabel Service */
-        WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
-        DeviceManagementDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
         try {
+            WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
+            DeviceManagementDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
             whiteLabelManagementService.addDefaultWhiteLabelThemeIfNotExist(tenantId);
-        } catch (Throwable e) {
-            log.error("Error occurred while adding default tenant white label theme", e);
-
+            bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
+        } catch (MetadataManagementException e) {
+            log.error("Error occurred while initializing the white label management service", e);
         }
-        bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
 
         /* Registering DeviceState Filter Service */
-        DeviceStatusManagementService deviceStatusManagemntService = new DeviceStatusManagementServiceImpl();
-        DeviceManagementDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagemntService);
+        DeviceStatusManagementService deviceStatusManagementService = new DeviceStatusManagementServiceImpl();
+        DeviceManagementDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagementService);
         try {
-            deviceStatusManagemntService.addDefaultDeviceStatusFilterIfNotExist(tenantId);
+            deviceStatusManagementService.addDefaultDeviceStatusFilterIfNotExist(tenantId);
         } catch (Throwable e) {
             log.error("Error occurred while adding default tenant device status", e);
 
         }
-        bundleContext.registerService(DeviceStatusManagementService.class.getName(), deviceStatusManagemntService, null);
+        bundleContext.registerService(DeviceStatusManagementService.class.getName(), deviceStatusManagementService, null);
 
         /* Registering Event Configuration Service */
         EventConfigurationProviderService eventConfigurationService = new EventConfigurationProviderServiceImpl();

@@ -36,8 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -143,23 +141,6 @@ public class MetadataServiceImpl implements MetadataService {
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while deleting the metadata entry for metaKey:" + metaKey;
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-    }
-
-    /**
-     * Useful to send files as application/octet-stream responses
-     */
-    private Response sendFileStream(byte[] content) throws IOException {
-        try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
-            Response.ResponseBuilder response = Response
-                    .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
-            response.status(Response.Status.OK);
-            response.header("Content-Length", content.length);
-            return response.build();
-        } catch (IOException e) {
-            String msg = "Error occurred while creating input stream from buffer array. ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

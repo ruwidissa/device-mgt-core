@@ -107,13 +107,13 @@ public class MetaRepositoryBasedLicenseManager implements LicenseManager {
             } else {
                 metadataManagementService.createMetadata(metadata);
             }
-        } catch (MetadataManagementException e) {
-            String msg = "Error occurred while saving the licence value in meta data repository";
+        } catch (MetadataKeyAlreadyExistsException e) {
+            String msg = "Error occurred while saving the licence key and licence key exist.Licence Key: "
+                    + licenceKey;
             log.error(msg, e);
             throw new LicenseManagementException(msg, e);
-        } catch (MetadataKeyAlreadyExistsException e) {
-            String msg =
-                    "Error occurred while saving the licence key and licence key exist. Licence Key: " + licenceKey;
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while saving the licence value in meta data repository";
             log.error(msg, e);
             throw new LicenseManagementException(msg, e);
         }

@@ -187,11 +187,14 @@ public interface SubscriptionManager {
      * @param subType subscription type of the application.
      * @param offsetValue offset value for get paginated request.
      * @param limitValue limit value for get paginated request.
+     * @param uninstalled a Boolean flag indicating the filter criteria for retrieve subscription data
+     * @param searchName an optional search term to filter the results by name. If null or empty, no filtering by name is applied.
      * @return {@link PaginationResult} pagination result of the category details.
      * @throws {@link ApplicationManagementException} Exception of the application management
      */
     PaginationResult getAppInstalledSubscribers(int offsetValue, int limitValue, String appUUID,
-                                               String subType) throws ApplicationManagementException;
+                                               String subType, Boolean uninstalled, String searchName)
+            throws ApplicationManagementException;
 
     /**
      * This method is responsible to provide application subscription data for given application release UUID.

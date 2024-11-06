@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>policy-mgt</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,8 +29,8 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.policy.information.point</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - Policy Information Point</name>
-    <description>WSO2 Carbon - Policy Information Point</description>
+    <name>Entgra Device Management - Policy Information Point</name>
+    <description>Entgra Device Management - Policy Information Point</description>
     <url>https://entgra.io</url>
 
 
@@ -60,10 +60,10 @@
                             io.entgra.device.mgt.core.policy.information.point.*
                         </Export-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.policy.information.point,
-                            io.entgra.device.mgt.core.policy.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.policy.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
                             org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}"
                         </Import-Package>

@@ -21,15 +21,15 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>operation-template-mgt</artifactId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.operation.template</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra IoT - Operation Template Core</name>
-    <description>Entgra IoT - Operation Template Core</description>
+    <name>Entgra Device Management - Operation Template Core</name>
+    <description>Entgra Device Management - Operation Template Core</description>
     <url>http://entgra.io</url>
 
     <build>
@@ -56,8 +56,8 @@
                         <Import-Package>
                             com.google.common.cache;version="[32.1,33)";resolution:=optional,
                             com.google.gson;version="[2.9,3)",
-                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
-                            io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.service;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.operation.template.cache,
                             io.entgra.device.mgt.core.operation.template.dao,
                             io.entgra.device.mgt.core.operation.template.dao.impl,

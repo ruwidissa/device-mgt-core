@@ -34,18 +34,19 @@ public interface DeviceStatusManagementService {
     void addDefaultDeviceStatusFilterIfNotExist(int tenantId) throws MetadataManagementException;
 
     /**
-     * This method is useful to reset existing device status to default values in xml
+     * This method is useful to reset existing device status to default values and device status check value to
+     * default value that is defined in the ui-config
      *
      * @throws MetadataManagementException if error while resetting default device status
      */
-    void resetToDefaultDeviceStausFilter() throws MetadataManagementException;
+    void resetToDefaultDeviceStatusFilter() throws MetadataManagementException;
 
     /**
      * This method is useful to update existing allowed device status
      *
      * @throws MetadataManagementException if error while updating existing device status
      */
-    void updateDefaultDeviceStatusFilters(int tenantId, String deviceType, List<String> deviceStatus)
+    void updateDefaultDeviceStatusFilters(String deviceType, List<String> deviceStatus)
             throws MetadataManagementException;
 
     /**
@@ -53,21 +54,21 @@ public interface DeviceStatusManagementService {
      *
      * @throws MetadataManagementException if error while updating existing device status
      */
-    boolean updateDefaultDeviceStatusCheck(int tenantId, boolean isChecked)
+    boolean updateDefaultDeviceStatusCheck(boolean isChecked)
             throws MetadataManagementException;
     /**
      * This method is useful to get existing device status filters
      *
      * @throws MetadataManagementException if error while getting existing device status
      */
-    List<AllowedDeviceStatus> getDeviceStatusFilters(int tenantId) throws MetadataManagementException;
+    List<AllowedDeviceStatus> getDeviceStatusFilters() throws MetadataManagementException;
 
     /**
      * This method is useful to get existing device status filters by device type and tenant id
      *
      * @throws MetadataManagementException if error while getting existing device status
      */
-    List<String> getDeviceStatusFilters(String deviceType, int tenantId) throws MetadataManagementException;
+    List<String> getDeviceStatusFilters(String deviceType) throws MetadataManagementException;
 
     /**
      * This method is useful to get existing device status filters

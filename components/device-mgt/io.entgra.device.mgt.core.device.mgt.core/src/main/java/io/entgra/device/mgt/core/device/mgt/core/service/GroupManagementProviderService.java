@@ -392,4 +392,13 @@ public interface GroupManagementProviderService {
 
     int getDeviceCount(String groupName) throws GroupManagementException;
 
+    /**
+     * Retrieves the count of devices for a specific group and device type.
+     *
+     * @param groupName the name of the group
+     * @param deviceTypeId the ID of the device type (e.g., Android, iOS, Windows)
+     * @return the count of devices for the given group and device type
+     * @throws GroupManagementException if an error occurs during the retrieval of the device count
+     */
+    int getDeviceCountWithGroup(String groupName, int deviceTypeId) throws GroupManagementException;
 }

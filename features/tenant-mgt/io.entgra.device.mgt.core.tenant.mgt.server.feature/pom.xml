@@ -20,14 +20,14 @@
     <parent>
         <artifactId>tenant-mgt-feature</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.2.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.device.mgt.core.tenant.mgt.server.feature</artifactId>
-    <name>Entgra IoT - Tenant Management Server Feature</name>
-    <description>Entgra IoT - Tenant Management Server Feature</description>
+    <name>Entgra Device Management - Tenant Management Server Feature</name>
+    <description>Entgra Device Management - Tenant Management Server Feature</description>
     <packaging>pom</packaging>
 
     <dependencies>
