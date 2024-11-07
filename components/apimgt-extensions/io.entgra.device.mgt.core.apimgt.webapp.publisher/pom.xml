@@ -148,14 +148,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -174,7 +166,7 @@
                         <Import-Package>
                             com.google.gson;version="[2.9,3)",
                             com.google.gson.reflect;version="[2.9,3)",
-                            io.entgra.device.mgt.core.apimgt.annotations;version="${io.entgra.device.mgt.core.version.range}",
+<!--                            io.entgra.device.mgt.core.apimgt.annotations;version="${io.entgra.device.mgt.core.version.range}",-->
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.*,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.config,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.dto,

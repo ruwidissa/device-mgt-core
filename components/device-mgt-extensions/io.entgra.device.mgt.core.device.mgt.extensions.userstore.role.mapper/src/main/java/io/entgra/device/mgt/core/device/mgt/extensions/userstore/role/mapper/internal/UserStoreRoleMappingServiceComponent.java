@@ -62,32 +62,32 @@ public class UserStoreRoleMappingServiceComponent {
         }
     }
 
-    @Reference(
-            name = "user.realmservice.default",
-            service = org.wso2.carbon.user.core.service.RealmService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetRealmService")
-    protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting ConfigurationContextService");
-        }
-
-        UserStoreRoleMappingDataHolder.getInstance().setConfigurationContextService(configurationContextService);
-    }
-
-    @Reference(
-            name = "config.context.service",
-            service = org.wso2.carbon.utils.ConfigurationContextService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetConfigurationContextService")
-    protected void unsetConfigurationContextService(ConfigurationContextService configurationContextService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Un-setting ConfigurationContextService");
-        }
-        UserStoreRoleMappingDataHolder.getInstance().setConfigurationContextService(null);
-    }
+//    @Reference(
+//            name = "user.realmservice.default",
+//            service = org.apache.axis2.context.ConfigurationContext.class,
+//            cardinality = ReferenceCardinality.MANDATORY,
+//            policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRealmService")
+//    protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
+//        if (log.isDebugEnabled()) {
+//            log.debug("Setting ConfigurationContextService");
+//        }
+//
+//        UserStoreRoleMappingDataHolder.getInstance().setConfigurationContextService(configurationContextService);
+//    }
+//
+//    @Reference(
+//            name = "config.context.service",
+//            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+//            cardinality = ReferenceCardinality.OPTIONAL,
+//            policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetConfigurationContextService")
+//    protected void unsetConfigurationContextService(ConfigurationContextService configurationContextService) {
+//        if (log.isDebugEnabled()) {
+//            log.debug("Un-setting ConfigurationContextService");
+//        }
+//        UserStoreRoleMappingDataHolder.getInstance().setConfigurationContextService(null);
+//    }
 
     /**
      * Sets Realm Service.

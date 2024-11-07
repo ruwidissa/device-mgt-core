@@ -130,12 +130,12 @@
                                 <bundleDef>
                                     io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.webapp.publisher:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
-                                <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.annotations:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
+<!--                                <bundleDef>-->
+<!--                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${io.entgra.device.mgt.core.version}-->
+<!--                                </bundleDef>-->
+<!--                                <bundleDef>-->
+<!--                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.annotations:${io.entgra.device.mgt.core.version}-->
+<!--                                </bundleDef>-->
                                 <bundleDef>
                                     io.entgra.org.scannotation:scannotation:${scannotation.version}
                                 </bundleDef>

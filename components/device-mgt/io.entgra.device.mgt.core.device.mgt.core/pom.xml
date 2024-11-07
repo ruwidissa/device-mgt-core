@@ -62,14 +62,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -86,7 +78,7 @@
                             com.google.common.reflect;version="[32.1,33)";resolution:=optional,
                             com.google.gson;version="[2.9,3)",
                             com.google.gson.reflect;version="[2.9,3)",
-                            io.entgra.device.mgt.core.apimgt.annotations;version="${io.entgra.device.mgt.core.version.range}",
+<!--                            io.entgra.device.mgt.core.apimgt.annotations;version="${io.entgra.device.mgt.core.version.range}",-->
                             io.entgra.device.mgt.core.apimgt.extension.rest.api;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.dto;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;version="${io.entgra.device.mgt.core.version.range}",

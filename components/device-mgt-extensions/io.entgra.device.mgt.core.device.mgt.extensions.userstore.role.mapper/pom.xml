@@ -35,18 +35,10 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -59,21 +51,21 @@
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
-                            org.apache.axis2.*;version="${axis2.osgi.version.range}",
+<!--                            org.apache.axis2.*;version="${axis2.osgi.version.range}",-->
                             org.wso2.carbon.core,
                             org.wso2.carbon.utils.*,
-                            javax.xml.bind;resolution:=optional,
-                            javax.xml.bind.annotation,
-                            javax.xml.parsers,
-                            org.w3c.dom,
-                            org.wso2.carbon,
+<!--                            javax.xml.bind;resolution:=optional,-->
+<!--                            javax.xml.bind.annotation,-->
+<!--                            javax.xml.parsers,-->
+<!--                            org.w3c.dom,-->
+<!--                            org.wso2.carbon,-->
                             org.wso2.carbon.context,
                             org.wso2.carbon.user.api,
-                            org.wso2.carbon.user.core.common,
+<!--                            org.wso2.carbon.user.core.common,-->
                             org.wso2.carbon.user.core.service,
-                            org.wso2.carbon.user.mgt.common,
-                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service,
-                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception
+<!--                            org.wso2.carbon.user.mgt.common,-->
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service
+<!--                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception-->
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.internal,

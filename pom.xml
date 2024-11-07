@@ -1944,75 +1944,34 @@
             </extension>
         </extensions>
 
-        <plugins>
-            <plugin>
-                <groupId>org.jvnet.maven.incrementalbuild</groupId>
-                <artifactId>incremental-build-plugin</artifactId>
-                <version>1.3</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>incremental-build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <preparationGoals>clean install</preparationGoals>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-            </plugin>
-        </plugins>
         <pluginManagement>
             <plugins>
+                <!-- maven-compiler-plugin for Java version configuration -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
-                        <source>17</source>
-                        <target>17</target>
+                        <source>11</source>
+                        <target>11</target>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>5.1.9</version>
                     <extensions>true</extensions>
                     <configuration>
                         <obrRepository>NONE</obrRepository>
-                        <!--<instructions>
-                          <_include>-osgi.bnd</_include>
-                        </instructions>-->
                     </configuration>
                 </plugin>
+
+                <!-- maven-source-plugin for attaching source JARs -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>2.1.2</version>
+                    <version>3.2.1</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -2022,6 +1981,25 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <!-- maven-surefire-plugin for unit testing -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec</jacoco-agent.destfile>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+
+                <!-- Additional plugin definitions with versions as defaults for submodules -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.3.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -2037,22 +2015,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>1.8</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.1.2</version>
-                    <configuration>
-                        <systemPropertyVariables>
-                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec
-                            </jacoco-agent.destfile>
-                        </systemPropertyVariables>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.6</version>
                 </plugin>
                 <plugin>
                     <groupId>org.wso2.maven</groupId>
@@ -2086,14 +2048,31 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <!-- Plugins that need to run in the root project build itself, such as for release or installation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean install</preparationGoals>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
+
 
     <properties>
         <servelet.jsp.version>2.2.1</servelet.jsp.version>
         <testng.version>7.4.0</testng.version>
         <carbon.kernel.version>4.8.1</carbon.kernel.version>
         <carbon.kernel.version.range>[4.8.0, 5.0.0)</carbon.kernel.version.range>
-        <carbon.p2.plugin.version>5.1.2</carbon.p2.plugin.version>
+        <carbon.p2.plugin.version>5.2.74</carbon.p2.plugin.version>
 
         <!-- Axis2 -->
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>

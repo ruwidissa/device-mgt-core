@@ -36,10 +36,6 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-
-            </plugin>
-            <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <packagingExcludes>WEB-INF/lib/*cxf*.jar</packagingExcludes>
