@@ -38,6 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -71,14 +72,12 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>API Management Application Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.apimgt.application.extension.internal</Private-Package>
-                        <Import-Packages>
-                            io.entgra.device.mgt.core.apimgt.analytics.extension.dto,
-                            io.entgra.device.mgt.core.apimgt.analytics.extension.exception,
+                        <Import-Package>
                             org.apache.velocity,
                             org.apache.velocity.app,
                             org.apache.velocity.context,
                             org.wso2.carbon.utils;version="[4.8,5)"
-                        </Import-Packages>
+                        </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.apimgt.analytics.extension.*
                         </Export-Package>

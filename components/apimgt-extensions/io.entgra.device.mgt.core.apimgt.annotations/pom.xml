@@ -33,22 +33,6 @@
     <description>Entgra Device Management - API Management Custom Annotation Module</description>
     <url>https://entgra.io</url>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
-        </dependency>
-    </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -61,12 +45,13 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>API Management Extentions - Custom Annotations</Bundle-Description>
+                        <Import-Package></Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.apimgt.annotations.*
                         </Export-Package>
-                        <Embed-Dependency>
-                            scribe;scope=compile|runtime;inline=false,
-                        </Embed-Dependency>
+<!--                        <Embed-Dependency>-->
+<!--                            scribe;scope=compile|runtime;inline=false,-->
+<!--                        </Embed-Dependency>-->
                     </instructions>
                 </configuration>
             </plugin>

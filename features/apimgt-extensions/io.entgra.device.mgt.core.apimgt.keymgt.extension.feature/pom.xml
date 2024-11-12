@@ -112,9 +112,9 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-<!--                                <bundleDef>-->
-<!--                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.keymgt.extension:${io.entgra.device.mgt.core.version}-->
-<!--                                </bundleDef>-->
+                                <bundleDef>
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.keymgt.extension:${io.entgra.device.mgt.core.version}
+                                </bundleDef>
                             </bundles>
                             <importBundles>
                             </importBundles>

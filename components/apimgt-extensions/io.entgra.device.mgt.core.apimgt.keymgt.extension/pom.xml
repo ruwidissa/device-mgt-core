@@ -75,7 +75,7 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>API Management Application Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.apimgt.keymgt.extension.internal</Private-Package>
-                        <Import-Packages>
+                        <Import-Package>
                             com.google.gson;version="[2.9,3)",
                             io.entgra.device.mgt.core.apimgt.keymgt.extension,
                             io.entgra.device.mgt.core.apimgt.keymgt.extension.exception,
@@ -111,7 +111,7 @@
                             org.wso2.carbon.user.core.service;version="[4.8,5)",
                             org.wso2.carbon.user.core.tenant;version="[4.8,5)",
                             org.wso2.carbon.utils.multitenancy;version="[4.8,5)"
-                        </Import-Packages>
+                        </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.apimgt.keymgt.extension.internal,
                             io.entgra.device.mgt.core.apimgt.keymgt.extension.*

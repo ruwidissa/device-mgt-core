@@ -49,9 +49,9 @@
                             com.dd.plist;version="[1.21,2)",
                             com.google.gson;version="[2.9,3)",
                             com.google.gson.reflect;version="[2.9,3)",
-<!--                            io.entgra.device.mgt.core.apimgt.application.extension;version="${io.entgra.device.mgt.core.version.range}",-->
-<!--                            io.entgra.device.mgt.core.apimgt.application.extension.dto;version="${io.entgra.device.mgt.core.version.range}",-->
-<!--                            io.entgra.device.mgt.core.apimgt.application.extension.exception;version="${io.entgra.device.mgt.core.version.range}",-->
+                            io.entgra.device.mgt.core.apimgt.application.extension;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.apimgt.application.extension.dto;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.apimgt.application.extension.exception;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.common.config;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.common.dto;version="${io.entgra.device.mgt.core.version.range}",
@@ -219,10 +219,12 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>objenesis</artifactId>
@@ -233,6 +235,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>org.wso2.securevault</artifactId>
@@ -333,6 +336,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.apimgt.application.extension</artifactId>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>org.wso2.carbon.registry.servlet</artifactId>
@@ -403,6 +407,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!--nTask dependencies-->
         <dependency>

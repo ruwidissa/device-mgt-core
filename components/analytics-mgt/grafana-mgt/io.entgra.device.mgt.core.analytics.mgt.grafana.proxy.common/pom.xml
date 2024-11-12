@@ -45,6 +45,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Grafana Management Common Bundle</Bundle-Description>
+                        <Import-Package></Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.*
                         </Export-Package>
