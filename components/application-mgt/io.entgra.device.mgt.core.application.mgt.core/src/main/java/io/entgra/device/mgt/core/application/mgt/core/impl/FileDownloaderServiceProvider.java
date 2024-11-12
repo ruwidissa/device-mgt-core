@@ -122,7 +122,10 @@ public class FileDownloaderServiceProvider {
                 }
 
                 FileMetaEntry fileMetaEntry = new FileMetaEntry();
-                fileMetaEntry.setSize(Long.parseLong(Objects.requireNonNull(response.header("Content-Length"))));
+                String contentLength = response.header("Content-Length");
+                if (contentLength != null) {
+                    fileMetaEntry.setSize(Long.parseLong(contentLength));
+                }
                 fileMetaEntry.setFileName(fileNameSegments[0]);
                 fileMetaEntry.setExtension(fileNameSegments[1]);
                 return fileMetaEntry;
@@ -132,9 +135,21 @@ public class FileDownloaderServiceProvider {
         }
 
         /**
-         * Extracting file name segments by parsing the URL
-         * @param url Remote URL to extract file name segments
-         * @return Array containing file name segments or null when failed to extract
+         * Extracts file name segments (name and extension) by parsing the given URL.
+         * This method handles two types of URL formats:
+         * - If the URL includes a query parameter in the format `?fileName=`, the file name
+         *   is extracted from this query parameter (ex: when referencing an existing
+         *   screenshot or icon from the main release)
+         * - If the URL does not have the `fileName` query parameter, the method attempts to
+         *   extract the file name from the URL path. (ex: this applies to cases where new files are
+         *   uploaded, and only a path-based URL is provided)
+         * After locating the file name (from either the query parameter or path), the method
+         * splits the name into segments based on the last dot (`.`), returning the base name and
+         * extension as a two-element array. If file name cannot be extracted, `null` is returned.
+         *
+         * @param url Remote URL to extract file name segments from, which may contain a file name
+         *            as either a query parameter (`fileName=...`) or in the path.
+         * @return An array containing the file name and extension segments, or null if extraction fails.
          */
         public static String[] extractFileNameSegmentsFromUrl(URL url) {
             if (url == null) {
@@ -143,24 +158,35 @@ public class FileDownloaderServiceProvider {
                 }
                 return null;
             }
-
-            String []urlSegments = url.toString().split("/");
-            if (urlSegments.length < 1) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Cannot determine the file name for the remote file");
+            String fullQualifiedName = null;
+            String query = url.getQuery();
+            if (query != null && query.startsWith("fileName=")) {
+                String[] queryParts = query.split("=", 2);
+                if (queryParts.length > 1 && !queryParts[1].isEmpty()) {
+                    fullQualifiedName = queryParts[1];
                 }
-                return null;
             }
-
-            String fullQualifiedName = urlSegments[urlSegments.length - 1];
-            String []fileNameSegments = fullQualifiedName.split("\\.(?=[^.]+$)");
-            if (fileNameSegments.length != 2) {
+            if (fullQualifiedName == null) {
+                String[] urlSegments = url.getPath().split("/");
+                if (urlSegments.length > 0) {
+                    fullQualifiedName = urlSegments[urlSegments.length - 1];
+                }
+            }
+            if (fullQualifiedName != null) {
+                String[] fileNameSegments = fullQualifiedName.split("\\.(?=[^.]+$)");
+                if (fileNameSegments.length == 2) {
+                    return fileNameSegments;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error encountered when constructing file name");
+                    }
+                }
+            } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Error encountered when constructing file name");
                 }
-                return null;
             }
-            return fileNameSegments;
+            return null;
         }
 
         /**
