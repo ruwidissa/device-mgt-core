@@ -122,7 +122,10 @@ public class FileDownloaderServiceProvider {
                 }
 
                 FileMetaEntry fileMetaEntry = new FileMetaEntry();
-                fileMetaEntry.setSize(Long.parseLong(Objects.requireNonNull(response.header("Content-Length"))));
+                String contentLength = response.header("Content-Length");
+                if (contentLength != null) {
+                    fileMetaEntry.setSize(Long.parseLong(contentLength));
+                }
                 fileMetaEntry.setFileName(fileNameSegments[0]);
                 fileMetaEntry.setExtension(fileNameSegments[1]);
                 return fileMetaEntry;
