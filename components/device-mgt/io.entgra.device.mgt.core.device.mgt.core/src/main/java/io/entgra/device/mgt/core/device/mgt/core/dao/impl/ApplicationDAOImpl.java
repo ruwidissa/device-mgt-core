@@ -240,8 +240,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     private Application loadApplicationDetails(ResultSet rs) throws DeviceManagementDAOException {
-        ByteArrayInputStream bais;
-        ObjectInputStream ois;
         Properties properties;
 
         Application application = new Application();
@@ -252,11 +250,13 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
             if (rs.getBytes("APP_PROPERTIES") != null) {
                 byte[] appProperties = rs.getBytes("APP_PROPERTIES");
-                bais = new ByteArrayInputStream(appProperties);
 
-                ois = new ObjectInputStream(bais);
-                properties = (Properties) ois.readObject();
-                application.setAppProperties(properties);
+                try (ByteArrayInputStream bais = new ByteArrayInputStream(appProperties);
+                     ObjectInputStream ois = new ObjectInputStream(bais)) {
+
+                    properties = (Properties) ois.readObject();
+                    application.setAppProperties(properties);
+                }
             }
             application.setCategory(rs.getString("CATEGORY"));
             application.setImageUrl(rs.getString("IMAGE_URL"));
@@ -269,10 +269,16 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setApplicationIdentifier(rs.getString("APP_IDENTIFIER"));
 
         } catch (IOException e) {
+            String msg = "IO error occurred while retrieving application properties";
+            log.error(msg, e);
             throw new DeviceManagementDAOException("IO error occurred fetch at app properties", e);
         } catch (ClassNotFoundException e) {
+            String msg = "Class not found error occurred while retrieving application properties";
+            log.error(msg, e);
             throw new DeviceManagementDAOException("Class not found error occurred fetch at app properties", e);
         } catch (SQLException e) {
+            String msg = "SQL error occurred while retrieving application properties";
+            log.error(msg, e);
             throw new DeviceManagementDAOException("SQL error occurred fetch at application", e);
         }
         return application;
@@ -620,16 +626,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         try {
             conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, deviceId);
-                stmt.setInt(2, enrolmentId);
-                stmt.setInt(3, tenantId);
-                int paramIndex = 4;
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, deviceId);
+                stmt.setInt(paramIndex++, enrolmentId);
+                stmt.setInt(paramIndex++, tenantId);
                 if (isSystemApp != 0) {
-                    stmt.setInt(paramIndex, isSystemApp);
-                    paramIndex++;
+                    stmt.setInt(paramIndex++, isSystemApp);
                 }
-                stmt.setInt(paramIndex, limit);
-                paramIndex++;
+                stmt.setInt(paramIndex++, limit);
                 stmt.setInt(paramIndex, offset);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
@@ -647,7 +651,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         }
         return applicationList;
     }
-
 
     public List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int tenantId)
             throws DeviceManagementDAOException {
