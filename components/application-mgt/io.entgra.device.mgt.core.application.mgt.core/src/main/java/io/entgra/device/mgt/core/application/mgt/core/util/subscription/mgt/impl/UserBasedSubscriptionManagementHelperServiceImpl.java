@@ -187,12 +187,10 @@ public class UserBasedSubscriptionManagementHelperServiceImpl implements Subscri
                     applicationDAO.getApplication(applicationReleaseDTO.getUuid(), tenantId).getDeviceTypeId(), subscriptionInfo.getIdentifier(), null);
             int allDeviceCount = devices.size();
             return SubscriptionManagementHelperUtil.getSubscriptionStatistics(subscriptionStatisticDTO, allDeviceCount);
-        } catch (DeviceManagementException | ApplicationManagementDAOException e) {
+        } catch (DeviceManagementException | ApplicationManagementDAOException | DeviceManagementDAOException e) {
             String msg = "Error encountered while getting subscription statistics for user: " + subscriptionInfo.getIdentifier();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (DeviceManagementDAOException e) {
-            throw new RuntimeException(e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

@@ -1621,5 +1621,3 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         }
     }
 }
-
-
