@@ -225,7 +225,7 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
     }
 
     private int getDeviceIdsOwnByRoleWithType(String roleName, int tenantId, ApplicationReleaseDTO applicationReleaseDTO)
-            throws UserStoreException, DeviceManagementException {
+            throws UserStoreException, DeviceManagementException, ApplicationManagementException {
         UserStoreManager userStoreManager = DataHolder.getInstance().getRealmService()
                 .getTenantUserRealm(tenantId).getUserStoreManager();
         String[] usersWithRole = userStoreManager.getUserListOfRole(roleName);
@@ -236,7 +236,7 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error encountered while accessing application management data.";
             log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
         for (String user : usersWithRole) {
             try {
@@ -247,9 +247,6 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
                 }
             } catch (DeviceManagementDAOException e) {
                 String msg = String.format("Error encountered while accessing device management data for user: %s", user);
-                log.error(msg, e);
-            } catch (Exception e) {
-                String msg = String.format("Unexpected error occurred for user: %s", user);
                 log.error(msg, e);
             }
         }
