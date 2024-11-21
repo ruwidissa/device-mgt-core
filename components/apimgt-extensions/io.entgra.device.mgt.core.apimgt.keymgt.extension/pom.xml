@@ -77,9 +77,7 @@
                         <Private-Package>io.entgra.device.mgt.core.apimgt.keymgt.extension.internal</Private-Package>
                         <Import-Package>
                             com.google.gson;version="[2.9,3)",
-                            io.entgra.device.mgt.core.apimgt.keymgt.extension,
-                            io.entgra.device.mgt.core.apimgt.keymgt.extension.exception,
-                            io.entgra.device.mgt.core.apimgt.keymgt.extension.service,
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.*;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.core.config;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.core.config.keymanager;version="${io.entgra.device.mgt.core.version.range}",

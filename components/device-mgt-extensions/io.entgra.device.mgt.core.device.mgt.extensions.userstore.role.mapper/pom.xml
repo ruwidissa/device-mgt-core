@@ -64,7 +64,7 @@
                             org.wso2.carbon.user.core.common,
                             org.wso2.carbon.user.core.service,
                             org.wso2.carbon.user.mgt.common,
-                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service,
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception
                         </Import-Package>
                         <Export-Package>

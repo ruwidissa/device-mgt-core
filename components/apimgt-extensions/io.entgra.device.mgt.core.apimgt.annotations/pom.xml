@@ -49,9 +49,6 @@
                         <Export-Package>
                             io.entgra.device.mgt.core.apimgt.annotations.*
                         </Export-Package>
-<!--                        <Embed-Dependency>-->
-<!--                            scribe;scope=compile|runtime;inline=false,-->
-<!--                        </Embed-Dependency>-->
                     </instructions>
                 </configuration>
             </plugin>
