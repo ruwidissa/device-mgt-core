@@ -35,14 +35,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -227,10 +219,12 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>objenesis</artifactId>
@@ -241,6 +235,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>org.wso2.securevault</artifactId>
@@ -341,6 +336,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.apimgt.application.extension</artifactId>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>org.wso2.carbon.registry.servlet</artifactId>
@@ -411,6 +407,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!--nTask dependencies-->
         <dependency>
