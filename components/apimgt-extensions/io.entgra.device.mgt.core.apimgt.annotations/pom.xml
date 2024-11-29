@@ -22,7 +22,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>6.0.0-SNAPSHOT</version>
+        <version>6.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -45,7 +45,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>API Management Extentions - Custom Annotations</Bundle-Description>
-                        <Import-Package></Import-Package>
+                        <Import-Package />
                         <Export-Package>
                             io.entgra.device.mgt.core.apimgt.annotations.*
                         </Export-Package>
