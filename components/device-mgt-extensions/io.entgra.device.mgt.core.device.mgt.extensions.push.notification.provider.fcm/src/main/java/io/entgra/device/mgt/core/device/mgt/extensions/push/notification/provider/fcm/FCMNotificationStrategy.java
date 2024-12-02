@@ -62,7 +62,7 @@ public class FCMNotificationStrategy implements NotificationStrategy {
                 Device device = FCMDataHolder.getInstance().getDeviceManagementProviderService()
                         .getDeviceWithTypeProperties(ctx.getDeviceId());
                 if(device.getProperties() != null && getFCMToken(device.getProperties()) != null) {
-                    FCMUtil.getInstance().getDefaultApplication().refresh();
+                    FCMUtil.getInstance().getDefaultApplication().refreshIfExpired();
                     sendWakeUpCall(FCMUtil.getInstance().getDefaultApplication().getAccessToken().getTokenValue(),
                             getFCMToken(device.getProperties()));
                 }
