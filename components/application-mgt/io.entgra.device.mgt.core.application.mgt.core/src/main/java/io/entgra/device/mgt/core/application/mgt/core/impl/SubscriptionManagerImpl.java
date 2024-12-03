@@ -708,6 +708,25 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     /**
+     * Validates if all devices in the subscription have pending operations for the application.
+     *
+     * @param devices List of {@link Device}
+     * @param subscribingDeviceIdHolder Subscribing device id holder.
+     * @throws BadRequestException if incompatible data is found with validate pending app operations request
+     */
+    private <T> void validatePendingAppSubscription(List<Device> devices, SubscribingDeviceIdHolder subscribingDeviceIdHolder) throws BadRequestException{
+        Set<DeviceIdentifier> deviceIdentifiers = devices.stream()
+            .map(device -> new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()))
+            .collect(Collectors.toSet());
+        Set<DeviceIdentifier> skippedDevices = subscribingDeviceIdHolder.getSkippedDevices().keySet();
+        if (skippedDevices.containsAll(deviceIdentifiers) && deviceIdentifiers.containsAll(skippedDevices)) {
+            String msg = "All devices in the subscription have pending operations for this application.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+    }
+
+    /**
      * This method perform given action (i.e APP INSTALL or APP UNINSTALL) on given set of devices.
      *
      * @param deviceType     Application supported device type.
@@ -741,6 +760,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         Map<String, List<DeviceIdentifier>> deviceIdentifierMap = new HashMap<>();
 
         if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+            validatePendingAppSubscription(devices, subscribingDeviceIdHolder);
             deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet()));
             deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppReInstallableDevices().keySet()));
             if (!isOperationReExecutingDisabled) {
