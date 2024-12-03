@@ -30,6 +30,7 @@ public class Policy {
     private String description;
     private String name;
     private List<Feature> features;
+    private String key;
 
     @XmlElement(name = "Description", required = true)
     public String getDescription() {
@@ -57,5 +58,14 @@ public class Policy {
 
     public void setFeatures(List<Feature> features) {
         this.features = features;
+    }
+
+    @XmlAttribute(name = "key", required = false)
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }
