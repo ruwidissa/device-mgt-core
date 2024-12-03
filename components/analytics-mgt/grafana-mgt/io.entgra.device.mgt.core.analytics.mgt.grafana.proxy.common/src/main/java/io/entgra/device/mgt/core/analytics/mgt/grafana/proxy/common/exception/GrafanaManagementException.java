@@ -17,7 +17,7 @@
  */
 package io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception;
 
-public class GrafanaManagementException extends Exception{
+public class GrafanaManagementException extends Exception {
 
     private static final long serialVersionUID = -3922279312829079297L;
 

@@ -180,8 +180,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             } else {
                 sql += " GROUP BY e.ID ";
             }
-            sql += ") ";
-            sql += " LIMIT ? OFFSET ?";
+            sql += ") ORDER BY d1.LAST_UPDATED_TIMESTAMP DESC LIMIT ? OFFSET ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;

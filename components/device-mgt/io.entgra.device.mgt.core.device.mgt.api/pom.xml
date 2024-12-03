@@ -22,7 +22,7 @@
     <parent>
         <artifactId>device-mgt</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>6.0.0-SNAPSHOT</version>
+        <version>6.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,14 +35,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -456,6 +448,11 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.apimgt.analytics.extension</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.application.extension</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

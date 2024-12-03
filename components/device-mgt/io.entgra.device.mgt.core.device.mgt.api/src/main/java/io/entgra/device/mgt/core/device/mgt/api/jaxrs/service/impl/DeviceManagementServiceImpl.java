@@ -19,17 +19,12 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
-import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;

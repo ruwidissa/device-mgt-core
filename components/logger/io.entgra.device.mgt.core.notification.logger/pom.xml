@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>logger</artifactId>
-        <version>6.0.0-SNAPSHOT</version>
+        <version>6.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
@@ -59,14 +59,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

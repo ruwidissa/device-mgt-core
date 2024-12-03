@@ -21,7 +21,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>6.0.0-SNAPSHOT</version>
+        <version>6.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -65,14 +65,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -83,11 +75,9 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>API Management Application Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.apimgt.keymgt.extension.internal</Private-Package>
-                        <Import-Packages>
+                        <Import-Package>
                             com.google.gson;version="[2.9,3)",
-                            io.entgra.device.mgt.core.apimgt.keymgt.extension,
-                            io.entgra.device.mgt.core.apimgt.keymgt.extension.exception,
-                            io.entgra.device.mgt.core.apimgt.keymgt.extension.service,
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.*;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.core.config;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.core.config.keymanager;version="${io.entgra.device.mgt.core.version.range}",
@@ -119,7 +109,7 @@
                             org.wso2.carbon.user.core.service;version="[4.8,5)",
                             org.wso2.carbon.user.core.tenant;version="[4.8,5)",
                             org.wso2.carbon.utils.multitenancy;version="[4.8,5)"
-                        </Import-Packages>
+                        </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.apimgt.keymgt.extension.internal,
                             io.entgra.device.mgt.core.apimgt.keymgt.extension.*
