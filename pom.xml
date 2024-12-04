@@ -1928,9 +1928,9 @@
     </dependencyManagement>
 
     <scm>
-        <url>https://repository.entgra.net/community/device-mgt-core.git</url>
-        <developerConnection>scm:git:https://repository.entgra.net/community/device-mgt-core.git</developerConnection>
-        <connection>scm:git:https://repository.entgra.net/community/device-mgt-core.git</connection>
+        <url>https://github.com/entgra/device-mgt-core.git</url>
+        <developerConnection>scm:git:https://github.com/entgra/device-mgt-core.git</developerConnection>
+        <connection>scm:git:https://github.com/entgra/device-mgt-core.git</connection>
         <tag>HEAD</tag>
     </scm>
 
