@@ -19,6 +19,7 @@ package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provid
 
 import com.google.gson.JsonObject;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationStrategy;
@@ -61,7 +62,9 @@ public class FCMNotificationStrategy implements NotificationStrategy {
             if (NOTIFIER_TYPE_FCM.equals(config.getType())) {
                 Device device = FCMDataHolder.getInstance().getDeviceManagementProviderService()
                         .getDeviceWithTypeProperties(ctx.getDeviceId());
-                if(device.getProperties() != null && getFCMToken(device.getProperties()) != null) {
+                if(device.getEnrolmentInfo() != null
+                        && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED
+                        && device.getProperties() != null && getFCMToken(device.getProperties()) != null) {
                     FCMUtil.getInstance().getDefaultApplication().refreshIfExpired();
                     sendWakeUpCall(FCMUtil.getInstance().getDefaultApplication().getAccessToken().getTokenValue(),
                             getFCMToken(device.getProperties()));
