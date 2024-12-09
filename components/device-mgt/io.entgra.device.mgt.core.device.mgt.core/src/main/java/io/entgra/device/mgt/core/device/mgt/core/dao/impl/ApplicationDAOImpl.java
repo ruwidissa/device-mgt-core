@@ -224,7 +224,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             rs = stmt.executeQuery();
 
             if (rs.next()) {
-                application = this.loadApplicationDetails(rs);
+                application = this.loadApplication(rs);
             }
             return application;
         } catch (SQLException e) {
@@ -237,51 +237,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     private Connection getConnection() throws SQLException {
         return DeviceManagementDAOFactory.getConnection();
-    }
-
-    private Application loadApplicationDetails(ResultSet rs) throws DeviceManagementDAOException {
-        Properties properties;
-
-        Application application = new Application();
-        try {
-            application.setId(rs.getInt("ID"));
-            application.setName(rs.getString("NAME"));
-            application.setType(rs.getString("TYPE"));
-
-            if (rs.getBytes("APP_PROPERTIES") != null) {
-                byte[] appProperties = rs.getBytes("APP_PROPERTIES");
-
-                try (ByteArrayInputStream bais = new ByteArrayInputStream(appProperties);
-                     ObjectInputStream ois = new ObjectInputStream(bais)) {
-
-                    properties = (Properties) ois.readObject();
-                    application.setAppProperties(properties);
-                }
-            }
-            application.setCategory(rs.getString("CATEGORY"));
-            application.setImageUrl(rs.getString("IMAGE_URL"));
-            application.setLocationUrl(rs.getString("LOCATION_URL"));
-            application.setPlatform(rs.getString("PLATFORM"));
-            application.setVersion(rs.getString("VERSION"));
-            application.setMemoryUsage(rs.getInt("MEMORY_USAGE"));
-            application.setActive(rs.getBoolean("IS_ACTIVE"));
-            application.setSystemApp(rs.getInt("IS_SYSTEM_APP"));
-            application.setApplicationIdentifier(rs.getString("APP_IDENTIFIER"));
-
-        } catch (IOException e) {
-            String msg = "IO error occurred while retrieving application properties";
-            log.error(msg, e);
-            throw new DeviceManagementDAOException("IO error occurred fetch at app properties", e);
-        } catch (ClassNotFoundException e) {
-            String msg = "Class not found error occurred while retrieving application properties";
-            log.error(msg, e);
-            throw new DeviceManagementDAOException("Class not found error occurred fetch at app properties", e);
-        } catch (SQLException e) {
-            String msg = "SQL error occurred while retrieving application properties";
-            log.error(msg, e);
-            throw new DeviceManagementDAOException("SQL error occurred fetch at application", e);
-        }
-        return application;
     }
 
     @Override
@@ -304,7 +259,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                application = loadApplicationDetails(rs);
+                application = loadApplication(rs);
                 applications.add(application);
             }
         } catch (SQLException e) {
@@ -456,6 +411,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setVersion(rs.getString("VERSION"));
             application.setMemoryUsage(rs.getInt("MEMORY_USAGE"));
             application.setActive(rs.getBoolean("IS_ACTIVE"));
+            application.setSystemApp(rs.getInt("IS_SYSTEM_APP"));
             application.setApplicationIdentifier(rs.getString("APP_IDENTIFIER"));
 
         } catch (IOException e) {
@@ -468,8 +424,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
         return application;
     }
-
-
 
     @Override
     public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId)
@@ -637,7 +591,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setInt(paramIndex, offset);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        application = loadApplicationDetails(rs);
+                        application = loadApplication(rs);
                         applicationList.add(application);
                     }
                 }
@@ -684,7 +638,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setInt(3, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        application = loadApplicationDetails(rs);
+                        application = loadApplication(rs);
                         applicationList.add(application);
                     }
                 }
