@@ -187,8 +187,16 @@ public class UserBasedSubscriptionManagementHelperServiceImpl implements Subscri
                     applicationDAO.getApplication(applicationReleaseDTO.getUuid(), tenantId).getDeviceTypeId(), subscriptionInfo.getIdentifier(), null);
             int allDeviceCount = devices.size();
             return SubscriptionManagementHelperUtil.getSubscriptionStatistics(subscriptionStatisticDTO, allDeviceCount);
-        } catch (DeviceManagementException | ApplicationManagementDAOException | DeviceManagementDAOException e) {
-            String msg = "Error encountered while getting subscription statistics for user: " + subscriptionInfo.getIdentifier();
+        } catch (DeviceManagementException e) {
+            String msg = "Error encountered while retrieving device management data";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error encountered while accessing application management data";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error encountered while retrieving device data";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
