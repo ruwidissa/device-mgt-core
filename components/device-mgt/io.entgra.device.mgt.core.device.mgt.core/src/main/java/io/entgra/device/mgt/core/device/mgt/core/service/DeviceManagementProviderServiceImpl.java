@@ -5431,7 +5431,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     @Override
     public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId, String deviceOwner, String deviceStatus)
-            throws DeviceManagementDAOException {
+            throws DeviceManagementDAOException, DeviceManagementException {
         List<DeviceDetailsDTO> devices;
         List<String> allowingDeviceStatuses = new ArrayList<>();
         allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
@@ -5443,10 +5443,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             if (devices == null || devices.isEmpty()) {
                 String msg = "No devices found for tenant ID: " + tenantId;
                 log.error(msg);
-                throw new DeviceManagementDAOException(msg);
             }
-        } catch (DeviceManagementDAOException | SQLException e) {
-            String msg = "Error occurred while retrieving devices for tenant ID: " + tenantId;
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Failed to retrieve devices for tenant ID: " + tenantId + ", deviceTypeId: " + deviceTypeId;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while accessing devices for tenant ID: " + tenantId;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         } finally {
