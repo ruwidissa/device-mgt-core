@@ -226,6 +226,8 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
 
     /**
      * Retrieves the count of devices owned by users with a specific role and device type.
+     * This method requires that the database connection is already opened before being invoked.
+     * Ensure that {ConnectionManagerUtil.openDBConnection()} is called prior to executing this method.
      *
      * @param roleName the name of the role
      * @param tenantId the ID of the tenant
@@ -250,7 +252,7 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
             throw new ApplicationManagementException(msg, e);
         }
         DeviceManagementProviderService deviceManagementProviderService =
-                HelperUtil.getDeviceManagementProviderService();
+                DataHolder.getInstance().getDeviceManagementService();
         for (String user : usersWithRole) {
             try {
                 List<DeviceDetailsDTO> idsOwnByRole = deviceManagementProviderService
@@ -260,9 +262,6 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
                 }
             } catch (DeviceManagementDAOException e) {
                 String msg = String.format("Error encountered while accessing device management data for user: %s", user);
-                log.error(msg, e);
-            } catch (Exception e) {
-                String msg = String.format("Unexpected error occurred for user: %s", user);
                 log.error(msg, e);
             }
         }
