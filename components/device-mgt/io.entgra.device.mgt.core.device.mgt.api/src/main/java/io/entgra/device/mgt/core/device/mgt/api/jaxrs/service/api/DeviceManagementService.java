@@ -1858,22 +1858,22 @@ public interface DeviceManagementService {
                     String ownership,
             @ApiParam(
                     name = "createdFrom",
-                    value = "Since when user wants to filter operation logs using the created data and time")
+                    value = "Since when user wants to filter operation logs using the created data and time (timestamp in seconds)")
             @QueryParam("createdFrom")
                     Long createdFrom,
             @ApiParam(
                     name = "createdTo",
-                    value = "Till when user wants to filter operation logs using the created data and time")
+                    value = "Till when user wants to filter operation logs using the created data and time (timestamp in seconds)")
             @QueryParam("createdTo")
                     Long createdTo,
             @ApiParam(
                     name = "updatedFrom",
-                    value = "Since when user wants to filter operation logs using the received date and time")
+                    value = "Since when user wants to filter operation logs using the received date and time (timestamp in seconds)")
             @QueryParam("updatedFrom")
                     Long updatedFrom,
             @ApiParam(
                     name = "updatedTo",
-                    value = "Till when user wants to filter operation logs using the received date and time")
+                    value = "Till when user wants to filter operation logs using the received date and time (timestamp in seconds)")
             @QueryParam("updatedTo")
                     Long updatedTo,
             @ApiParam(

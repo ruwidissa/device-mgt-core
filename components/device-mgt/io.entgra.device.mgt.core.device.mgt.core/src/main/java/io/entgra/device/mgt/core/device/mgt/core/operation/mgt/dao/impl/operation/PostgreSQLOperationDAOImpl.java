@@ -44,18 +44,17 @@ public class PostgreSQLOperationDAOImpl extends GenericOperationDAOImpl {
             throws OperationManagementDAOException {
         Operation operation;
         List<Operation> operations = new ArrayList<Operation>();
-        String createdTo = null;
-        String createdFrom = null;
-        DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Long createdTo = null;
+        Long createdFrom = null;
         boolean isCreatedDayProvided = false;
         boolean isUpdatedDayProvided = false;  //updated day = received day
         boolean isOperationCodeProvided = false;
         boolean isStatusProvided = false;
         if (request.getOperationLogFilters().getCreatedDayFrom() != null) {
-            createdFrom = simple.format(request.getOperationLogFilters().getCreatedDayFrom());
+            createdFrom = request.getOperationLogFilters().getCreatedDayFrom();
         }
         if (request.getOperationLogFilters().getCreatedDayTo() != null) {
-            createdTo = simple.format(request.getOperationLogFilters().getCreatedDayTo());
+            createdTo = request.getOperationLogFilters().getCreatedDayTo();
         }
         Long updatedFrom = request.getOperationLogFilters().getUpdatedDayFrom();
         Long updatedTo = request.getOperationLogFilters().getUpdatedDayTo();
@@ -88,7 +87,7 @@ public class PostgreSQLOperationDAOImpl extends GenericOperationDAOImpl {
             isUpdatedDayProvided = true;
         }
         sql = sql + ") om ON o.ID = om.OPERATION_ID ";
-        if (createdFrom != null && !createdFrom.isEmpty() && createdTo != null && !createdTo.isEmpty()) {
+        if (createdFrom != null && createdFrom != 0 && createdTo != null && createdTo != 0) {
             sql = sql + " WHERE o.CREATED_TIMESTAMP BETWEEN ? AND ?";
             isCreatedDayProvided = true;
         }
@@ -137,8 +136,8 @@ public class PostgreSQLOperationDAOImpl extends GenericOperationDAOImpl {
                     stmt.setLong(paramIndex++, updatedTo);
                 }
                 if (isCreatedDayProvided) {
-                    stmt.setString(paramIndex++, createdFrom);
-                    stmt.setString(paramIndex++, createdTo);
+                    stmt.setLong(paramIndex++, createdFrom);
+                    stmt.setLong(paramIndex++, createdTo);
                 }
                 if (isStatusProvided) {
                     int size = status.size();

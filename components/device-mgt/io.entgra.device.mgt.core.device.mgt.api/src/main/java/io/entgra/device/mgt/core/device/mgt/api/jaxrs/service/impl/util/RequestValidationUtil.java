@@ -615,13 +615,11 @@ public class RequestValidationUtil {
         }
         if (createdTo != null || createdFrom != null) {
             validateDates(createdFrom, createdTo);
-            createdFrom = createdFrom * 1000;
             //if user only sends the fromDate toDate sets as current date
             if (createdFrom != null && createdTo == null) {
                 operationLogFilters.setCreatedDayFrom(createdFrom);
                 operationLogFilters.setCreatedDayTo(timeMilli);
             } else {
-                createdTo = createdTo * 1000;
                 operationLogFilters.setCreatedDayFrom(createdFrom);
                 operationLogFilters.setCreatedDayTo(createdTo);
             }
