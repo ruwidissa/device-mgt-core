@@ -103,7 +103,7 @@ public interface ApplicationDAO {
      * @param tenantId tenant ID
      * @throws DeviceManagementDAOException If any database error occurred
      */
-    List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int offset, int limit, int tenantId)
+    List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int offset, int limit, int tenantId, int isSystemApp)
             throws DeviceManagementDAOException;
 
     /**

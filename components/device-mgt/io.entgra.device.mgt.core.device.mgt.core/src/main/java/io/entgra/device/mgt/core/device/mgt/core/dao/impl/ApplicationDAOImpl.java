@@ -56,8 +56,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             conn = this.getConnection();
             stmt = conn.prepareStatement("INSERT INTO DM_APPLICATION (NAME, PLATFORM, " +
                     "CATEGORY, VERSION, TYPE, LOCATION_URL, IMAGE_URL, TENANT_ID, " +
-                    "APP_IDENTIFIER, MEMORY_USAGE, IS_ACTIVE, DEVICE_ID, ENROLMENT_ID) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "APP_IDENTIFIER, MEMORY_USAGE, IS_ACTIVE, DEVICE_ID, ENROLMENT_ID, IS_SYSTEM_APP) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             for (Application application : applications) {
                 stmt.setString(1, application.getName());
@@ -73,6 +73,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setBoolean(11, application.isActive());
                 stmt.setInt(12, deviceId);
                 stmt.setInt(13, enrolmentId);
+                stmt.setInt(14, application.isSystemApp());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -91,7 +92,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         try {
             conn = this.getConnection();
             stmt = conn.prepareStatement("UPDATE DM_APPLICATION SET NAME = ?, PLATFORM = ?, CATEGORY = ?, " +
-                    "VERSION = ?, TYPE = ?, LOCATION_URL = ?, IMAGE_URL = ?, MEMORY_USAGE = ?, IS_ACTIVE = ? " +
+                    "VERSION = ?, TYPE = ?, LOCATION_URL = ?, IMAGE_URL = ?, MEMORY_USAGE = ?, IS_ACTIVE = ?, IS_SYSTEM_APP = ? " +
                     "WHERE ID = ?");
 
             for (Application application : applications) {
@@ -104,7 +105,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setString(7, application.getImageUrl());
                 stmt.setInt(8, application.getMemoryUsage());
                 stmt.setBoolean(9, application.isActive());
-                stmt.setInt(10, application.getId());
+                stmt.setInt(10, application.isSystemApp());
+                stmt.setInt(11, application.getId());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -211,7 +213,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         try {
             conn = this.getConnection();
             stmt = conn.prepareStatement("SELECT ID,  NAME, APP_IDENTIFIER, PLATFORM, CATEGORY, VERSION, TYPE, " +
-                    "LOCATION_URL, IMAGE_URL, APP_PROPERTIES, MEMORY_USAGE, IS_ACTIVE, TENANT_ID " +
+                    "LOCATION_URL, IMAGE_URL, APP_PROPERTIES, MEMORY_USAGE, IS_ACTIVE, IS_SYSTEM_APP, TENANT_ID " +
                     "FROM DM_APPLICATION WHERE DEVICE_ID = ? AND ENROLMENT_ID = ? AND APP_IDENTIFIER = ? AND " +
                     "VERSION = ? AND TENANT_ID = ?");
             stmt.setInt(1, deviceId);
@@ -248,7 +250,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         try {
             conn = this.getConnection();
             stmt = conn.prepareStatement("SELECT ID, NAME, APP_IDENTIFIER, PLATFORM, CATEGORY, VERSION, TYPE, " +
-                    "LOCATION_URL, IMAGE_URL, APP_PROPERTIES, MEMORY_USAGE, IS_ACTIVE, TENANT_ID FROM DM_APPLICATION " +
+                    "LOCATION_URL, IMAGE_URL, APP_PROPERTIES, MEMORY_USAGE, IS_ACTIVE, IS_SYSTEM_APP, TENANT_ID FROM DM_APPLICATION " +
                     "WHERE DEVICE_ID = ? AND ENROLMENT_ID = ? AND TENANT_ID = ?");
 
             stmt.setInt(1, deviceId);
@@ -409,6 +411,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setVersion(rs.getString("VERSION"));
             application.setMemoryUsage(rs.getInt("MEMORY_USAGE"));
             application.setActive(rs.getBoolean("IS_ACTIVE"));
+            application.setSystemApp(rs.getInt("IS_SYSTEM_APP"));
             application.setApplicationIdentifier(rs.getString("APP_IDENTIFIER"));
 
         } catch (IOException e) {
@@ -547,7 +550,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     @Override
-    public List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int offset, int limit, int tenantId)
+    public List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int offset, int limit, int tenantId, int isSystemApp)
             throws DeviceManagementDAOException {
         Connection conn;
         List<Application> applicationList = new ArrayList<>();
@@ -565,21 +568,27 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "APP_PROPERTIES, " +
                 "MEMORY_USAGE, " +
                 "IS_ACTIVE, " +
+                "IS_SYSTEM_APP, " +
                 "TENANT_ID " +
                 "FROM DM_APPLICATION " +
                 "WHERE DEVICE_ID = ? AND " +
                 "ENROLMENT_ID = ? AND " +
                 "TENANT_ID = ? " +
+                (isSystemApp != 0 ? "AND IS_SYSTEM_APP = ? " : "") +
                 "LIMIT ? " +
-                "OFFSET ?";
+                "OFFSET ? ";
         try {
             conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, deviceId);
-                stmt.setInt(2, enrolmentId);
-                stmt.setInt(3, tenantId);
-                stmt.setInt(4, limit);
-                stmt.setInt(5, offset);
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, deviceId);
+                stmt.setInt(paramIndex++, enrolmentId);
+                stmt.setInt(paramIndex++, tenantId);
+                if (isSystemApp != 0) {
+                    stmt.setInt(paramIndex++, isSystemApp);
+                }
+                stmt.setInt(paramIndex++, limit);
+                stmt.setInt(paramIndex, offset);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         application = loadApplication(rs);
@@ -590,7 +599,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
         } catch (SQLException e) {
             String msg = "SQL Error occurred while retrieving the list of Applications " +
-                    "installed in device id '" + deviceId;
+                    "installed on device id '" + deviceId + "'";
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -615,6 +624,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 "APP_PROPERTIES, " +
                 "MEMORY_USAGE, " +
                 "IS_ACTIVE, " +
+                "IS_SYSTEM_APP, " +
                 "TENANT_ID " +
                 "FROM DM_APPLICATION " +
                 "WHERE DEVICE_ID = ? AND " +

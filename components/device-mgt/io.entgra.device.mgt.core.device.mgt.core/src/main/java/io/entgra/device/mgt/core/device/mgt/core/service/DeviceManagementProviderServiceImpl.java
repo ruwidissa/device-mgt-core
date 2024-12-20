@@ -5152,13 +5152,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit) throws DeviceManagementException {
+    public List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit, int isSystemApp) throws DeviceManagementException {
         List<Application> applications;
         try {
             DeviceManagementDAOFactory.openConnection();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
-                    device.getEnrolmentInfo().getId(), offset, limit, tenantId);
+                    device.getEnrolmentInfo().getId(), offset, limit, tenantId, isSystemApp);
             if (applications == null) {
                 String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
                 log.error(msg);
