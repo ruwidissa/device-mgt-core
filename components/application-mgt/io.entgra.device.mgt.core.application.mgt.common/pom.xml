@@ -57,6 +57,8 @@
                             io.entgra.device.mgt.core.device.mgt.common.app.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.common.operation.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.core.common.exception;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.config;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.core.config.permission;version="${io.entgra.device.mgt.core.version.range}",
                             io.swagger.annotations;version="[1.6,2)",
                             javax.validation.constraints;version="[2.0,3)",
                             javax.xml.bind.annotation;version="[0.0,1)"

@@ -231,6 +231,10 @@
         <Scope>am:pub:sp:connect</Scope>
         <Scope>am:pub:app:view</Scope>
         <Scope>am:pub:app:update</Scope>
+        <Scope>am:pub:ent-app:update</Scope>
+        <Scope>am:pub:web-app:update</Scope>
+        <Scope>am:pub:pub-app:update</Scope>
+        <Scope>am:pub:custom-app:update</Scope>
         <Scope>am:store:app:view</Scope>
         <Scope>am:store:app:modify</Scope>
         <Scope>am:store:app:sub:install</Scope>
@@ -323,7 +327,6 @@
         <Scope>cm:cert:add</Scope>
         <Scope>cm:cert:verify</Scope>
         <Scope>dm:admin</Scope>
-        <Scope>dm:device-type:deploy</Scope>
         <Scope>dm:device-type:event:modify</Scope>
         <Scope>dm:device-type:event:view</Scope>
         <Scope>dm:admin:device-type:modify</Scope>
@@ -393,7 +396,6 @@
         <Scope>win:ops:enterprise-app-install</Scope>
         <Scope>win:microsoft-store:search</Scope>
         <Scope>win:updates:read</Scope>
-        <Scope>win:ops:os-updates-install</Scope>
         <Scope>admin:tenant:view</Scope>
         <Scope>dm:admin:devices:usage:view</Scope>
         <Scope>and:ops:clear-app</Scope>
@@ -435,6 +437,32 @@
         <Scope>tm:tags:delete</Scope>
         <Scope>tm:tags:mapping:create</Scope>
         <Scope>tm:tags:mapping:delete</Scope>
+        <Scope>dm:devices:any:permitted</Scope>
+        <Scope>dm:device:api:subscribe</Scope>
+        <Scope>Convert tag to attribute</Scope>
+        <Scope>dm:hide:unauthorized:functions</Scope>
+        <Scope>dm:hide:all:device</Scope>
+        <Scope>dm:hide:enroll:device</Scope>
+        <Scope>dm:hide:abm:device</Scope>
+        <Scope>dm:hide:abm:profile</Scope>
+        <Scope>dm:hide:policies</Scope>
+        <Scope>dm:hide:geo:fences</Scope>
+        <Scope>dm:hide:device:locations</Scope>
+        <Scope>dm:hide:config:configurations</Scope>
+        <Scope>dm:hide:config:users</Scope>
+        <Scope>dm:hide:config:roles</Scope>
+        <Scope>dm:hide:config:groups</Scope>
+        <Scope>dm:hide:config:certificates</Scope>
+        <Scope>dm:hide:config:platform:config</Scope>
+        <Scope>dm:hide:device:tracker</Scope>
+        <Scope>am:admin:lc:app:create</Scope>
+        <Scope>am:admin:lc:app:review</Scope>
+        <Scope>am:admin:lc:app:approve</Scope>
+        <Scope>am:admin:lc:app:reject</Scope>
+        <Scope>am:admin:lc:app:publish</Scope>
+        <Scope>am:admin:lc:app:block</Scope>
+        <Scope>am:admin:lc:app:deprecate</Scope>
+        <Scope>am:admin:lc:app:retire</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

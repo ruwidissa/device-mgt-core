@@ -45,15 +45,10 @@ import java.util.List;
 public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthorizationService {
 
     private final static String CDM_ADMIN_PERMISSION = "/device-mgt/devices/any-device/permitted-actions-under-owning-device";
-    private final static String CDM_ADMIN = "Device Management Administrator";
     private static Log log = LogFactory.getLog(DeviceAccessAuthorizationServiceImpl.class);
 
     public DeviceAccessAuthorizationServiceImpl() {
-        try {
-            this.addAdminPermissionToRegistry();
-        } catch (PermissionManagementException e) {
-            log.error("Unable to add the emm-admin permission to the registry.", e);
-        }
+        log.info("DeviceAccessAuthorizationServiceImpl initialized.");
     }
 
     @Override
@@ -233,12 +228,5 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
 
     private int getTenantId() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantId();
-    }
-
-    private boolean addAdminPermissionToRegistry() throws PermissionManagementException {
-        Permission permission = new Permission();
-        permission.setName(CDM_ADMIN);
-        permission.setPath(PermissionUtils.getAbsolutePermissionPath(CDM_ADMIN_PERMISSION));
-        return PermissionUtils.putPermission(permission);
     }
 }

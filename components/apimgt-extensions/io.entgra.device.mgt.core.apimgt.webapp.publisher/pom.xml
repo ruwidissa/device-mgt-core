@@ -176,6 +176,7 @@
                             io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
                             io.entgra.device.mgt.core.device.mgt.core.config,
                             io.entgra.device.mgt.core.device.mgt.core.config.permission,
+                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.swagger.annotations;version="[1.6,2)",
                             javax.servlet;version="[2.6,3)",
                             javax.xml.bind;version="[0.0,1)",

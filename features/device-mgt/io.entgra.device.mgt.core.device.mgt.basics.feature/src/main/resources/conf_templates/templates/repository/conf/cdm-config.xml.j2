@@ -392,94 +392,165 @@
             {% endif %}
     </EnrollmentGuideConfiguration>
     <DefaultPermissions>
-            <DefaultPermission>
-                <Name>/permission/admin/device-mgt/devices/any-device/permitted-actions-under-owning-device</Name>
-                <MappedScopeDetails>
-                    <Name>Apply permitted actions on any device</Name>
-                    <Key>dm:devices:any:permitted</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/device-mgt/device/api/subscribe</Name>
-                <MappedScopeDetails>
-                    <Name>Subscribe APIs</Name>
-                    <Key>dm:device:api:subscribe</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/approve</Name>
-                <MappedScopeDetails>
-                    <Name>Approve Applications</Name>
-                    <Key>am:admin:lc:app:approve</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/create</Name>
-                <MappedScopeDetails>
-                    <Name>Create Applications</Name>
-                    <Key>am:admin:lc:app:create</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/reject</Name>
-                <MappedScopeDetails>
-                    <Name>Reject Applications</Name>
-                    <Key>am:admin:lc:app:reject</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/block</Name>
-                <MappedScopeDetails>
-                    <Name>Block Applications</Name>
-                    <Key>am:admin:lc:app:block</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/review</Name>
-                <MappedScopeDetails>
-                    <Name>Review Applications</Name>
-                    <Key>am:admin:lc:app:review</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/retire</Name>
-                <MappedScopeDetails>
-                    <Name>Retire Applications</Name>
-                    <Key>am:admin:lc:app:retire</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/deprecate</Name>
-                <MappedScopeDetails>
-                    <Name>Deprecate Application</Name>
-                    <Key>am:admin:lc:app:deprecate</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/app-mgt/life-cycle/application/publish</Name>
-                <MappedScopeDetails>
-                    <Name>Publish Applications</Name>
-                    <Key>am:admin:lc:app:publish</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-            <DefaultPermission>
-                <Name>/permission/admin/device-mgt/devices/any-group/permitted-actions-under-owning-group</Name>
-                <MappedScopeDetails>
-                    <Name>Apply permitted actions on any group</Name>
-                    <Key>dm:group:any:permitted</Key>
-                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
-                </MappedScopeDetails>
-            </DefaultPermission>
-        </DefaultPermissions>
+        <DefaultPermission>
+            <Name>/permission/admin/device-mgt/devices/any-device/permitted-actions-under-owning-device</Name>
+            <MappedScopeDetails>
+                <Name>Apply permitted actions on any device</Name>
+                <Key>dm:devices:any:permitted</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/device-mgt/device/api/subscribe</Name>
+            <MappedScopeDetails>
+                <Name>Subscribe APIs</Name>
+                <Key>dm:device:api:subscribe</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/device-mgt/devices/any-group/permitted-actions-under-owning-group</Name>
+            <MappedScopeDetails>
+                <Name>Apply permitted actions on any group</Name>
+                <Key>dm:group:any:permitted</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/hide-unauthorized-functions</Name>
+            <MappedScopeDetails>
+                <Name>Hide unauthorized functions</Name>
+                <Key>dm:hide:unauthorized:functions</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-all-device-menu</Name>
+            <MappedScopeDetails>
+                <Name>Hide All Device Menu from the sider</Name>
+                <Key>dm:hide:all:device</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-enroll-device</Name>
+            <MappedScopeDetails>
+                <Name>Hide Enroll Device Menu from the sider</Name>
+                <Key>dm:hide:enroll:device</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-abm-device</Name>
+            <MappedScopeDetails>
+                <Name>Hide ABM Device Menu from the sider</Name>
+                <Key>dm:hide:abm:device</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-abm-profile</Name>
+            <MappedScopeDetails>
+                <Name>Hide ABM Profile Menu from the sider</Name>
+                <Key>dm:hide:abm:profile</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/hide-policies</Name>
+            <MappedScopeDetails>
+                <Name>Hide Policies Menu from the sider</Name>
+                <Key>dm:hide:policies</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/hide-geo-fences</Name>
+            <MappedScopeDetails>
+                <Name>Hide Geo Fences Menu from the sider</Name>
+                <Key>dm:hide:geo:fences</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/hide-device-locations</Name>
+            <MappedScopeDetails>
+                <Name>Hide Device Locations Menu from the sider</Name>
+                <Key>dm:hide:device:locations</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/config/hide-configurations</Name>
+            <MappedScopeDetails>
+                <Name>Hide Configurations Menu from the sider</Name>
+                <Key>dm:hide:config:configurations</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/config/hide-users</Name>
+            <MappedScopeDetails>
+                <Name>Hide Users Menu of the Configurations from the sider</Name>
+                <Key>dm:hide:config:users</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/config/hide-roles</Name>
+            <MappedScopeDetails>
+                <Name>Hide Roles Menu of the Configurations from the sider</Name>
+                <Key>dm:hide:config:roles</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/config/hide-groups</Name>
+            <MappedScopeDetails>
+                <Name>Hide Groups Menu of the Configurations from the sider</Name>
+                <Key>dm:hide:config:groups</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/config/hide-certificates</Name>
+            <MappedScopeDetails>
+                <Name>Hide Certificates Menu of the Configurations from the sider</Name>
+                <Key>dm:hide:config:certificates</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/config/hide-platform-config</Name>
+            <MappedScopeDetails>
+                <Name>Hide Platform Configuration Menu of the Configurations from the sider</Name>
+                <Key>dm:hide:config:platform:config</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/default-scope/ui-permissions/hide-device-tracker</Name>
+            <MappedScopeDetails>
+                <Name>Hide Device Tracker Menu of the Configurations from the sider</Name>
+                <Key>dm:hide:device:tracker</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
+        </DefaultPermission>
+    </DefaultPermissions>
 </DeviceMgtConfiguration>
 

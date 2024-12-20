@@ -84,6 +84,11 @@
             <ProceedingStates>
                 <State>In-Review</State>
             </ProceedingStates>
+            <MappedScopeDetails>
+                <Name>Create Applications</Name>
+                <Key>am:admin:lc:app:create</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
         <LifecycleState name="In-Review">
             <Permission>/app-mgt/life-cycle/application/review</Permission>
@@ -92,6 +97,11 @@
                 <State>Approved</State>
                 <State>Created</State>
             </ProceedingStates>
+            <MappedScopeDetails>
+                <Name>Review Applications</Name>
+                <Key>am:admin:lc:app:review</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
         <LifecycleState name="Approved">
             <Permission>/app-mgt/life-cycle/application/approve</Permission>
@@ -99,6 +109,11 @@
                 <State>In-Review</State>
                 <State>Published</State>
             </ProceedingStates>
+            <MappedScopeDetails>
+                <Name>Approve Applications</Name>
+                <Key>am:admin:lc:app:approve</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
         <LifecycleState name="Rejected">
             <IsDeletableState>true</IsDeletableState>
@@ -106,6 +121,11 @@
             <ProceedingStates>
                 <State>In-Review</State>
             </ProceedingStates>
+            <MappedScopeDetails>
+                <Name>Reject Applications</Name>
+                <Key>am:admin:lc:app:reject</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
         <LifecycleState name="Published">
             <IsAppInstallable>true</IsAppInstallable>
@@ -114,6 +134,11 @@
                 <State>Blocked</State>
                 <State>Deprecated</State>
             </ProceedingStates>
+            <MappedScopeDetails>
+                <Name>Publish Applications</Name>
+                <Key>am:admin:lc:app:publish</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
         <LifecycleState name="Blocked">
             <Permission>/app-mgt/life-cycle/application/block</Permission>
@@ -121,6 +146,11 @@
                 <State>Published</State>
                 <State>Deprecated</State>
             </ProceedingStates>
+            <MappedScopeDetails>
+                <Name>Block Applications</Name>
+                <Key>am:admin:lc:app:block</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
         <LifecycleState name="Deprecated">
             <Permission>/app-mgt/life-cycle/application/deprecate</Permission>
@@ -128,10 +158,20 @@
                 <State>Published</State>
                 <State>Retired</State>
             </ProceedingStates>
+            <MappedScopeDetails>
+                <Name>Deprecate Application</Name>
+                <Key>am:admin:lc:app:deprecate</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
         <LifecycleState name="Retired">
             <IsEndState>true</IsEndState>
             <Permission>/app-mgt/life-cycle/application/retire</Permission>
+            <MappedScopeDetails>
+                <Name>Retire Applications</Name>
+                <Key>am:admin:lc:app:retire</Key>
+                <DefaultRoles>admin, Internal/devicemgt-user</DefaultRoles>
+            </MappedScopeDetails>
         </LifecycleState>
     </LifecycleStates>
 

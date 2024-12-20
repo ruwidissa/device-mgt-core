@@ -150,6 +150,7 @@ public final class DeviceManagementConstants {
 
         public static final String DEFAULT_DEVICE_USER = "Internal/devicemgt-user";
         public static final String DEFAULT_DEVICE_ADMIN = "Internal/devicemgt-admin";
+        public static final String DEFAULT_UI_EXECUTER = "Internal/ui-executer";
 
         public static final String CLAIM_EMAIL_ADDRESS = "http://wso2.org/claims/emailaddress";
         public static final String CLAIM_FIRST_NAME = "http://wso2.org/claims/givenname";

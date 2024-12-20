@@ -27,10 +27,12 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlready
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermission;
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -102,9 +104,11 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                 }
             }
 
+            DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+            DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
             try {
                 publisher.updateScopeRoleMapping();
-                publisher.addDefaultScopesIfNotExist();
+                publisher.addDefaultScopesIfNotExist(defaultPermissions.getDefaultPermissions());
             } catch (APIManagerPublisherException e) {
                 log.error("failed to update scope role mapping.", e);
             }
@@ -112,7 +116,7 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                updateScopeMetadataEntryWithDefaultScopes();
+                updateScopeMetadataEntryAndRegistryWithDefaultScopes(defaultPermissions.getDefaultPermissions());
             } finally {
                 PrivilegedCarbonContext.endTenantFlow();
             }
@@ -163,13 +167,11 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
      * Update permission scope mapping entry with default scopes if perm-scope-mapping entry exists, otherwise this function
      * will create that entry and update the value with default permissions.
      */
-    private void updateScopeMetadataEntryWithDefaultScopes() {
+    public static void updateScopeMetadataEntryAndRegistryWithDefaultScopes(List<DefaultPermission> defaultPermissions) {
         Map<String, String> permScopeMap = APIPublisherDataHolder.getInstance().getPermScopeMapping();
         Metadata permScopeMapping;
 
         MetadataManagementService metadataManagementService = APIPublisherDataHolder.getInstance().getMetadataManagementService();
-        DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-        DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
 
         try {
             permScopeMapping = metadataManagementService.retrieveMetadata(Constants.PERM_SCOPE_MAPPING_META_KEY);
@@ -179,10 +181,10 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                         new HashMap<>();
             }
 
-            for (DefaultPermission defaultPermission : defaultPermissions.getDefaultPermissions()) {
+            for (DefaultPermission defaultPermission : defaultPermissions) {
                 permScopeMap.putIfAbsent(defaultPermission.getName(), defaultPermission.getScopeMapping().getKey());
+                PermissionUtils.putPermission(defaultPermission.getName());
             }
-
 
             permScopeMapping = new Metadata();
             permScopeMapping.setMetaKey(Constants.PERM_SCOPE_MAPPING_META_KEY);
@@ -197,9 +199,11 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
             APIPublisherDataHolder.getInstance().setPermScopeMapping(permScopeMap);
             log.info(Constants.PERM_SCOPE_MAPPING_META_KEY + "entry updated successfully");
         } catch (MetadataKeyAlreadyExistsException e) {
-            log.error("Metadata entry already exists for " + Constants.PERM_SCOPE_MAPPING_META_KEY);
+            log.error("Metadata entry already exists for " + Constants.PERM_SCOPE_MAPPING_META_KEY, e);
         } catch (MetadataManagementException e) {
-            log.error("Error encountered while updating permission scope mapping metadata with default scopes");
+            log.error("Error encountered while updating permission scope mapping metadata with default scopes", e);
+        } catch (PermissionManagementException e) {
+            log.error("Error when adding default permission to the registry", e);
         }
     }
 }

@@ -53,8 +53,6 @@ public class APIUtil {
 
     private static final String DEFAULT_DEVICE_ORGANIZATION_MGT_TAG= "device_organization_management";
 
-    public static final String PERMISSION_PROPERTY_NAME = "name";
-
     public static String getAuthenticatedUser() {
         PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         String username = threadLocalCarbonContext.getUsername();
@@ -130,53 +128,5 @@ public class APIUtil {
             allowedApisTags.add(DEFAULT_ENTERPRISE_TAG);
         }
         return allowedApisTags;
-    }
-
-    public static void putPermission(String permission) {
-        try {
-            StringTokenizer tokenizer = new StringTokenizer(permission, "/");
-            String lastToken = "", currentToken, tempPath;
-            while (tokenizer.hasMoreTokens()) {
-                currentToken = tokenizer.nextToken();
-                tempPath = lastToken + "/" + currentToken;
-                if (!checkResourceExists(tempPath)) {
-                    createRegistryCollection(tempPath, currentToken);
-
-                }
-                lastToken = tempPath;
-            }
-        } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            log.error("Failed to creation permission in registry" + permission, e);
-        }
-    }
-
-    public static void createRegistryCollection(String path, String resourceName)
-            throws org.wso2.carbon.registry.api.RegistryException {
-        Resource resource = getGovernanceRegistry().newCollection();
-        resource.addProperty(PERMISSION_PROPERTY_NAME, resourceName);
-        getGovernanceRegistry().beginTransaction();
-        getGovernanceRegistry().put(path, resource);
-        getGovernanceRegistry().commitTransaction();
-    }
-
-    public static boolean checkResourceExists(String path)
-            throws RegistryException {
-        return getGovernanceRegistry().resourceExists(path);
-    }
-
-    public static Registry getGovernanceRegistry() throws RegistryException {
-        return getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
-    }
-
-    public static RegistryService getRegistryService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        RegistryService registryService =
-                (RegistryService) ctx.getOSGiService(RegistryService.class, null);
-        if (registryService == null) {
-            String msg = "registry service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return registryService;
     }
 }

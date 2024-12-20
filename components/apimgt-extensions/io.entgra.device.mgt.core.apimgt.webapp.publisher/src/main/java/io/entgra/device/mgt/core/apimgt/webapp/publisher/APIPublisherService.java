@@ -19,6 +19,9 @@ package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
 
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermission;
+
+import java.util.List;
 
 /**
  * This interface represents all methods related to API manipulation that's done as part of API-Management tasks.
@@ -39,7 +42,7 @@ public interface APIPublisherService {
     /**
      * Add default scopes defined in the cdm-config.xml
      */
-    void addDefaultScopesIfNotExist() throws APIManagerPublisherException;
+    void addDefaultScopesIfNotExist(List<DefaultPermission> defaultPermissions) throws APIManagerPublisherException;
 
     /**
      * If the permissions are in the permission list, identify the relevant scopes of the supplied permission list

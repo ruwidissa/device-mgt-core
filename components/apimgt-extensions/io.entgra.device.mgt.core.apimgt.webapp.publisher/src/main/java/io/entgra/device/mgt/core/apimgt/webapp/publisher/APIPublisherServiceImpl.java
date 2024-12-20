@@ -435,13 +435,11 @@ public class APIPublisherServiceImpl implements APIPublisherService {
     }
 
     @Override
-    public void addDefaultScopesIfNotExist() throws APIManagerPublisherException {
+    public void addDefaultScopesIfNotExist(List<DefaultPermission> defaultPermissions) throws APIManagerPublisherException {
         WebappPublisherConfig config = WebappPublisherConfig.getInstance();
         List<String> tenants = new ArrayList<>(Collections.singletonList(APIConstants.SUPER_TENANT_DOMAIN));
         tenants.addAll(config.getTenants().getTenant());
 
-        DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-        DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
         APIApplicationServices apiApplicationServices = APIPublisherDataHolder.getInstance().getApiApplicationServices();
         PublisherRESTAPIServices publisherRESTAPIServices = APIPublisherDataHolder.getInstance().getPublisherRESTAPIServices();
 
@@ -460,14 +458,12 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
 
                 Scope scope = new Scope();
-                for (DefaultPermission defaultPermission : defaultPermissions.getDefaultPermissions()) {
+                for (DefaultPermission defaultPermission : defaultPermissions) {
                     if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
                             defaultPermission.getScopeMapping().getKey())) {
                         ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
-
                         List<String> bindings = new ArrayList<>(
                                 Arrays.asList(scopeMapping.getDefaultRoles().split(",")));
-                        bindings.add(ADMIN_ROLE_KEY);
                         scope.setName(scopeMapping.getKey());
                         scope.setDescription(scopeMapping.getName());
                         scope.setDisplayName(scopeMapping.getName());
@@ -475,10 +471,18 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                         publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                     }
                 }
-            } catch (BadRequestException | UnexpectedResponseException | APIServicesException e) {
-                String errorMsg = "Error occurred while adding default scopes";
+            } catch (BadRequestException e) {
+                String errorMsg = "Bad request while adding default scopes for tenant: " + tenantDomain;
                 log.error(errorMsg, e);
-                throw new APIManagerPublisherException(e);
+                throw new APIManagerPublisherException(errorMsg, e);
+            } catch (UnexpectedResponseException e) {
+                String errorMsg = "Unexpected response while adding default scopes for tenant: " + tenantDomain;
+                log.error(errorMsg, e);
+                throw new APIManagerPublisherException(errorMsg, e);
+            } catch (APIServicesException e) {
+                String errorMsg = "API services exception while adding default scopes for tenant: " + tenantDomain;
+                log.error(errorMsg, e);
+                throw new APIManagerPublisherException(errorMsg, e);
             } finally {
                 APIPublisherUtils.removeScopePublishUserIfExists(tenantDomain);
                 PrivilegedCarbonContext.endTenantFlow();

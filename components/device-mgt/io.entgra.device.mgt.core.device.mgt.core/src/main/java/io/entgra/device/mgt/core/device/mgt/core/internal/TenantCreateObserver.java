@@ -102,6 +102,11 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                             permission.getResourceId(), permission.getAction());
                 }
             }
+            if (!userStoreManager.isExistingRole(DeviceManagementConstants.User.DEFAULT_UI_EXECUTER)) {
+                userStoreManager.addRole(DeviceManagementConstants.User.DEFAULT_UI_EXECUTER,
+                        null,
+                        null);
+            }
             userStoreManager.updateRoleListOfUser(tenantAdminName, null,
                     new String[] {DeviceManagementConstants.User.DEFAULT_DEVICE_ADMIN,
                             DeviceManagementConstants.User.DEFAULT_DEVICE_USER});
@@ -399,8 +404,14 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
         scope.setDisplayName(tenantScope.getDisplayName());
         scope.setDescription(tenantScope.getDescription());
         scope.setName(tenantScope.getName());
+        List<String> existingBindings = tenantScope.getBindings();
         List<String> bindings = new ArrayList<>();
-        bindings.add(Constants.ADMIN_ROLE_KEY);
+        if (existingBindings != null &&
+                existingBindings.contains(DeviceManagementConstants.User.DEFAULT_UI_EXECUTER)) {
+            bindings.add(DeviceManagementConstants.User.DEFAULT_UI_EXECUTER);
+        } else {
+            bindings.add(Constants.ADMIN_ROLE_KEY);
+        }
         scope.setBindings(bindings);
         return scope;
     }

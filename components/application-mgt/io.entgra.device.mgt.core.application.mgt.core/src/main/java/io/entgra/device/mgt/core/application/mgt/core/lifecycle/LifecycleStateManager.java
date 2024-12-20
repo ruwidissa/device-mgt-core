@@ -18,10 +18,14 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.lifecycle;
 
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherServiceImpl;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherStartupHandler;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.exception.LifecycleManagementException;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
-import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermission;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.Constants;
 import org.apache.commons.logging.Log;
@@ -29,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,20 +48,25 @@ public class LifecycleStateManager {
 
     public void init(List<LifecycleState> states) throws LifecycleManagementException {
         lifecycleStates = new HashMap<>();
+        APIPublisherService publisher = new APIPublisherServiceImpl();
+        List<DefaultPermission> allDefaultPermissions = new ArrayList<>();
         for (LifecycleState lifecycleState : states) {
             if (lifecycleState.getProceedingStates() != null) {
                 lifecycleState.getProceedingStates().replaceAll(String::toUpperCase);
             }
             lifecycleStates.put(lifecycleState.getName().toUpperCase(), lifecycleState);
-            try {
-                PermissionUtils
-                        .putPermission(PermissionUtils.ADMIN_PERMISSION_REGISTRY_PATH + lifecycleState.getPermission());
-            } catch (PermissionManagementException e) {
-                String msg = "Error when adding permission " + lifecycleState.getPermission() + "  related to the "
-                        + "state: " + lifecycleState.getName();
-                log.error(msg, e);
-                throw new LifecycleManagementException(msg, e);
-            }
+            DefaultPermission defaultPermission = new DefaultPermission();
+            defaultPermission.setName(PermissionUtils.ADMIN_PERMISSION_REGISTRY_PATH + lifecycleState.getPermission());
+            defaultPermission.setScopeMapping(lifecycleState.getScopeMapping());
+            allDefaultPermissions.add(defaultPermission);
+        }
+        try {
+            APIPublisherStartupHandler.updateScopeMetadataEntryAndRegistryWithDefaultScopes(allDefaultPermissions);
+            publisher.addDefaultScopesIfNotExist(allDefaultPermissions);
+        } catch (APIManagerPublisherException e) {
+            String errorMsg = "Failed to update API publisher with default permissions.";
+            log.error(errorMsg, e);
+            throw new LifecycleManagementException(errorMsg, e);
         }
     }
 

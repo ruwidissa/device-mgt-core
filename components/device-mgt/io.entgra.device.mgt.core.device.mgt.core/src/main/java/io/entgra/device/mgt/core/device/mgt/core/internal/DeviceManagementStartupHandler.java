@@ -36,6 +36,8 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Arrays;
+
 public class DeviceManagementStartupHandler implements ServerStartupObserver {
     private static final Log log = LogFactory.getLog(DeviceManagementStartupHandler.class);
     private static final Gson gson = new Gson();

@@ -17,6 +17,8 @@
  */
 package io.entgra.device.mgt.core.application.mgt.common.config;
 
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.ScopeMapping;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -37,6 +39,16 @@ public class LifecycleState {
     private boolean isInitialState;
     private boolean isEndState;
     private boolean isDeletableState;
+    private ScopeMapping scopeMapping;
+
+    @XmlElement(name = "MappedScopeDetails", required = true)
+    public ScopeMapping getScopeMapping() {
+        return scopeMapping;
+    }
+
+    public void setScopeMapping(ScopeMapping scopeMapping) {
+        this.scopeMapping = scopeMapping;
+    }
 
     @XmlAttribute(name = "name")
     public String getName() {

@@ -41,15 +41,10 @@ import java.util.List;
 public class GroupAccessAuthorizationServiceImpl implements GroupAccessAuthorizationService {
 
     private final static String GROUP_ADMIN_PERMISSION = "/device-mgt/devices/any-group/permitted-actions-under-owning-group";
-    private final static String GROUP_ADMIN = "Group Management Administrator";
     private static Log log = LogFactory.getLog(DeviceAccessAuthorizationServiceImpl.class);
 
     public GroupAccessAuthorizationServiceImpl() {
-        try {
-            this.addAdminPermissionToRegistry();
-        } catch (PermissionManagementException e) {
-            log.error("Unable to add the group-admin permission to the registry.", e);
-        }
+        log.info("GroupAccessAuthorizationServiceImpl initialized.");
     }
 
     @Override
@@ -165,12 +160,4 @@ public class GroupAccessAuthorizationServiceImpl implements GroupAccessAuthoriza
     private int getTenantId() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantId();
     }
-
-    private boolean addAdminPermissionToRegistry() throws PermissionManagementException {
-        Permission permission = new Permission();
-        permission.setName(GROUP_ADMIN);
-        permission.setPath(PermissionUtils.getAbsolutePermissionPath(GROUP_ADMIN_PERMISSION));
-        return PermissionUtils.putPermission(permission);
-    }
-
 }

@@ -52,6 +52,8 @@
                             io.entgra.device.mgt.core.apimgt.application.extension;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.application.extension.dto;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.application.extension.exception;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.apimgt.webapp.publisher;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.apimgt.webapp.publisher.exception;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.common;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.common.config;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.common.dto;version="${io.entgra.device.mgt.core.version.range}",
@@ -120,6 +122,9 @@
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.quartz;version="[2.1,3)",
+                            org.wso2.carbon.apimgt.api;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.api.model;version="[9.28,10)",
+                            org.wso2.carbon.apimgt.impl;version="${carbon.api.mgt.version.range}",
                             org.wso2.carbon.context;version="[4.8,5)",
                             org.wso2.carbon.ndatasource.core;version="[4.8,5)",
                             org.wso2.carbon.ntask.common;version="[4.9,5)",
@@ -438,6 +443,16 @@
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.webapp.publisher</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -26,6 +26,7 @@ public class DefaultPermission {
 
     private String name;
     private ScopeMapping scopeMapping;
+    private Boolean isAssignableToDefaultRoles;
 
     @XmlElement(name = "Name", required = true)
     public String getName() {
@@ -43,5 +44,14 @@ public class DefaultPermission {
 
     public void setScopeMapping(ScopeMapping scopeMapping) {
         this.scopeMapping = scopeMapping;
+    }
+
+    @XmlElement(name = "IsAssignableToDefaultRoles", required = false)
+    public Boolean isAssignableToDefaultRoles() {
+        return isAssignableToDefaultRoles;
+    }
+
+    public void setAssignableToDefaultRoles(Boolean isAssignableToDefaultRoles) {
+        this.isAssignableToDefaultRoles = isAssignableToDefaultRoles;
     }
 }
