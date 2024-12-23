@@ -60,11 +60,6 @@
     </context-param>
 
     <filter>
-        <filter-name>ApiPermissionFilter</filter-name>
-        <filter-class>io.entgra.device.mgt.core.apimgt.application.extension.api.filter.ApiPermissionFilter</filter-class>
-    </filter>
-
-    <filter>
         <filter-name>HttpHeaderSecurityFilter</filter-name>
         <filter-class>org.apache.catalina.filters.HttpHeaderSecurityFilter</filter-class>
         <init-param>
@@ -99,10 +94,4 @@
         <filter-name>ContentTypeBasedCachePreventionFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
-    <filter-mapping>
-        <filter-name>ApiPermissionFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
 </web-app>
