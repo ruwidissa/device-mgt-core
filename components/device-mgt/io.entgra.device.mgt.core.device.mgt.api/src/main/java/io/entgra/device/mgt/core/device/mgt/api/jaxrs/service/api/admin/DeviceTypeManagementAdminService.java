@@ -73,6 +73,13 @@ import javax.ws.rs.core.Response;
                         key = "dm:admin:device-type:conf:add",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/device-type/config"}
+                ),
+                @Scope(
+                        name = "View Device Type Config",
+                        description = "View Platform Config of a Device Type",
+                        key = "dm:admin:device-type:conf:view",
+                        roles = {"Internal/devicemgt-admin"},
+                        permissions = {"/device-mgt/admin/device-type/config-view"}
                 )
         }
 )
@@ -348,6 +355,59 @@ public interface DeviceTypeManagementAdminService {
                     value = "Platform configuration of specified device type.",
                     required = true)
                     PlatformConfiguration config);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/{type}/configs")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "View Configuration Details",
+            notes = "View Configuration Details of a Device Type.",
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:conf:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device type config.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device type config does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device type config.",
+                    response = ErrorResponse.class)
+    })
+    Response getDeviceTypePlatformConfig(
+            @ApiParam(
+                    name = "type",
+                    value = "The device type name, such as ios, android, windows or fire-alarm.",
+                    required = true)
+            @PathParam("type")
+            @Size(min = 2, max = 45)
+            String type);
+
 
 
     @POST
