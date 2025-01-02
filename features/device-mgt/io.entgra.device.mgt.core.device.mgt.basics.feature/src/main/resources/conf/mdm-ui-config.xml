@@ -439,7 +439,6 @@
         <Scope>tm:tags:mapping:delete</Scope>
         <Scope>dm:devices:any:permitted</Scope>
         <Scope>dm:device:api:subscribe</Scope>
-        <Scope>Convert tag to attribute</Scope>
         <Scope>dm:hide:unauthorized:functions</Scope>
         <Scope>dm:hide:all:device</Scope>
         <Scope>dm:hide:enroll:device</Scope>

@@ -244,7 +244,6 @@
                 <Key>dm:hide:unauthorized:functions</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-all-device-menu</Name>
@@ -253,7 +252,6 @@
                 <Key>dm:hide:all:device</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-enroll-device</Name>
@@ -262,7 +260,6 @@
                 <Key>dm:hide:enroll:device</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-abm-device</Name>
@@ -271,7 +268,6 @@
                 <Key>dm:hide:abm:device</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-abm-profile</Name>
@@ -280,7 +276,6 @@
                 <Key>dm:hide:abm:profile</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/hide-policies</Name>
@@ -289,7 +284,6 @@
                 <Key>dm:hide:policies</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/hide-geo-fences</Name>
@@ -298,7 +292,6 @@
                 <Key>dm:hide:geo:fences</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/hide-device-locations</Name>
@@ -307,7 +300,6 @@
                 <Key>dm:hide:device:locations</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/config/hide-configurations</Name>
@@ -316,7 +308,6 @@
                 <Key>dm:hide:config:configurations</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/config/hide-users</Name>
@@ -325,7 +316,6 @@
                 <Key>dm:hide:config:users</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/config/hide-roles</Name>
@@ -334,7 +324,6 @@
                 <Key>dm:hide:config:roles</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/config/hide-groups</Name>
@@ -343,7 +332,6 @@
                 <Key>dm:hide:config:groups</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/config/hide-certificates</Name>
@@ -352,7 +340,6 @@
                 <Key>dm:hide:config:certificates</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/config/hide-platform-config</Name>
@@ -361,7 +348,6 @@
                 <Key>dm:hide:config:platform:config</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
         <DefaultPermission>
             <Name>/permission/admin/default-scope/ui-permissions/hide-device-tracker</Name>
@@ -370,7 +356,6 @@
                 <Key>dm:hide:device:tracker</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
-            <IsAssignableToDefaultRoles>false</IsAssignableToDefaultRoles>
         </DefaultPermission>
     </DefaultPermissions>
 </DeviceMgtConfiguration>
