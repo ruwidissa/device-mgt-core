@@ -5440,10 +5440,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         try {
             DeviceManagementDAOFactory.openConnection();
             devices = enrollmentDAO.getDevicesByTenantId(tenantId, allowingDeviceStatuses, deviceTypeId, deviceOwner, deviceStatus);
-            if (devices == null || devices.isEmpty()) {
-                String msg = "No devices found for tenant ID: " + tenantId;
-                log.error(msg);
-            }
         } catch (DeviceManagementDAOException e) {
             String msg = "Failed to retrieve devices for tenant ID: " + tenantId + ", deviceTypeId: " + deviceTypeId;
             log.error(msg, e);
@@ -5451,7 +5447,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } catch (SQLException e) {
             String msg = "SQL error occurred while accessing devices for tenant ID: " + tenantId;
             log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
+            throw new DeviceManagementException(msg, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
