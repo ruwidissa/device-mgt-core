@@ -5426,7 +5426,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     @Override
     public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId, String deviceOwner, String deviceStatus)
-            throws DeviceManagementDAOException, DeviceManagementException {
+            throws DeviceManagementException {
         List<DeviceDetailsDTO> devices;
         List<String> allowingDeviceStatuses = new ArrayList<>();
         allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
