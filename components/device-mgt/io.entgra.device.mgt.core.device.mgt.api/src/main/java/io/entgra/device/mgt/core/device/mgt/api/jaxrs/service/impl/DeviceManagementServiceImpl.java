@@ -213,7 +213,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 }
             }
             if (type != null && !type.isEmpty()) {
-                request.setDeviceType(type);
+                if (io.entgra.device.mgt.core.application.mgt.core.util.Constants.WEB_CLIP.equals(type)) {
+                    request.setDeviceType(io.entgra.device.mgt.core.application.mgt.core.util.Constants.ANY);
+                } else {
+                    request.setDeviceType(type);
+                }
             }
             if (ownership != null && !ownership.isEmpty()) {
                 RequestValidationUtil.validateOwnershipType(ownership);

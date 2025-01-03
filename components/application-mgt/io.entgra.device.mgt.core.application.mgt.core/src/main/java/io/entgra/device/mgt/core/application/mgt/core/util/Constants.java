@@ -68,6 +68,7 @@ public class Constants {
     public static final String QUERY_STRING_SEPARATOR = "&";
     public static final String QUERY_KEY_VALUE_SEPARATOR = "=";
     public static final String ANY = "ANY";
+    public static final String WEB_CLIP = "web-clip";
     public static final String DEFAULT_PCK_NAME = "default.app.com";
     public static final String ALL = "ALL";
     public static final String SHOW_ALL_ROLES = "SHOW_ALL_ROLES";
