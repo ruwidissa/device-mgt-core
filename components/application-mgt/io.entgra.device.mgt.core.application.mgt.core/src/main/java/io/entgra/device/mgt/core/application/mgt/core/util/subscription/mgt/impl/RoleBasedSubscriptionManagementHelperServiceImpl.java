@@ -263,6 +263,7 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
             } catch (DeviceManagementDAOException e) {
                 String msg = String.format("Error encountered while accessing device management data for user: %s", user);
                 log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
             }
         }
         return idCountOwnByRole;
