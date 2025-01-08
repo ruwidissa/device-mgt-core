@@ -19,20 +19,38 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.util;
 
 import okhttp3.ConnectionPool;
+import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
 
-import javax.net.ssl.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
-import java.security.*;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +70,6 @@ public class HttpsTrustManagerUtils {
      * Default trustmanager type of the client
      */
     private static final String TRUST_MANAGER_TYPE = "SunX509"; //Default Trust Manager Type
-    private static final String SSLV3 = "SSLv3";
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_HOST_IP = "127.0.0.1";
     private static final int TIMEOUT = 1000;
@@ -108,12 +125,19 @@ public class HttpsTrustManagerUtils {
         };
 
         if (isIgnoreHostnameVerification) {
+            SSLSocketFactory simpleSSLSocketFactory = getSimpleTrustedSSLSocketFactory();
+            if (simpleSSLSocketFactory == null) {
+                String msg = "Null received as the simple ssl socket factory";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+
             okHttpClient = new OkHttpClient.Builder()
                     .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
                     .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
                     .readTimeout(TIMEOUT, TimeUnit.SECONDS)
                     .connectionPool(new ConnectionPool(TIMEOUT, TIMEOUT, TimeUnit.SECONDS))
-                    .sslSocketFactory(getSimpleTrustedSSLSocketFactory(), trustAllCerts)
+                    .sslSocketFactory(simpleSSLSocketFactory, trustAllCerts)
                     .hostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(String s, SSLSession sslSession) {
@@ -123,13 +147,53 @@ public class HttpsTrustManagerUtils {
             return okHttpClient;
         } else {
             SSLSocketFactory trustedSSLSocketFactory = getTrustedSSLSocketFactory();
-            okHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
-                    .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
-                    .readTimeout(TIMEOUT, TimeUnit.SECONDS)
-                    .connectionPool(new ConnectionPool(TIMEOUT, TIMEOUT, TimeUnit.SECONDS))
-                    .sslSocketFactory(trustedSSLSocketFactory)
-                    .proxySelector(proxySelector).build();
+            if (trustedSSLSocketFactory == null) {
+                String msg = "Null received as the trusted ssl socket factory";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+
+            try {
+                TrustManagerFactory trustManagerFactory =
+                        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                trustManagerFactory.init(loadTrustStore(ServerConfiguration.getInstance().getFirstProperty(
+                        "Security.TrustStore.Location"), ServerConfiguration.getInstance().getFirstProperty(
+                        "Security.TrustStore.Password")));
+                TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+
+                if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+                    String msg = "Unexpected default trust managers:" + Arrays.toString(trustManagers);
+                    log.error(msg);
+                    throw new IllegalStateException(msg);
+                }
+
+                okHttpClient = new OkHttpClient.Builder()
+                        .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+                        .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
+                        .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+                        .connectionPool(new ConnectionPool(TIMEOUT, TIMEOUT, TimeUnit.SECONDS))
+                        .sslSocketFactory(trustedSSLSocketFactory, (X509TrustManager) trustManagers[0])
+                        .proxySelector(proxySelector)
+                        .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+                        .build();
+            } catch (NoSuchAlgorithmException e) {
+                String msg = "Error encountered when initializing the trust manager factory with default algorithm : "
+                        + TrustManagerFactory.getDefaultAlgorithm();
+                log.error(msg, e);
+                throw new IllegalStateException(msg, e);
+            } catch (CertificateException e) {
+                String msg = "Any of the certificates in the keystore could not be loaded";
+                log.error(msg, e);
+                throw new IllegalStateException(msg, e);
+            } catch (KeyStoreException e) {
+                String msg = "Provided keystore provider does not support the keystore service provider implementation";
+                log.error(msg);
+                throw new IllegalStateException(msg, e);
+            } catch (IOException e) {
+                String msg = "IO exception encountered while loading keystore";
+                log.error(msg);
+                throw new IllegalStateException(msg, e);
+            }
             return okHttpClient;
         }
     }
@@ -181,13 +245,14 @@ public class HttpsTrustManagerUtils {
 
     private static SSLSocketFactory initSSLConnection(KeyStore keyStore, String keyStorePassword, KeyStore trustStore)
             throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, KeyManagementException {
+        final String tlsProtocol = System.getProperty("tls.protocol");
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KEY_MANAGER_TYPE);
         keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TRUST_MANAGER_TYPE);
         trustManagerFactory.init(trustStore);
 
         // Create and initialize SSLContext for HTTPS communication
-        SSLContext sslContext = SSLContext.getInstance(SSLV3);
+        SSLContext sslContext = SSLContext.getInstance(tlsProtocol);
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
         SSLContext.setDefault(sslContext);
         return sslContext.getSocketFactory();

@@ -58,6 +58,12 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.wso2.carbon</groupId>
+                    <artifactId>org.wso2.carbon.base</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
@@ -81,6 +87,10 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.base</artifactId>
         </dependency>
     </dependencies>
 
@@ -106,6 +116,7 @@
                         <Import-Package>
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.base;version="[1.0,2)",
                             org.wso2.carbon.core;version="4.6",
                             org.wso2.carbon.core.util;version="4.6",
                             org.apache.commons.ssl,
