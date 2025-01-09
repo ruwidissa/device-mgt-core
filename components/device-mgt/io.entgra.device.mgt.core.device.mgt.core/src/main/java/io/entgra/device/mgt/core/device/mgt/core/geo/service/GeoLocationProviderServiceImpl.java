@@ -113,8 +113,6 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
      */
     private static final String TRUST_MANAGER_TYPE = "SunX509"; //Default Trust Manager Type
 
-    private static final String SSLV3 = "SSLv3";
-
     private final GeofenceDAO geofenceDAO;
 
     public GeoLocationProviderServiceImpl() {
@@ -1223,7 +1221,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
         // Create and initialize SSLContext for HTTPS communication
 
-        SSLContext sslContext = SSLContext.getInstance(SSLV3);
+        SSLContext sslContext = SSLContext.getInstance(System.getProperty("tls.protocol"));
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
         SSLContext.setDefault(sslContext);
         return sslContext;

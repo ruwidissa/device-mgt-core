@@ -145,7 +145,6 @@ public class DeviceMgtAPIUtils {
     private static final String TRUST_STORE_TYPE = "JKS";
     private static final String KEY_MANAGER_TYPE = "SunX509"; //Default Key Manager Type
     private static final String TRUST_MANAGER_TYPE = "SunX509"; //Default Trust Manager Type
-    private static final String SSLV3 = "SSLv3";
     private static final String EVENT_CACHE_MANAGER_NAME = "mqttAuthorizationCacheManager";
     private static final String EVENT_CACHE_NAME = "mqttAuthorizationCache";
     public static final String DAS_ADMIN_SERVICE_EP = "https://" + DAS_HOST_NAME + ":" + DAS_PORT + "/services/";
@@ -1046,7 +1045,7 @@ public class DeviceMgtAPIUtils {
         trustManagerFactory.init(trustStore);
 
         // Create and initialize SSLContext for HTTPS communication
-        sslContext = SSLContext.getInstance(SSLV3);
+        sslContext = SSLContext.getInstance(System.getProperty("tls.protocol"));
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
         SSLContext.setDefault(sslContext);
     }
