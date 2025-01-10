@@ -184,7 +184,8 @@
                             io.entgra.device.mgt.core.device.mgt.core.config.push.notification.*,
                             io.entgra.device.mgt.core.device.mgt.extensions.logger.spi,
                             io.entgra.device.mgt.core.notification.logger.*,
-                            com.google.auth.oauth2.*
+                            com.google.auth.oauth2.*,
+                            okhttp3
                         </Import-Package>
                         <Embed-Dependency>
                             google-auth-library-oauth2-http;scope=compile|runtime,
