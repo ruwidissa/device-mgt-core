@@ -890,7 +890,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             + "you can add this app release as an new application release, under the existing "
                             + "application.";
                     log.error(msg);
-                    throw new ApplicationManagementException(msg);
+                    throw new BadRequestException(msg);
                 }
                 String md5OfApp = applicationStorageManager.
                         getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
