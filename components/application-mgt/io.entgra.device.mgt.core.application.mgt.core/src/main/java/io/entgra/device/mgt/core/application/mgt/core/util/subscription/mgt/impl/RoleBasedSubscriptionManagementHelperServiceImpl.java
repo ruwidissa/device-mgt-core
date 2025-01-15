@@ -255,16 +255,10 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
                 DataHolder.getInstance().getDeviceManagementService();
         List<DeviceDetailsDTO> idsOwnByRole;
         for (String user : usersWithRole) {
-            try {
-                idsOwnByRole = deviceManagementProviderService
-                        .getDevicesByTenantId(tenantId, deviceTypeId, user, null);
-                if (idsOwnByRole != null) {
-                    idCountOwnByRole += idsOwnByRole.size();
-                }
-            } catch (DeviceManagementDAOException e) {
-                String msg = "Error encountered while accessing device management data for user: "+ user;
-                log.error(msg, e);
-                throw new DeviceManagementException(msg, e);
+            idsOwnByRole = deviceManagementProviderService
+                    .getDevicesByTenantId(tenantId, deviceTypeId, user, null);
+            if (idsOwnByRole != null) {
+                idCountOwnByRole += idsOwnByRole.size();
             }
         }
         return idCountOwnByRole;

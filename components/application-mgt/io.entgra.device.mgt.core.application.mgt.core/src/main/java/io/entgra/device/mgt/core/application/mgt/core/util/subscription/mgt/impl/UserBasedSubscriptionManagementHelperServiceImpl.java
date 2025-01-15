@@ -196,10 +196,6 @@ public class UserBasedSubscriptionManagementHelperServiceImpl implements Subscri
             String msg = "Error encountered while accessing application management data";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error encountered while retrieving device data";
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
