@@ -1112,7 +1112,7 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
     List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId, String deviceOwner, String deviceStatus)
-            throws DeviceManagementDAOException;
+            throws DeviceManagementException;
 
     /**
      * Get operation details by operation code.

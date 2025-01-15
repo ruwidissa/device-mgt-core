@@ -44,6 +44,8 @@ import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -190,7 +192,7 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
             List<Integer> deviceIdsOwnByRole = getDeviceIdsOwnByRole(subscriptionInfo.getIdentifier(), tenantId);
             SubscriptionStatisticDTO subscriptionStatisticDTO = subscriptionDAO.
                     getSubscriptionStatistic(deviceIdsOwnByRole, isUnsubscribe, tenantId, applicationReleaseDTO.getId());
-            int allDeviceCount = deviceIdsOwnByRole.size();
+            int allDeviceCount = getDeviceIdsOwnByRoleWithType(subscriptionInfo.getIdentifier(), tenantId, applicationReleaseDTO);
             return SubscriptionManagementHelperUtil.getSubscriptionStatistics(subscriptionStatisticDTO, allDeviceCount);
         } catch (DeviceManagementException | ApplicationManagementDAOException | UserStoreException e) {
             String msg = "Error encountered while getting subscription statistics for role: " + subscriptionInfo.getIdentifier();
@@ -212,7 +214,7 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
             PaginationRequest paginationRequest = new PaginationRequest(-1, -1);
             paginationRequest.setOwner(user);
             paginationRequest.setStatusList(Arrays.asList(EnrolmentInfo.Status.ACTIVE.name(),
-                    EnrolmentInfo.Status.INACTIVE.name(),EnrolmentInfo.Status.UNREACHABLE.name()));
+                    EnrolmentInfo.Status.INACTIVE.name(), EnrolmentInfo.Status.UNREACHABLE.name()));
             PaginationResult ownDeviceIds = HelperUtil.getDeviceManagementProviderService().
                     getAllDevicesIdList(paginationRequest);
             if (ownDeviceIds.getData() != null) {
@@ -220,6 +222,46 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
             }
         }
         return deviceListOwnByRole.stream().map(Device::getId).collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves the count of devices owned by users with a specific role and device type.
+     * This method requires that the database connection is already opened before being invoked.
+     * Ensure that {ConnectionManagerUtil.openDBConnection()} is called prior to executing this method.
+     *
+     * @param roleName the name of the role
+     * @param tenantId the ID of the tenant
+     * @param applicationReleaseDTO the ApplicationReleaseDTO object containing application details
+     * @return the count of device IDs owned by users with the specified role and device type
+     * @throws UserStoreException if an error occurs while accessing the user store
+     * @throws DeviceManagementException if an error occurs while retrieving device information
+     * @throws ApplicationManagementException if an error occurs while retrieving application details
+     */
+    private int getDeviceIdsOwnByRoleWithType(String roleName, int tenantId, ApplicationReleaseDTO applicationReleaseDTO)
+            throws UserStoreException, DeviceManagementException, ApplicationManagementException {
+        UserStoreManager userStoreManager = DataHolder.getInstance().getRealmService()
+                .getTenantUserRealm(tenantId).getUserStoreManager();
+        String[] usersWithRole = userStoreManager.getUserListOfRole(roleName);
+        int idCountOwnByRole = 0;
+        int deviceTypeId;
+        try {
+            deviceTypeId = applicationDAO.getApplication(applicationReleaseDTO.getUuid(), tenantId).getDeviceTypeId();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error encountered while accessing application management data.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        DeviceManagementProviderService deviceManagementProviderService =
+                DataHolder.getInstance().getDeviceManagementService();
+        List<DeviceDetailsDTO> idsOwnByRole;
+        for (String user : usersWithRole) {
+            idsOwnByRole = deviceManagementProviderService
+                    .getDevicesByTenantId(tenantId, deviceTypeId, user, null);
+            if (idsOwnByRole != null) {
+                idCountOwnByRole += idsOwnByRole.size();
+            }
+        }
+        return idCountOwnByRole;
     }
 
     private static class RoleBasedSubscriptionManagementHelperServiceImplHolder {
