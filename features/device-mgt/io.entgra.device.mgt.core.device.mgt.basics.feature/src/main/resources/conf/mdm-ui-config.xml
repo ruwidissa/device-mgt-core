@@ -396,6 +396,7 @@
         <Scope>win:ops:enterprise-app-install</Scope>
         <Scope>win:microsoft-store:search</Scope>
         <Scope>win:updates:read</Scope>
+        <Scope>win:ops:os-updates-install</Scope>
         <Scope>admin:tenant:view</Scope>
         <Scope>dm:admin:devices:usage:view</Scope>
         <Scope>and:ops:clear-app</Scope>
