@@ -437,6 +437,8 @@
         <Scope>tm:tags:delete</Scope>
         <Scope>tm:tags:mapping:create</Scope>
         <Scope>tm:tags:mapping:delete</Scope>
+        <Scope>and:conf:zero-touch-sync</Scope>
+        <Scope>and:conf:zero-touch-clean</Scope>
         <Scope>dm:devices:any:permitted</Scope>
         <Scope>dm:device:api:subscribe</Scope>
         <Scope>dm:hide:unauthorized:functions</Scope>
