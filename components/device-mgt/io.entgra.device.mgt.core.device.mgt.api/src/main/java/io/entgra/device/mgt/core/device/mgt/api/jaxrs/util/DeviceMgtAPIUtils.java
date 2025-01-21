@@ -1039,13 +1039,19 @@ public class DeviceMgtAPIUtils {
      */
     private static void initSSLConnection() throws NoSuchAlgorithmException, UnrecoverableKeyException,
             KeyStoreException, KeyManagementException {
+        final String tlsProtocol = System.getProperty("tls.protocol");
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KEY_MANAGER_TYPE);
         keyManagerFactory.init(keyStore, keyStorePassword);
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TRUST_MANAGER_TYPE);
         trustManagerFactory.init(trustStore);
 
         // Create and initialize SSLContext for HTTPS communication
-        sslContext = SSLContext.getInstance(System.getProperty("tls.protocol"));
+        if (tlsProtocol == null) {
+            String msg = "Null received for system property : [tls.protocol]";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        sslContext = SSLContext.getInstance(tlsProtocol);
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
         SSLContext.setDefault(sslContext);
     }

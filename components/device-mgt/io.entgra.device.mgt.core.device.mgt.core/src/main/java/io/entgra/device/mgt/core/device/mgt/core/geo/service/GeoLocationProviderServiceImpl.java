@@ -1202,6 +1202,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     private SSLContext initSSLConnection(String tenantAdminUser)
             throws NoSuchAlgorithmException, UnrecoverableKeyException,
             KeyStoreException, KeyManagementException, IOException, CertificateException {
+        final String tlsProtocol = System.getProperty("tls.protocol");
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
         String trustStorePassword = ServerConfiguration.getInstance().getFirstProperty(
                 "Security.TrustStore.Password");
@@ -1220,8 +1221,12 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         trustManagerFactory.init(trustStore);
 
         // Create and initialize SSLContext for HTTPS communication
-
-        SSLContext sslContext = SSLContext.getInstance(System.getProperty("tls.protocol"));
+        if (tlsProtocol == null) {
+            String msg = "Null received for system property : [tls.protocol]";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        SSLContext sslContext = SSLContext.getInstance(tlsProtocol);
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
         SSLContext.setDefault(sslContext);
         return sslContext;

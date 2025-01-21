@@ -252,6 +252,11 @@ public class HttpsTrustManagerUtils {
         trustManagerFactory.init(trustStore);
 
         // Create and initialize SSLContext for HTTPS communication
+        if (tlsProtocol == null) {
+            String msg = "Null received for system property : [tls.protocol]";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
         SSLContext sslContext = SSLContext.getInstance(tlsProtocol);
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
         SSLContext.setDefault(sslContext);
