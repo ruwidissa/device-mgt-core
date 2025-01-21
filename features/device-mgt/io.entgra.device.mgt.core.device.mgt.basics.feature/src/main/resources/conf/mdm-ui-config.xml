@@ -394,6 +394,8 @@
         <Scope>win:ops:firewall-info</Scope>
         <Scope>win:ops:os-updates-info</Scope>
         <Scope>win:ops:enterprise-app-install</Scope>
+        <Scope>win:ops:wns-config</Scope>
+        <Scope>win:ops:send-notif</Scope>
         <Scope>win:microsoft-store:search</Scope>
         <Scope>win:updates:read</Scope>
         <Scope>win:ops:os-updates-install</Scope>
