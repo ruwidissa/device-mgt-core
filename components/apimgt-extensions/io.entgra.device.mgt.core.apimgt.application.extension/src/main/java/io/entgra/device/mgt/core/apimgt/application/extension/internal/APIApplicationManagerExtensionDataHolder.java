@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.IOAuthClientService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
@@ -41,6 +42,7 @@ public class APIApplicationManagerExtensionDataHolder {
     private ConsumerRESTAPIServices consumerRESTAPIServices;
     private APIApplicationServices apiApplicationServices;
     private MetadataManagementService metadataManagementService;
+    private IOAuthClientService ioAuthClientService;
 
     private APIApplicationManagerExtensionDataHolder() {
     }
@@ -133,5 +135,16 @@ public class APIApplicationManagerExtensionDataHolder {
 
     public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
         this.metadataManagementService = metadataManagementService;
+    }
+
+    public IOAuthClientService getIoAuthClientService() {
+        if (ioAuthClientService == null) {
+            throw new IllegalStateException("Auth client service not initialized properly");
+        }
+        return ioAuthClientService;
+    }
+
+    public void setIoAuthClientService(IOAuthClientService ioAuthClientService) {
+        this.ioAuthClientService = ioAuthClientService;
     }
 }

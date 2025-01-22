@@ -447,7 +447,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             ConsumerRESTAPIServices consumerRESTAPIServices =
                     KeyMgtDataHolder.getInstance().getConsumerRESTAPIServices();
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
-                    consumerRESTAPIServices.getAllApplications(apiApplicationInfo, applicationName);
+                    consumerRESTAPIServices.getAllApplications(applicationName);
             if (applications.length == 1) {
                 return applications[0];
             } else {

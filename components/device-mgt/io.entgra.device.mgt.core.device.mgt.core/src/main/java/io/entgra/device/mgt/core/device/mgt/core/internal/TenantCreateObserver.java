@@ -147,36 +147,18 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
      */
     private void publishScopesToTenant(String tenantDomain) throws TenantManagementException {
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            APIApplicationServices apiApplicationServices = DeviceManagementDataHolder.getInstance().getApiApplicationServices();
-            APIApplicationKey apiApplicationKey;
-            AccessTokenInfo accessTokenInfo;
-
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-                APIPublisherUtils.createScopePublishUserIfNotExists(tenantDomain);
-                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                        "ClientForScopePublish",
-                        "client_credentials password refresh_token");
-                accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                        apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-            } catch (APIServicesException e) {
-                msg = "Error occurred while generating the API application for tenant: '" + tenantDomain + "'.";
-                log.error(msg, e);
-                throw new TenantManagementException(msg, e);
-            }
-
-            try {
                 PublisherRESTAPIServices publisherRESTAPIServices = DeviceManagementDataHolder.getInstance().getPublisherRESTAPIServices();
-                Scope[] superTenantScopes = getAllScopesFromSuperTenant(apiApplicationServices, publisherRESTAPIServices);
+                Scope[] superTenantScopes = getAllScopesFromSuperTenant(publisherRESTAPIServices);
 
                 if (superTenantScopes != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("Number of super tenant scopes already published - " + superTenantScopes.length);
                     }
 
-                    Scope[] subTenantScopes = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
+                    Scope[] subTenantScopes = publisherRESTAPIServices.getScopes();
 
                     if (subTenantScopes.length > 0) {
                         // If there is already existing scopes on the sub tenant space then do a comparison with the
@@ -216,8 +198,7 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                             if (log.isDebugEnabled()) {
                                 log.debug("Starting to add new/updated shared scopes to the tenant: '" + tenantDomain + "'.");
                             }
-                            publishSharedScopes(missingScopes, publisherRESTAPIServices, apiApplicationKey,
-                                    accessTokenInfo);
+                            publishSharedScopes(missingScopes, publisherRESTAPIServices);
                         }
 
                         for (Scope subTenantScope : subTenantScopes) {
@@ -247,10 +228,9 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                                 log.debug("Starting to delete shared scopes from the tenant: '" + tenantDomain + "'.");
                             }
                             for (Scope deletedScope : deletedScopes) {
-                                if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
-                                        deletedScope.getName())) {
+                                if (publisherRESTAPIServices.isSharedScopeNameExists(deletedScope.getName())) {
                                     Scope scope = createScopeObject(deletedScope);
-                                    publisherRESTAPIServices.deleteSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                                    publisherRESTAPIServices.deleteSharedScope(scope);
                                 }
                             }
                         }
@@ -259,8 +239,7 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                             log.debug("Starting to publish shared scopes to newly created tenant: '" + tenantDomain + "'.");
                         }
 
-                        publishSharedScopes(Arrays.asList(superTenantScopes), publisherRESTAPIServices,
-                                apiApplicationKey, accessTokenInfo);
+                        publishSharedScopes(Arrays.asList(superTenantScopes), publisherRESTAPIServices);
                     }
                 } else {
                     msg = "Unable to publish scopes to sub tenants due to super tenant scopes list being empty.";
@@ -339,15 +318,13 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
 
     /**
      * Get all the scopes from the super tenant space
-     * @param apiApplicationServices {@link APIApplicationServices} is used to create an OAuth application and retrieve client ID and secret
      * @param publisherRESTAPIServices {@link PublisherRESTAPIServices} is used to get all scopes under a given tenant using client credentials
      * @return array of {@link Scope}
      * @throws BadRequestException if an invalid request is sent to the API Manager Publisher REST API Service
      * @throws UnexpectedResponseException if an unexpected response is received from the API Manager Publisher REST API Service
      * @throws TenantManagementException if an error occurred while processing the request sent to API Manager Publisher REST API Service
      */
-    private Scope[] getAllScopesFromSuperTenant(APIApplicationServices apiApplicationServices,
-                                                PublisherRESTAPIServices publisherRESTAPIServices) throws BadRequestException,
+    private Scope[] getAllScopesFromSuperTenant(PublisherRESTAPIServices publisherRESTAPIServices) throws BadRequestException,
             UnexpectedResponseException, TenantManagementException {
 
         try {
@@ -355,12 +332,7 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
             // in order to see if any new scopes were added or deleted
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            APIApplicationKey superTenantApiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                    "ClientForScopePublish",
-                    "client_credentials password refresh_token");
-            AccessTokenInfo superTenantAccessToken = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                    superTenantApiApplicationKey.getClientId(), superTenantApiApplicationKey.getClientSecret());
-            return publisherRESTAPIServices.getScopes(superTenantApiApplicationKey, superTenantAccessToken);
+            return publisherRESTAPIServices.getScopes();
         } catch (APIServicesException e) {
             msg = "Error occurred while retrieving access token from super tenant";
             log.error(msg, e);
@@ -374,21 +346,17 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
      * Add shared scopes to the tenant space.
      * @param scopeList {@link List} of {@link Scope}
      * @param publisherRESTAPIServices {@link PublisherRESTAPIServices} is used to add shared scopes to a given tenant using client credentials
-     * @param apiApplicationKey {@link APIApplicationKey} contains client credentials of the OAuth application
-     * @param accessTokenInfo {@link AccessTokenInfo} contains token information generated from the client credentials
      * @throws BadRequestException if an invalid request is sent to the API Manager Publisher REST API Service
      * @throws UnexpectedResponseException if an unexpected response is received from the API Manager Publisher REST API Service
      * @throws APIServicesException if an error occurred while processing the request sent to API Manager Publisher REST API Service
      */
-    private void publishSharedScopes (List<Scope> scopeList, PublisherRESTAPIServices publisherRESTAPIServices,
-                                        APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    private void publishSharedScopes (List<Scope> scopeList, PublisherRESTAPIServices publisherRESTAPIServices)
             throws BadRequestException, UnexpectedResponseException, APIServicesException {
 
         for (Scope tenantScope : scopeList) {
-            if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
-                    tenantScope.getName())) {
+            if (!publisherRESTAPIServices.isSharedScopeNameExists(tenantScope.getName())) {
                 Scope scope = createScopeObject(tenantScope);
-                publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                publisherRESTAPIServices.addNewSharedScope(scope);
             }
         }
     }

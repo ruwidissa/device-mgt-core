@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.entgra.device.mgt.core.apimgt.application.extension.dto;
+package io.entgra.device.mgt.core.apimgt.application.extension.bean;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.constants.ApiApplicationConstants;
 import org.json.simple.JSONObject;
@@ -25,29 +25,37 @@ import org.json.simple.JSONObject;
  * This holds api application consumer key and secret.
  */
 public class ApiApplicationKey {
-    private String consumerKey;
-    private String consumerSecret;
+    private String client_id;
+    private String client_secret;
 
-    public String getConsumerKey() {
-        return this.consumerKey;
+    public ApiApplicationKey(String client_id, String client_secret) {
+        this.client_id = client_id;
+        this.client_secret = client_secret;
     }
 
-    public void setConsumerKey(String consumerKey) {
-        this.consumerKey = consumerKey;
+    public ApiApplicationKey() {
     }
 
-    public String getConsumerSecret() {
-        return this.consumerSecret;
+    public String getClientId() {
+        return this.client_id;
     }
 
-    public void setConsumerSecret(String consumerSecret) {
-        this.consumerSecret = consumerSecret;
+    public void setClientId(String client_id) {
+        this.client_id = client_id;
+    }
+
+    public String getClientSecret() {
+        return this.client_secret;
+    }
+
+    public void setClientSecret(String client_secret) {
+        this.client_secret = client_secret;
     }
 
     public String toString() {
         JSONObject obj = new JSONObject();
-        obj.put(ApiApplicationConstants.OAUTH_CLIENT_ID, this.getConsumerKey());
-        obj.put(ApiApplicationConstants.OAUTH_CLIENT_SECRET, this.getConsumerSecret());
+        obj.put(ApiApplicationConstants.OAUTH_CLIENT_ID, this.getClientId());
+        obj.put(ApiApplicationConstants.OAUTH_CLIENT_SECRET, this.getClientSecret());
         return obj.toString();
     }
 }

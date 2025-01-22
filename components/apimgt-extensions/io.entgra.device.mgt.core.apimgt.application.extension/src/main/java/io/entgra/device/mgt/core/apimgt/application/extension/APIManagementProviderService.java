@@ -18,46 +18,51 @@
 package io.entgra.device.mgt.core.apimgt.application.extension;
 
 
-import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.ApiApplicationProfile;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.Token;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.TokenCreationProfile;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
-
-import java.util.ArrayList;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 
 /**
- * This comprise on operation that is been done with api manager from CDMF. This service needs to be implemented in APIM.
+ * This comprise on operation that is been done with api manager from CDMF. This service needs to be implemented in
+ * APIM.
  */
 public interface APIManagementProviderService {
 
     /**
      * Check whether the tier is loaded for the tenant.
+     *
      * @return
      */
     boolean isTierLoaded();
 
-    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
-                                                         String keyType, String username,
-                                                         boolean isAllowedAllDomains,
-                                                         String validityTime,
-                                                         String password, String accessToken,
-                                                         ArrayList<String> supportedGrantTypes,
-                                                         String callbackUrl,
-                                                         boolean isMappingRequired) throws APIManagerException;
+    /**
+     * Create and retrieve API application token base on {@link TokenCreationProfile}
+     * @param tokenCreationProfile {@link TokenCreationProfile}
+     * @return Retrieve {@link Token} result on a successful execution
+     * @throws APIManagerException Throws when error occurred while retrieving the token
+     */
+    Token getToken(TokenCreationProfile tokenCreationProfile) throws APIManagerException;
 
     /**
-     * To get access token for given scopes and for the given validity period
-     * @param scopes Scopes
-     * @param tags Tags
-     * @param applicationName Application Name
-     * @param tokenType Token Type
-     * @param validityPeriod Validity Period
-     * @param username Name of the user to create the token. If null, set as carbon context user
-     * @return {@link String} Access Token
-     * @throws APIManagerException if error occurred while getting the access token for given scopes,
-     * validity period etc.
+     * Register API application base on {@link ApiApplicationProfile}
+     * @param apiApplicationProfile {@link ApiApplicationProfile}
+     * @return {@link ApiApplicationKey} result on a successful execution
+     * @throws APIManagerException Throws when error encountered while registering the application profile
+     * @throws BadRequestException Throws when the application profile contains invalid attributes
+     * @throws UnexpectedResponseException Throws when unexpected response received from the REST API client
      */
-    AccessTokenInfo getAccessToken(String scopes, String[] tags, String applicationName, String
-            tokenType, String validityPeriod, String username)
-            throws APIManagerException;
+    ApiApplicationKey registerApiApplication(ApiApplicationProfile apiApplicationProfile)
+            throws APIManagerException, BadRequestException, UnexpectedResponseException;
 
+    /**
+     * Generate custom JWT token via extended JWT client
+     * @param tokenCreationProfile {@link TokenCreationProfile}
+     * @return Retrieve {@link Token} result on a successful execution
+     * @throws APIManagerException Throws when error occurred while retrieving the token
+     */
+    Token getCustomToken(TokenCreationProfile tokenCreationProfile) throws APIManagerException;
 }

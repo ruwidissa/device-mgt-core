@@ -50,7 +50,7 @@
                             com.google.gson;version="[2.9,3)",
                             com.google.gson.reflect;version="[2.9,3)",
                             io.entgra.device.mgt.core.apimgt.application.extension;version="${io.entgra.device.mgt.core.version.range}",
-                            io.entgra.device.mgt.core.apimgt.application.extension.dto;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.apimgt.application.extension.bean;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.application.extension.exception;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.webapp.publisher;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.exception;version="${io.entgra.device.mgt.core.version.range}",

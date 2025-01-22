@@ -31,9 +31,11 @@
             </bean>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <ref bean="jsonProvider"/>
         </jaxrs:providers>
     </jaxrs:server>
+
+    <bean id="jsonProvider" class="io.entgra.device.mgt.core.apimgt.application.extension.api.common.GsonMessageBodyHandler"/>
 
 </beans>
 

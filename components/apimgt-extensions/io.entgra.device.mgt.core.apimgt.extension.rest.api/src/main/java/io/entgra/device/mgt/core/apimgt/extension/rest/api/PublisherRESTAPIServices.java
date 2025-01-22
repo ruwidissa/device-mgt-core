@@ -18,9 +18,13 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.*;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.MediationPolicy;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
@@ -29,86 +33,86 @@ import java.util.List;
 
 public interface PublisherRESTAPIServices {
 
-    Scope[] getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    Scope[] getScopes()
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean isSharedScopeNameExists(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String key)
+    boolean isSharedScopeNameExists(String key)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean addNewSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
+    boolean addNewSharedScope(Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
+    boolean updateSharedScope(Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean deleteSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
+    boolean deleteSharedScope(Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIInfo getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
+    APIInfo getApi(String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIInfo[] getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    APIInfo[] getApis()
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIInfo addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
+    APIInfo addAPI(APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
+    boolean updateApi(APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean saveAsyncApiDefinition(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+    boolean saveAsyncApiDefinition(String uuid,
                                    String asyncApiDefinition)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    MediationPolicy[] getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                         String apiUuid)
+    MediationPolicy[] getAllApiSpecificMediationPolicies(
+            String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean addApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                          String uuid, Mediation mediation)
+    boolean addApiSpecificMediationPolicy(
+            String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean deleteApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                             String uuid, Mediation mediation)
+    boolean deleteApiSpecificMediationPolicy(
+            String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean changeLifeCycleStatus(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                  String uuid, String action)
+    boolean changeLifeCycleStatus(
+            String uuid, String action)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIRevision[] getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+    APIRevision[] getAPIRevisions(String uuid,
                                   Boolean deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIRevision addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                              APIRevision apiRevision)
+    APIRevision addAPIRevision(
+            APIRevision apiRevision)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean deployAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+    boolean deployAPIRevision(String uuid,
                               String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeploymentList)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                          APIRevision apiRevisionDeployment, String uuid)
+    boolean undeployAPIRevisionDeployment(
+            APIRevision apiRevisionDeployment, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean deleteAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                              APIRevision apiRevision, String uuid)
+    boolean deleteAPIRevision(
+            APIRevision apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Documentation[] getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                 String uuid)
+    Documentation[] getDocumentations(
+            String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean deleteDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                 String uuid, String documentID)
+    boolean deleteDocumentations(
+            String uuid, String documentID)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                   String uuid, Documentation documentation)
+    Documentation addDocumentation(
+            String uuid, Documentation documentation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                    String apiUuid, String docId, String docContent)
+    boolean addDocumentationContent(
+            String apiUuid, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }

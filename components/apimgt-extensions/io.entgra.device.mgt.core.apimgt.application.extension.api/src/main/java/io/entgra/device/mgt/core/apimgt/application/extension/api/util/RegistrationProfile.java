@@ -47,6 +47,7 @@ public class RegistrationProfile {
     private String callbackUrl;
 
     private ArrayList<String> supportedGrantTypes;
+    private String tokenType;
 
     public String getApplicationName() {
         return applicationName;
@@ -110,5 +111,13 @@ public class RegistrationProfile {
 
     public void setSupportedGrantTypes(ArrayList<String> supportedGrantTypes) {
         this.supportedGrantTypes = supportedGrantTypes;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }

@@ -20,16 +20,12 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
-import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.ApiApplicationProfile;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.Token;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.TokenCreationProfile;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
 import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
@@ -130,7 +126,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -955,51 +950,36 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         }
 
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String applicationName = type.replace(" ", "").replace("_", "")
                 + "_" + tenantDomain;
 
-        KeyMgtService keyMgtService = new KeyMgtServiceImpl();
+        APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
+
         try {
             ApiApplicationKey apiApplicationKey;
             try {
-                APIApplicationServices apiApplicationServices = DeviceMgtAPIUtils.getApiApplicationServices();
-                APIApplicationKey adminDCRResponse = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                        "ClientForJWTTokenGeneration",
-                        "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer"
-                );
+                ApiApplicationProfile apiApplicationProfile = new ApiApplicationProfile();
+                apiApplicationProfile.setApplicationName(applicationName);
+                apiApplicationProfile.setTags(new String[] {"device_management"});
+                apiApplicationProfile.setGrantTypes("client_credentials password refresh_token");
+                apiApplicationProfile.setTokenType(ApiApplicationProfile.TOKEN_TYPE.OPAQUE);
 
-                PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx.
-                        getOSGiService(JWTClientManagerService.class, null);
-                JWTClient jwtClient = jwtClientManagerService.getJWTClient();
-                AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(adminDCRResponse.getClientId(),
-                        adminDCRResponse.getClientSecret(),
-                        username, "appm:subscribe apim:admin apim:api_key apim:app_import_export apim:app_manage" +
-                                " apim:store_settings apim:sub_alert_manage apim:sub_manage apim:subscribe openid perm:device:enroll " +
-                                "perm:devices:details perm:devices:features perm:devices:search perm:devices:view perm:groups:groups " +
-                                "perm:users:send-invitation");
-
-                APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
-                apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
-                        new String[] {"device_management"}, "PRODUCTION", null, false, String.valueOf(validityTime),
-                        null, accessTokenInfo.getAccessToken(), null, null,true);
-
-            } catch (JWTClientException e) {
-                String msg = "Error while generating an application tokens for Tenant Admin.";
+                apiApplicationKey = apiManagementProviderService.registerApiApplication(apiApplicationProfile);
+            } catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
+                String msg = "Application registration profile contains invalid attributes";
                 log.error(msg, e);
                 return Response.serverError().entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-            } catch (APIServicesException e) {
-                String msg = "Error while generating api Application";
+            } catch (UnexpectedResponseException e) {
+                String msg = "Unexpected error encountered while registering api application " + applicationName;
                 log.error(msg, e);
                 return Response.serverError().entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
             }
 
             //todo call REST APIs
-            deviceConfig.setClientId(apiApplicationKey.getConsumerKey());
-            deviceConfig.setClientSecret(apiApplicationKey.getConsumerSecret());
+            deviceConfig.setClientId(apiApplicationKey.getClientId());
+            deviceConfig.setClientSecret(apiApplicationKey.getClientSecret());
 
             StringBuilder scopes = new StringBuilder("device:" + type.replace(" ", "") + ":" + id);
             for (String topic : mqttEventTopicStructure) {
@@ -1017,13 +997,15 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             // add scopes for update operation /tenantDomain/deviceType/deviceId/update/operation
             scopes.append(" perm:topic:pub:" + tenantDomain + ":" + type + ":" + id + ":update:operation");
 
-            TokenRequest tokenRequest = new TokenRequest(apiApplicationKey.getConsumerKey(),
-            apiApplicationKey.getConsumerSecret(),
-                    null, scopes.toString(), "client_credentials", null,
-                    null, null, null,  validityTime);
-            TokenResponse tokenResponse = keyMgtService.generateAccessToken(tokenRequest);
-            deviceConfig.setAccessToken(tokenResponse.getAccessToken());
-            deviceConfig.setRefreshToken(tokenResponse.getRefreshToken());
+            TokenCreationProfile tokenCreationProfile = new TokenCreationProfile();
+            tokenCreationProfile.setGrantType("client_credentials");
+            tokenCreationProfile.setScope(scopes.toString());
+            tokenCreationProfile.setBasicAuthUsername(apiApplicationKey.getClientId());
+            tokenCreationProfile.setBasicAuthPassword(apiApplicationKey.getClientSecret());
+
+            Token token = apiManagementProviderService.getToken(tokenCreationProfile);
+            deviceConfig.setAccessToken(token.getAccessToken());
+            deviceConfig.setRefreshToken(token.getRefreshToken());
 
             try {
                 deviceConfig.setPlatformConfiguration(deviceManagementProviderService.getConfiguration(type));
@@ -1038,16 +1020,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             deviceConfig.setHttpGateway("http://" + System.getProperty("iot.gateway.host") + ":" + System.getProperty("iot.gateway.http.port"));
             deviceConfig.setHttpsGateway("https://" + System.getProperty("iot.gateway.host") + ":" + System.getProperty("iot.gateway.https.port"));
 
-        } catch (KeyMgtException e) {
-            String msg = "Error occurred while creating oauth application, device id : " +  id + ", device type : " + type;
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        } catch (io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestException e) {
-            String msg = "Error occurred while generating token, device id : " +  id + ", device type : " + type;
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (APIManagerException e) {
             String msg = "Error while calling rest Call for application key generation";
             log.error(msg, e);

@@ -22,6 +22,8 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.IOAuthClientService;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.OAuthClient;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
 import org.apache.commons.logging.Log;
@@ -45,6 +47,10 @@ public class APIManagerServiceComponent {
         }
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
+
+            IOAuthClientService ioAuthClientService = OAuthClient.getInstance();
+            bundleContext.registerService(IOAuthClientService.class, ioAuthClientService, null);
+            APIManagerServiceDataHolder.getInstance().setIoAuthClientService(ioAuthClientService);
 
             APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
             bundleContext.registerService(APIApplicationServices.class.getName(), apiApplicationServices, null);

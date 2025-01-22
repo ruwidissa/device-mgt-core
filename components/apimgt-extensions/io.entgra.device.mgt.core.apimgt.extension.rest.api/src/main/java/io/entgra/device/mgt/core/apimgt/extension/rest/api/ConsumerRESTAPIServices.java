@@ -18,7 +18,11 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.*;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.ApiApplicationInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
@@ -29,44 +33,47 @@ import java.util.Map;
 
 public interface ConsumerRESTAPIServices {
 
-    Application[] getAllApplications(ApiApplicationInfo apiApplicationInfo, String appName)
+    Application[] getAllApplications(String appName)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Application getDetailsOfAnApplication(ApiApplicationInfo apiApplicationInfo, String applicationId)
+    Application getDetailsOfAnApplication(String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Application createApplication(ApiApplicationInfo apiApplicationInfo, Application application)
+    Application createApplication(Application application)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Boolean deleteApplication(ApiApplicationInfo apiApplicationInfo, String applicationId)
+    Boolean deleteApplication(String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription[] getAllSubscriptions(ApiApplicationInfo apiApplicationInfo, String applicationId)
+    Subscription[] getAllSubscriptions(String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIInfo[] getAllApis(ApiApplicationInfo apiApplicationInfo, Map<String, String> queryParams, Map<String, String> headerParams)
+    APIInfo[] getAllApis(Map<String, String> queryParams, Map<String, String> headerParams)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription createSubscription(ApiApplicationInfo apiApplicationInfo, Subscription subscriptions)
+    Subscription createSubscription(Subscription subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription[] createSubscriptions(ApiApplicationInfo apiApplicationInfo, List<Subscription> subscriptions)
+    public ApplicationKey[] getAllKeys(String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey generateApplicationKeys(ApiApplicationInfo apiApplicationInfo, String applicationId, String keyManager,
-                                           String validityTime, String keyType)
+    Subscription[] createSubscriptions(List<Subscription> subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey mapApplicationKeys(ApiApplicationInfo apiApplicationInfo, Application application, String keyManager, String keyType)
+    ApplicationKey generateApplicationKeys(String applicationId, String keyManager,
+                                           String validityTime, String keyType, String grantTypesToBeSupported, String callbackUrl)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey getKeyDetails(ApiApplicationInfo apiApplicationInfo, String applicationId, String keyMapId)
+    ApplicationKey mapApplicationKeys(String consumerKey, String consumerSecret, Application application,
+                                      String keyManager, String keyType)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey updateGrantType(ApiApplicationInfo apiApplicationInfo, String applicationId, String keyMapId, String keyManager,
-                                   List<String> supportedGrantTypes, String callbackUrl)
+    ApplicationKey getKeyDetails(String applicationId, String keyMapId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    KeyManager[] getAllKeyManagers(ApiApplicationInfo apiApplicationInfo)
+    ApplicationKey updateGrantType(String applicationId, String keyMapId, List<String> supportedGrantTypes, String callbackUrl)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    KeyManager[] getAllKeyManagers()
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }

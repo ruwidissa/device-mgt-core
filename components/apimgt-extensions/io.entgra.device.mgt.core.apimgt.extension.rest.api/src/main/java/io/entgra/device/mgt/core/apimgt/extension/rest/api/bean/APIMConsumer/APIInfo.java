@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -28,6 +29,20 @@ import java.util.Set;
  */
 
 public class APIInfo {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        APIInfo apiInfo = (APIInfo) o;
+        return Objects.equals(id, apiInfo.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 
     private String id;
     private String name;

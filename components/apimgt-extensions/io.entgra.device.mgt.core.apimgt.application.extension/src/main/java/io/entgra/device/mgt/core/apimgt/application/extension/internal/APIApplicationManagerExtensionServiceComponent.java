@@ -21,6 +21,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.IOAuthClientService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -208,5 +209,35 @@ public class APIApplicationManagerExtensionServiceComponent {
             log.debug("Unsetting Meta Data mgt Service");
         }
         APIApplicationManagerExtensionDataHolder.getInstance().setMetadataManagementService(null);
+    }
+
+    /**
+     * Sets IOAuthclientService.
+     *
+     * @param ioAuthClientService An instance of {@link IOAuthClientService}
+     */
+    @Reference(
+            name = "APIM.application.oauth.client.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.IOAuthClientService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIApplicationServices")
+    protected void setIOAuthClientService(IOAuthClientService ioAuthClientService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting IOAuthclientService.");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setIoAuthClientService(ioAuthClientService);
+    }
+
+    /**
+     * Unset IOAuthclientService.
+     *
+     * @param ioAuthClientService An instance of {@link IOAuthClientService}
+     */
+    protected void unsetAPIApplicationServices(IOAuthClientService ioAuthClientService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting DCR REST API Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setIoAuthClientService(null);
     }
 }

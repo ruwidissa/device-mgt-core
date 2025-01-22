@@ -19,19 +19,23 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.IOAuthClientService;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
 public class APIManagerServiceDataHolder {
-
+    private static final Log log = LogFactory.getLog(APIManagerServiceDataHolder.class);
     private APIApplicationServices apiApplicationServices;
     private APIManagerConfigurationService apiManagerConfigurationService;
     private PublisherRESTAPIServices publisherRESTAPIServices;
     private RealmService realmService;
     private TenantManager tenantManager;
+    private IOAuthClientService ioAuthClientService;
 
     private static APIManagerServiceDataHolder thisInstance = new APIManagerServiceDataHolder();
 
@@ -40,7 +44,7 @@ public class APIManagerServiceDataHolder {
     private APIManagerServiceDataHolder() {
     }
 
-    static APIManagerServiceDataHolder getInstance() {
+    public static APIManagerServiceDataHolder getInstance() {
         return thisInstance;
     }
 
@@ -101,5 +105,18 @@ public class APIManagerServiceDataHolder {
 
     public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
         this.consumerRESTAPIServices = consumerRESTAPIServices;
+    }
+
+    public IOAuthClientService getIoAuthClientService() {
+        if (ioAuthClientService == null) {
+            String msg = "OAuth client service is not initialized properly";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return ioAuthClientService;
+    }
+
+    public void setIoAuthClientService(IOAuthClientService ioAuthClientService) {
+        this.ioAuthClientService = ioAuthClientService;
     }
 }

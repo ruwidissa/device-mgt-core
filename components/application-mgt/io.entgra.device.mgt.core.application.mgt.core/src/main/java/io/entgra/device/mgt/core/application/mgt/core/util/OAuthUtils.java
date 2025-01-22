@@ -19,8 +19,11 @@
 package io.entgra.device.mgt.core.application.mgt.core.util;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
-import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.ApiApplicationProfile;
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApiRegistrationProfile;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
@@ -61,12 +64,17 @@ public class OAuthUtils {
             PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             APIManagementProviderService apiManagementProviderService = (APIManagementProviderService) ctx.
                     getOSGiService(APIManagementProviderService.class, null);
+
+            ApiApplicationProfile apiApplicationProfile = new ApiApplicationProfile();
+            apiApplicationProfile.setApplicationName(registrationProfile.getApplicationName());
+            apiApplicationProfile.setTags(registrationProfile.getTags());
+            apiApplicationProfile.setGrantTypes("refresh_token client_credentials password");
             apiApplicationKeyInfo = apiManagementProviderService.
-                    generateAndRetrieveApplicationKeys(registrationProfile.getApplicationName(),
-                            registrationProfile.getTags(), Constants.ApplicationInstall.DEFAULT_TOKEN_TYPE,
-                            username, registrationProfile.isAllowedToAllDomains(),
-                            Constants.ApplicationInstall.DEFAULT_VALIDITY_PERIOD, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
-                                    .getRealmConfiguration().getAdminPassword(), null, null, null, false);
+                    registerApiApplication(apiApplicationProfile);
+        } catch (BadRequestException | UnexpectedResponseException  e) {
+            String msg = "Error encountered while registering api application";
+            log.error(msg);
+            throw new APIManagerException(msg, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -80,7 +88,7 @@ public class OAuthUtils {
             JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx.
                     getOSGiService(JWTClientManagerService.class, null);
             JWTClient jwtClient = jwtClientManagerService.getJWTClient();
-            return jwtClient.getAccessToken(apiApplicationKey.getConsumerKey(), apiApplicationKey.getConsumerSecret(),
+            return jwtClient.getAccessToken(apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret(),
                     username, Constants.ApplicationInstall.SUBSCRIPTION_SCOPE);
         } catch (JWTClientException e) {
             String errorMsg = "Error while generating an OAuth token for user " + username;

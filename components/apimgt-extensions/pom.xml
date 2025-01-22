@@ -37,8 +37,6 @@
         <module>io.entgra.device.mgt.core.apimgt.application.extension</module>
         <module>io.entgra.device.mgt.core.apimgt.application.extension.api</module>
         <module>io.entgra.device.mgt.core.apimgt.annotations</module>
-        <module>io.entgra.device.mgt.core.apimgt.keymgt.extension</module>
-        <module>io.entgra.device.mgt.core.apimgt.keymgt.extension.api</module>
         <module>io.entgra.device.mgt.core.apimgt.analytics.extension</module>
         <module>io.entgra.device.mgt.core.apimgt.extension.rest.api</module>
     </modules>

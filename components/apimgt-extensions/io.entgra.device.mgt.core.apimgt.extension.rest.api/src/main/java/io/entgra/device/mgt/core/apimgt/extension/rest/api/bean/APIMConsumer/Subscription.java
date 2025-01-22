@@ -20,7 +20,23 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 public class Subscription {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Subscription that = (Subscription) o;
+        return Objects.equals(apiId, that.apiId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(apiId);
+    }
 
     private String subscriptionId;
     private String applicationId;
