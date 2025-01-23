@@ -151,10 +151,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             }
 
             Set<APIInfo> apis = new HashSet<>();
+            Map<String, String> queryParam = new HashMap<>();
             for (String tag : apiApplicationProfile.getTags()) {
-                Map<String, String> queryParam = new HashMap<>();
                 queryParam.put("tag", tag);
                 apis.addAll(Arrays.asList(consumerRESTAPIServices.getAllApis(queryParam, new HashMap<>())));
+                queryParam.clear();
             }
 
             return applications.isEmpty() ? createAndRetrieveApplicationKeys(apiApplicationProfile, apis) :
@@ -308,6 +309,50 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         }).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieve API publish enabled tenant domain list from the super tenant space
+     *
+     * @return Returns list of API publishing enabled tenant domains
+     * @throws APIManagerException Throws when error encountered while getting tenant list from metadata registry
+     */
+    private static List<String> getApiPublishingEnabledTenantDomains() throws APIManagerException {
+        MetadataManagementService metadataManagementService =
+                APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
+        Metadata metaData;
+        try {
+            if (Objects.equals(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(),
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                metaData = metadataManagementService.retrieveMetadata(Constants.API_PUBLISHING_ENABLED_TENANT_LIST_KEY);
+            } else {
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    metaData =
+                            metadataManagementService.retrieveMetadata(Constants.API_PUBLISHING_ENABLED_TENANT_LIST_KEY);
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        } catch (MetadataManagementException e) {
+            String msg = "Failed to load API publishing enabled tenant domains from meta data registry.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        }
+
+        if (metaData == null) {
+            String msg = "Null retrieved for the metadata entry when getting API publishing enabled tenant domains.";
+            log.error(msg);
+            throw new APIManagerException(msg);
+        }
+
+        JsonArray tenants = gson.fromJson(metaData.getMetaValue(), JsonArray.class);
+        List<String> tenantDomains = new ArrayList<>();
+        for (JsonElement tenant : tenants) {
+            tenantDomains.add(tenant.getAsString());
+        }
+        return tenantDomains;
+    }
+
     @Override
     public boolean isTierLoaded() {
 
@@ -356,35 +401,16 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     public ApiApplicationKey registerApiApplication(ApiApplicationProfile apiApplicationProfile) throws APIManagerException,
             BadRequestException, UnexpectedResponseException {
         String flowStartingDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        MetadataManagementService metadataManagementService =
-                APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
 
-        try {
-            Metadata metaData =
-                    metadataManagementService.retrieveMetadata(Constants.API_PUBLISHING_ENABLED_TENANT_LIST_KEY);
-            if (metaData == null) {
-                String msg = "Null retrieved for the metadata entry when getting API publishing enabled tenant " +
-                        "domains.";
-                log.error(msg);
-                throw new APIManagerException(msg);
+        String currentTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+        // Here we are checking whether that the current tenant is API publishing enabled tenant or not
+        // If the current tenant belongs to a publishing enabled tenant, then start the api application
+        // registration sequences in current tenant space, otherwise in the super tenant
+        for (String tenantDomain : getApiPublishingEnabledTenantDomains()) {
+            if (Objects.equals(tenantDomain, currentTenantDomain)) {
+                flowStartingDomain = currentTenantDomain;
+                break;
             }
-
-            JsonArray tenants = gson.fromJson(metaData.getMetaValue(), JsonArray.class);
-
-            String currentTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
-            // Here we are checking whether that the current tenant is API publishing enabled tenant or not
-            // If the current tenant belongs to a publishing enabled tenant, then start the api application
-            // registration sequences in current tenant space, otherwise in the super tenant
-            for (JsonElement tenant : tenants) {
-                if (Objects.equals(tenant.getAsString(), currentTenantDomain)) {
-                    flowStartingDomain = currentTenantDomain;
-                    break;
-                }
-            }
-        } catch (MetadataManagementException e) {
-            String msg = "Failed to load API publishing enabled tenant domains from meta data registry.";
-            log.error(msg, e);
-            throw new APIManagerException(msg, e);
         }
 
         if (log.isDebugEnabled()) {
