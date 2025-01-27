@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ConflictException;
+import io.entgra.device.mgt.core.device.mgt.core.cache.DeviceCacheKey;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
@@ -778,6 +779,10 @@ public interface DeviceManagementProviderService {
     boolean isDeviceMonitoringEnabled(String deviceType);
 
     PolicyMonitoringManager getPolicyMonitoringManager(String deviceType);
+
+    void removeDeviceFromCache(DeviceIdentifier deviceIdentifier);
+
+    void removeDevicesFromCache(List<DeviceCacheKey> deviceList);
 
     /**
      * Change device status.
