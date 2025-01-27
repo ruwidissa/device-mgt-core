@@ -76,7 +76,7 @@ public class ApiApplicationProfile {
     }
 
     public enum TOKEN_TYPE {
-        JWT("JWT"), OPAQUE("DEFAULT");
+        JWT("JWT"), DEFAULT("DEFAULT");
         private final String value;
 
         TOKEN_TYPE(String value) {

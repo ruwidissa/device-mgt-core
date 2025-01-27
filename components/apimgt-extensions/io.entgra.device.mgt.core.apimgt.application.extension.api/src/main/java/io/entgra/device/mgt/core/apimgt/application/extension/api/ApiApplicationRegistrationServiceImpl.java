@@ -40,6 +40,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 
 
 public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegistrationService {
@@ -114,6 +115,7 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
 
             if (!StringUtils.isBlank(registrationProfile.getTokenType())) {
                 try {
+                    registrationProfile.setTokenType(registrationProfile.getTokenType().toUpperCase(Locale.ROOT));
                     Enum.valueOf(ApiApplicationProfile.TOKEN_TYPE.class, registrationProfile.getTokenType());
                 } catch (IllegalArgumentException e) {
                     String msg =

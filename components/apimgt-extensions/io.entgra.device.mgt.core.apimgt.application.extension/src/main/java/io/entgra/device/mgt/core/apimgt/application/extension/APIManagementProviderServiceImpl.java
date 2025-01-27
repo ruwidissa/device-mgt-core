@@ -29,14 +29,17 @@ import io.entgra.device.mgt.core.apimgt.application.extension.constants.ApiAppli
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.IOAuthClientService;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.IDNApplicationKeys;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.OAuthClientException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
@@ -58,7 +61,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -79,8 +81,6 @@ import java.util.stream.Collectors;
  * This class represents an implementation of APIManagementProviderService.
  */
 public class APIManagementProviderServiceImpl implements APIManagementProviderService {
-
-    public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
     private static final Log log = LogFactory.getLog(APIManagementProviderServiceImpl.class);
     private static final APIManagerConfiguration config =
             ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -167,7 +167,57 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             log.error(msg, e);
             throw new APIManagerException(msg, e);
         }
+    }
 
+    /**
+     * In case of getting OPAQUE token, we need to alter the default API application registration procedure.
+     * In such cases, create identity service provider(IDN DCR client) first and then create the API application.
+     * After that map the IDN DCR's client credentials and secret with the created API application.
+     *
+     * @param application API application
+     * @return {@link ApplicationKey}
+     * @throws APIManagerException         Throws when error encountered while API application creation
+     * @throws BadRequestException         Throws when API application profile contains an invalid properties
+     * @throws UnexpectedResponseException Throws when unexpected error encountered while invoking REST services
+     * @throws APIServicesException        Throws when error encountered while executing REST API invocations
+     */
+    private static ApiApplicationKey mapApiApplicationWithIdnDCRClient(Application application) throws APIManagerException,
+            BadRequestException, UnexpectedResponseException, APIServicesException {
+        ConsumerRESTAPIServices consumerRESTAPIServices =
+                APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
+        IOAuthClientService ioAuthClientService =
+                APIApplicationManagerExtensionDataHolder.getInstance().getIoAuthClientService();
+        IDNApplicationKeys idnApplicationKeys;
+
+        try {
+            idnApplicationKeys =
+                    ioAuthClientService.getIdnApplicationKeys("opaque_token_issuer_for" + application.getApplicationId() +
+                            "_" + ApiApplicationConstants.DEFAULT_TOKEN_TYPE);
+        } catch (OAuthClientException e) {
+            String msg = "Error encountered while registering IDN DCR client for generating OPAQUE token for API " +
+                    "application [ " + application.getName() + " ]";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        }
+
+        if (idnApplicationKeys == null) {
+            String msg = "Null received as registered DCR client for OPAQUE token issuing process";
+            log.error(msg);
+            throw new APIManagerException(msg);
+        }
+
+        KeyManager[] keyManagers = consumerRESTAPIServices.getAllKeyManagers();
+
+        if (keyManagers.length != 1) {
+            String msg = "Found invalid number of key managers.";
+            log.error(msg);
+            throw new APIManagerException(msg);
+        }
+
+        ApplicationKey applicationKey = consumerRESTAPIServices.mapApplicationKeys(idnApplicationKeys.getConsumerKey(),
+                idnApplicationKeys.getConsumerSecret(), application, keyManagers[0].getName(),
+                ApiApplicationConstants.DEFAULT_TOKEN_TYPE);
+        return new ApiApplicationKey(applicationKey.getConsumerKey(), applicationKey.getConsumerSecret());
     }
 
     /**
@@ -255,6 +305,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         List<Subscription> subscriptions = constructSubscriptionList(application.getApplicationId(), apis);
 
         consumerRESTAPIServices.createSubscriptions(subscriptions);
+
+        if (Objects.equals(apiApplicationProfile.getTokenType(), ApiApplicationProfile.TOKEN_TYPE.DEFAULT)) {
+            return mapApiApplicationWithIdnDCRClient(application);
+        }
 
         return generateApplicationKeys(application.getApplicationId(), apiApplicationProfile.getGrantTypes(),
                 apiApplicationProfile.getCallbackUrl());

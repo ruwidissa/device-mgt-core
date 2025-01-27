@@ -19,6 +19,7 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.IDNApplicationKeys;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.OAuthClientResponse;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.OAuthClientException;
@@ -38,4 +39,13 @@ public interface IOAuthClientService {
      */
     OAuthClientResponse execute(Request request) throws OAuthClientException, BadRequestException,
             UnexpectedResponseException;
+
+    /**
+     * Create and retrieve identity server side service provider applications
+     *
+     * @param clientName IDN client name
+     * @return {@link IDNApplicationKeys}
+     * @throws OAuthClientException Throws when error encountered while IDN client creation
+     */
+    IDNApplicationKeys getIdnApplicationKeys(String clientName) throws OAuthClientException;
 }

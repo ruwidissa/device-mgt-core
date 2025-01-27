@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.IDNApplicationKeys;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.OAuthClientResponse;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
@@ -92,7 +93,7 @@ public class OAuthClient implements IOAuthClientService {
 
         while (true) {
             try {
-              request = intercept(request);
+                request = intercept(request);
                 try (Response response = client.newCall(request).execute()) {
                     if (response.isSuccessful()) {
                         oAuthClientResponse = mapToOAuthClientResponse(response);
@@ -148,6 +149,26 @@ public class OAuthClient implements IOAuthClientService {
     }
 
     /**
+     * Create and retrieve identity server side service provider applications
+     *
+     * @param clientName IDN client name
+     * @return {@link IDNApplicationKeys}
+     * @throws OAuthClientException Throws when error encountered while IDN client creation
+     */
+    @Override
+    public IDNApplicationKeys getIdnApplicationKeys(String clientName) throws OAuthClientException {
+        try {
+            Keys keys =
+                    idnDynamicClientRegistration(clientName);
+            return new IDNApplicationKeys(keys.consumerKey, keys.consumerSecret);
+        } catch (IOException e) {
+            String msg = "IO exception encountered while registering DCR client for OPAQUE token generation";
+            log.error(msg, e);
+            throw new OAuthClientException(msg, e);
+        }
+    }
+
+    /**
      * Dynamic client registration will be handled through here. These clients can be located under carbon console's
      * service provider section in respective tenants.
      *
@@ -155,10 +176,9 @@ public class OAuthClient implements IOAuthClientService {
      * @throws IOException          Throws when error encountered while executing dcr request
      * @throws OAuthClientException Throws when failed to register dcr client
      */
-    private Keys idnDynamicClientRegistration() throws IOException, OAuthClientException {
+    private Keys idnDynamicClientRegistration(String tenantAwareClientName) throws IOException, OAuthClientException {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         createRestClientInvokerUserIfNotExists(tenantDomain);
-        String tenantAwareClientName = tenantDomain.toUpperCase() + IDN_DCR_CLIENT_PREFIX;
 
         List<String> grantTypes = Arrays.asList(Constants.PASSWORD_GRANT_TYPE, Constants.REFRESH_TOKEN_GRANT_TYPE);
         String dcrRequestJsonStr = (new JSONObject())
@@ -276,18 +296,15 @@ public class OAuthClient implements IOAuthClientService {
         CacheWrapper cacheWrapper = cache.computeIfAbsent(tenantDomain, key -> {
             CacheWrapper constructedWrapper = null;
             try {
-                Keys keys = idnDynamicClientRegistration();
+                Keys keys = idnDynamicClientRegistration(tenantDomain.toUpperCase() + IDN_DCR_CLIENT_PREFIX);
                 Tokens tokens = idnTokenGeneration(keys);
                 constructedWrapper = new CacheWrapper(keys, tokens);
             } catch (OAuthClientException e) {
-                String msg = "Failed to register DCR client and obtain a token";
-                log.error(msg, e);
+                log.error("Failed to register DCR client and obtain a token", e);
             } catch (IOException e) {
-                String msg = "Error encountered in token acquiring process";
-                log.error(msg, e);
+                log.error("Error encountered in token acquiring process", e);
             } catch (Exception e) {
-                String msg = "Error encountered while updating the cache";
-                log.error(msg, e);
+                log.error("Error encountered while updating the cache", e);
             }
             return constructedWrapper;
         });
@@ -315,14 +332,11 @@ public class OAuthClient implements IOAuthClientService {
                 Tokens tokens = idnTokenRefresh(value.keys, value.tokens.refreshToken);
                 updatedCacheWrapper = new CacheWrapper(value.keys, tokens);
             } catch (OAuthClientException e) {
-                String msg = "Failed to refresh the token using refresh token";
-                log.error(msg, e);
+                log.error("Failed to refresh the token using refresh token", e);
             } catch (IOException e) {
-                String msg = "Error encountered while executing token retrieving request";
-                log.error(msg, e);
+                log.error("Error encountered while executing token retrieving request", e);
             } catch (Exception e) {
-                String msg = "Error encountered while updating the cache";
-                log.error(msg, e);
+                log.error("Error encountered while updating the cache", e);
             }
             return updatedCacheWrapper;
         });
@@ -373,7 +387,8 @@ public class OAuthClient implements IOAuthClientService {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getUserStoreManager();
             if (!userStoreManager.isExistingUser(MultitenantUtils.getTenantAwareUsername(IDN_REST_API_INVOKER_USER))) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Creating user '" + IDN_REST_API_INVOKER_USER + "' in '" + tenantDomain + "' tenant domain.");
+                    log.debug("Creating user '" + IDN_REST_API_INVOKER_USER + "' in '" + tenantDomain + "' tenant " +
+                            "domain.");
                 }
                 String[] roles = {Constants.ADMIN_ROLE_KEY};
                 userStoreManager.addUser(
@@ -402,7 +417,7 @@ public class OAuthClient implements IOAuthClientService {
     /**
      * Act as an internal data class for containing dcr credentials, hence no need of expose as a bean
      */
-    private class Keys {
+    private static class Keys {
         String consumerKey;
         String consumerSecret;
     }
@@ -410,7 +425,7 @@ public class OAuthClient implements IOAuthClientService {
     /**
      * Act as an internal data class for containing dcr tokens, hence no need of expose as a bean
      */
-    private class Tokens {
+    private static class Tokens {
         String accessToken;
         String refreshToken;
     }
@@ -418,7 +433,7 @@ public class OAuthClient implements IOAuthClientService {
     /**
      * Act as an internal data class for containing cached tokens and keys, hence no need of expose as a bean
      */
-    private class CacheWrapper {
+    private static class CacheWrapper {
         Keys keys;
         Tokens tokens;
 

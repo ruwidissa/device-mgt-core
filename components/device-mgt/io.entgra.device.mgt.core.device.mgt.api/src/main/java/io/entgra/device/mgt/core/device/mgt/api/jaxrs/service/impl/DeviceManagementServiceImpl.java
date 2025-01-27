@@ -962,7 +962,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 apiApplicationProfile.setApplicationName(applicationName);
                 apiApplicationProfile.setTags(new String[] {"device_management"});
                 apiApplicationProfile.setGrantTypes("client_credentials password refresh_token");
-                apiApplicationProfile.setTokenType(ApiApplicationProfile.TOKEN_TYPE.OPAQUE);
+                apiApplicationProfile.setTokenType(ApiApplicationProfile.TOKEN_TYPE.DEFAULT);
 
                 apiApplicationKey = apiManagementProviderService.registerApiApplication(apiApplicationProfile);
             } catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
