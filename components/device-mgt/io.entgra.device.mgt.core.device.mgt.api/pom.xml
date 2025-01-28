@@ -421,11 +421,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.stream.core</artifactId>
             <scope>provided</scope>

@@ -330,16 +330,6 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension.api</artifactId>
-                <version>${io.entgra.device.mgt.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension</artifactId>
-                <version>${io.entgra.device.mgt.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
                 <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
