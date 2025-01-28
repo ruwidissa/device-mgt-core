@@ -34,7 +34,7 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
 
     private static final Log log = LogFactory.getLog(DynamicPartitionedScheduleTask.class);
 
-    private static DynamicTaskContext taskContext = null;
+    private volatile DynamicTaskContext taskContext = null;
     private Map<String, String> properties;
 
     @Override
@@ -83,6 +83,10 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
                 executeDynamicTask();
                 return;
             }
+            if (log.isDebugEnabled()) {
+                log.debug("Local hash index: " + localHashIndex + ", Server hash index: " +
+                        taskContext.getServerHashIndex());
+            }
             if (localHashIndex.equals(String.valueOf(taskContext.getServerHashIndex()))) {
                 if (log.isDebugEnabled()) {
                     log.debug("Executing dynamically scheduled task (" + getTaskName() +
@@ -96,6 +100,9 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
                 }
             }
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Task context is null or partitioning is not enabled. Executing dynamic task.");
+            }
             executeDynamicTask();
         }
     }
@@ -104,7 +111,7 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
         return getProperty(TaskMgtConstants.Task.LOCAL_TASK_NAME);
     }
 
-    public void refreshContext() {
+    public synchronized void refreshContext() {
         if (taskContext != null && taskContext.isPartitioningEnabled()) {
             try {
                 updateContext();
@@ -114,16 +121,25 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
         }
     }
 
-    private void updateContext() throws HeartBeatManagementException {
+    private synchronized void updateContext() throws HeartBeatManagementException {
         ServerCtxInfo ctxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
         if (ctxInfo != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Received ServerCtxInfo. ActiveServerCount: " + ctxInfo.getActiveServerCount() +
+                        ", LocalServerHashIdx: " + ctxInfo.getLocalServerHashIdx());
+            }
             populateContext(ctxInfo);
         } else {
             log.info("Dynamic Task Context not present. Tasks will run on regular worker/manager mode.");
         }
     }
 
-    private void populateContext(ServerCtxInfo ctxInfo) {
+    private synchronized void populateContext(ServerCtxInfo ctxInfo) {
+        if (log.isDebugEnabled()) {
+            log.debug("Populating task context with ServerCtxInfo. " +
+                    "ActiveServerCount: " + ctxInfo.getActiveServerCount() +
+                    ", LocalServerHashIdx: " + ctxInfo.getLocalServerHashIdx());
+        }
         taskContext.setActiveServerCount(ctxInfo.getActiveServerCount());
         taskContext.setServerHashIndex(ctxInfo.getLocalServerHashIdx());
 
@@ -138,12 +154,12 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
 
     protected abstract void executeDynamicTask();
 
-    public static DynamicTaskContext getTaskContext() {
+    public DynamicTaskContext getTaskContext() {
         return taskContext;
     }
 
     @Deprecated
-    public static boolean isDynamicTaskEligible() {
+    public boolean isDynamicTaskEligible() {
         return taskContext != null && taskContext.isPartitioningEnabled();
     }
 
