@@ -20,7 +20,7 @@
     <parent>
         <artifactId>tenant-mgt</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>7.0.0</version>
+        <version>7.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
