@@ -181,4 +181,13 @@ public interface DeviceManager {
      */
     boolean requireDeviceAuthorization();
 
+    /**
+     * Method to remove a particular device from CDM.
+     *
+     * @param deviceId Fully qualified device identifier
+     * @return A boolean indicating the status of the operation.
+     * @throws DeviceManagementException If some unusual behaviour is observed while removing a device
+     */
+    boolean removeDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
+
 }

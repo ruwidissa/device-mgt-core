@@ -58,6 +58,11 @@ public class TypeXDeviceManager implements DeviceManager {
     }
 
     @Override
+    public boolean removeDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
+        return false;
+    }
+
+    @Override
     public void deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException {
     }
 

@@ -674,6 +674,8 @@ public interface DeviceManagementProviderService {
 
     boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
 
+    boolean removeDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
+
     boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException, InvalidDeviceException;
 
     boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException;
@@ -1025,6 +1027,14 @@ public interface DeviceManagementProviderService {
             throws DeviceManagementException;
 
     Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException;
+
+    /**
+     * This method creates an activity to send a policy revoke operation.
+     * @param deviceIdentifier device identifier.
+     * @return {@link Activity}
+     * @throws DeviceManagementException if any service level or DAO level error occurs.
+     */
+    Activity sendPolicyRevokeOperation(DeviceIdentifier deviceIdentifier) throws DeviceManagementException;
 
     /**
      * This method is for saving application icon info

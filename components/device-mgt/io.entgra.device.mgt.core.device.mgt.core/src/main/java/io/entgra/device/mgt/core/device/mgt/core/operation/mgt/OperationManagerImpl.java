@@ -937,6 +937,13 @@ public class OperationManagerImpl implements OperationManager {
                         }
                     }
                 }
+                if (operation.getCode().equals("POLICY_REVOKE") && operation.getStatus().equals(Operation.Status.COMPLETED)){
+                    if (this.getDevice(deviceId).getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.DISENROLLMENT_REQUESTED)) {
+                        DeviceManagementProviderService deviceManagementProviderService = DeviceManagementDataHolder.getInstance().
+                                getDeviceManagementProvider();
+                        deviceManagementProviderService.removeDevice(deviceId);
+                    }
+                }
             }
             if (!isOperationUpdated) {
                 log.warn("Operation " + operationId + "'s status is not updated");
@@ -1035,6 +1042,9 @@ public class OperationManagerImpl implements OperationManager {
             }
         } catch (TransactionManagementException e) {
             throw new OperationManagementException("Error occurred while initiating a transaction", e);
+        } catch (DeviceManagementException e) {
+            throw new OperationManagementException("Error while checking the existence of the device identifier - "
+                    + deviceId.getId() + " of the device type - " + deviceId.getType(), e);
         } finally {
             OperationManagementDAOFactory.closeConnection();
         }

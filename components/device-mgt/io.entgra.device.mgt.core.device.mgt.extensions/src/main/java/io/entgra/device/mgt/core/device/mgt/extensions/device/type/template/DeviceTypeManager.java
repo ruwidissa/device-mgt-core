@@ -395,6 +395,12 @@ public class DeviceTypeManager implements DeviceManager {
     }
 
     @Override
+    public boolean removeDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
+        //Here we don't have anything specific to do. Hence returning.
+        return true;
+    }
+
+    @Override
     public boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException {
         if (deviceId == null) {
             throw new DeviceManagementException("Cannot check the enrollment status of a null device");

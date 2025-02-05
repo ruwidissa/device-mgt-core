@@ -62,6 +62,11 @@ public class TestDeviceManager implements DeviceManager {
     }
 
     @Override
+    public boolean removeDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
+        return true;
+    }
+
+    @Override
     public void deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException {
     }
 
