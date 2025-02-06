@@ -1043,8 +1043,10 @@ public class OperationManagerImpl implements OperationManager {
         } catch (TransactionManagementException e) {
             throw new OperationManagementException("Error occurred while initiating a transaction", e);
         } catch (DeviceManagementException e) {
-            throw new OperationManagementException("Error while checking the existence of the device identifier - "
-                    + deviceId.getId() + " of the device type - " + deviceId.getType(), e);
+            String msg = "Error while checking the existence of the device identifier - "
+                    + deviceId.getId() + " of the device type - " + deviceId.getType();
+            log.error(msg, e);
+            throw new OperationManagementException(msg, e);
         } finally {
             OperationManagementDAOFactory.closeConnection();
         }
