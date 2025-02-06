@@ -502,7 +502,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
     @Test(dependsOnMethods = {"getOperationByActivityIdAndDevice", "getOperationByActivityIdAndDeviceAsNonAdmin"})
     public void getOperationForInactiveDevice() throws DeviceManagementException, OperationManagementException {
         boolean disEnrolled = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider().
-                disenrollDevice(deviceIds.get(0));
+                removeDevice(deviceIds.get(0));
         Assert.assertTrue(disEnrolled);
         List operations = this.operationMgtService.getOperations(deviceIds.get(0));
         Assert.assertTrue(operations == null);

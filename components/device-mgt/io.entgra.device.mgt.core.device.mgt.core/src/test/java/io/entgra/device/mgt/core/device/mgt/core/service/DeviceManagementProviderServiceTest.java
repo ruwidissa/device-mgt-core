@@ -244,7 +244,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     public void testDisenrollment() throws DeviceManagementException {
         if (!isMock()) {
             Device device = TestDataHolder.generateDummyDeviceData(new DeviceIdentifier(DEVICE_ID, DEVICE_TYPE));
-            boolean disenrollmentStatus = deviceMgtService.disenrollDevice(new DeviceIdentifier
+            boolean disenrollmentStatus = deviceMgtService.removeDevice(new DeviceIdentifier
                     (device.getDeviceIdentifier(), device.getType()));
             log.info(disenrollmentStatus);
             Assert.assertTrue(disenrollmentStatus);
@@ -280,7 +280,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
         if (!isMock()) {
             Device device = TestDataHolder.generateDummyDeviceData(new DeviceIdentifier(DEVICE_ID,
                     DEVICE_TYPE));
-            boolean result = deviceMgtService.disenrollDevice(new DeviceIdentifier(
+            boolean result = deviceMgtService.removeDevice(new DeviceIdentifier(
                     device.getDeviceIdentifier(), device.getType()));
             Assert.assertTrue(result);
         }
