@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>task-mgt</artifactId>
-        <version>7.0.1-SNAPSHOT</version>
+        <version>7.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
