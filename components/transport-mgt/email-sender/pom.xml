@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>transport-mgt</artifactId>
-        <version>7.0.2-SNAPSHOT</version>
+        <version>7.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
