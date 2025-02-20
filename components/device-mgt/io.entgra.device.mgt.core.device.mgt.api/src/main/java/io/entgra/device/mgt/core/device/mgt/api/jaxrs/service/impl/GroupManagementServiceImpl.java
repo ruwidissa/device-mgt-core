@@ -456,6 +456,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             for(DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
                 Device device = dms.getDevice(deviceIdentifier, false);
+                dms.sendPolicyRevokeOperation(deviceIdentifier);
                 if(!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
                     pap.removePolicyUsed(deviceIdentifier);
                     DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceIdentifier);
