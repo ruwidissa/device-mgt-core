@@ -58,9 +58,6 @@ public class OAuthClient implements IOAuthClientService {
     private static final OkHttpClient client = new OkHttpClient(HttpsTrustManagerUtils.getSSLClient().newBuilder());
     private static final Gson gson = new Gson();
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private static final String IDN_DCR_CLIENT_PREFIX = "_REST_API_INVOKER_SERVICE";
-    private static final String IDN_REST_API_INVOKER_USER = "rest_service_reserved_user";
-    private static final String IDN_REST_API_INVOKER_USER_PWD = "rest_service_reserved_user";
     private static final APIManagerConfiguration config =
             ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     private static final String tokenEndpoint = config.getFirstProperty(Constants.TOKE_END_POINT);
@@ -183,7 +180,7 @@ public class OAuthClient implements IOAuthClientService {
         List<String> grantTypes = Arrays.asList(Constants.PASSWORD_GRANT_TYPE, Constants.REFRESH_TOKEN_GRANT_TYPE);
         String dcrRequestJsonStr = (new JSONObject())
                 .put("clientName", tenantAwareClientName)
-                .put("owner", IDN_REST_API_INVOKER_USER + "@" + tenantDomain)
+                .put("owner", Constants.IDN_REST_API_INVOKER_USER + "@" + tenantDomain)
                 .put("saasApp", true)
                 .put("grantType", String.join(Constants.SPACE, grantTypes))
                 .put("tokenType", "Default")
@@ -193,8 +190,8 @@ public class OAuthClient implements IOAuthClientService {
         Request dcrRequest = new Request.Builder()
                 .url(dcrEndpoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME,
-                        Credentials.basic(IDN_REST_API_INVOKER_USER + "@" + tenantDomain
-                                , IDN_REST_API_INVOKER_USER_PWD))
+                        Credentials.basic(Constants.IDN_REST_API_INVOKER_USER + "@" + tenantDomain
+                                , Constants.IDN_REST_API_INVOKER_USER_PWD))
                 .post(requestBody)
                 .build();
 
@@ -224,8 +221,8 @@ public class OAuthClient implements IOAuthClientService {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String tokenRequestJsonStr = (new JSONObject())
                 .put("grant_type", Constants.PASSWORD_GRANT_TYPE)
-                .put("username", IDN_REST_API_INVOKER_USER + "@" + tenantDomain)
-                .put("password", IDN_REST_API_INVOKER_USER_PWD)
+                .put("username", Constants.IDN_REST_API_INVOKER_USER + "@" + tenantDomain)
+                .put("password", Constants.IDN_REST_API_INVOKER_USER_PWD)
                 .put("scope", Constants.SCOPES)
                 .put("callbackUrl", Constants.PLACEHOLDING_CALLBACK_URL)
                 .toString();
@@ -296,7 +293,7 @@ public class OAuthClient implements IOAuthClientService {
         CacheWrapper cacheWrapper = cache.computeIfAbsent(tenantDomain, key -> {
             CacheWrapper constructedWrapper = null;
             try {
-                Keys keys = idnDynamicClientRegistration(tenantDomain.toUpperCase() + IDN_DCR_CLIENT_PREFIX);
+                Keys keys = idnDynamicClientRegistration(tenantDomain.toUpperCase() + Constants.IDN_DCR_CLIENT_PREFIX);
                 Tokens tokens = idnTokenGeneration(keys);
                 constructedWrapper = new CacheWrapper(keys, tokens);
             } catch (OAuthClientException e) {
@@ -381,19 +378,20 @@ public class OAuthClient implements IOAuthClientService {
                 response.body() != null ? response.body().string() : null, response.isSuccessful());
     }
 
-    public void createRestClientInvokerUserIfNotExists(String tenantDomain) throws OAuthClientException {
+    private void createRestClientInvokerUserIfNotExists(String tenantDomain) throws OAuthClientException {
         try {
             UserStoreManager userStoreManager =
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getUserStoreManager();
-            if (!userStoreManager.isExistingUser(MultitenantUtils.getTenantAwareUsername(IDN_REST_API_INVOKER_USER))) {
+            if (!userStoreManager.isExistingUser(MultitenantUtils.getTenantAwareUsername(Constants.IDN_REST_API_INVOKER_USER))) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Creating user '" + IDN_REST_API_INVOKER_USER + "' in '" + tenantDomain + "' tenant " +
+                    log.debug("Creating user '" + Constants.IDN_REST_API_INVOKER_USER + "' in '" + tenantDomain + "' " +
+                            "tenant " +
                             "domain.");
                 }
                 String[] roles = {Constants.ADMIN_ROLE_KEY};
                 userStoreManager.addUser(
-                        MultitenantUtils.getTenantAwareUsername(IDN_REST_API_INVOKER_USER),
-                        IDN_REST_API_INVOKER_USER_PWD,
+                        MultitenantUtils.getTenantAwareUsername(Constants.IDN_REST_API_INVOKER_USER),
+                        Constants.IDN_REST_API_INVOKER_USER_PWD,
                         roles,
                         null,
                         ""
@@ -401,7 +399,7 @@ public class OAuthClient implements IOAuthClientService {
             }
         } catch (UserStoreException e) {
             String msg =
-                    "Error occurred while creating " + IDN_REST_API_INVOKER_USER + "in tenant: '" + tenantDomain + "'.";
+                    "Error occurred while creating " + Constants.IDN_REST_API_INVOKER_USER + "in tenant: '" + tenantDomain + "'.";
             log.error(msg);
             throw new OAuthClientException(msg, e);
         }

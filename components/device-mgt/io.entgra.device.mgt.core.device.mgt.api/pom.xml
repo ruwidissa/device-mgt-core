@@ -465,5 +465,10 @@
             <artifactId>io.entgra.device.mgt.core.tenant.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

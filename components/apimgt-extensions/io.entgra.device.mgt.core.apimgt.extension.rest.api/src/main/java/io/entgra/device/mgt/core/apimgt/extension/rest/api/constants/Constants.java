@@ -78,4 +78,7 @@ public final class Constants {
     public static final String PERM_SCOPE_MAPPING_META_KEY  = "perm-scope-mapping";
     public static final String PLACEHOLDING_CALLBACK_URL = HTTPS_PROTOCOL + SCHEME_SEPARATOR + "localhost";
     public static final String API_PUBLISHING_ENABLED_TENANT_LIST_KEY = "api-publishing-enabled-tenant-list";
+    public static final String IDN_DCR_CLIENT_PREFIX = "_REST_API_INVOKER_SERVICE";
+    public static final String IDN_REST_API_INVOKER_USER = "rest_service_reserved_user";
+    public static final String IDN_REST_API_INVOKER_USER_PWD = "rest_service_reserved_user";
 }

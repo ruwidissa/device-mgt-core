@@ -461,7 +461,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             BasicUserInfo user;
             for (String username : users) {
                 if (Constants.APIM_RESERVED_USER.equals(username) || Constants.RESERVED_USER.equals(username) ||
-                        Constants.SCOPE_PUBLISH_RESERVED_USER.equals(username)) {
+                        io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants.IDN_REST_API_INVOKER_USER.equals(username)) {
                     continue;
                 }
                 user = getBasicUserInfo(username);
@@ -527,7 +527,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             if (commonUsers != null) {
                 commonUsers.remove(Constants.APIM_RESERVED_USER);
                 commonUsers.remove(Constants.RESERVED_USER);
-                commonUsers.remove(Constants.SCOPE_PUBLISH_RESERVED_USER);
+                commonUsers.remove(io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants.IDN_REST_API_INVOKER_USER);
             }
 
             if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(firstName)) {
@@ -705,7 +705,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             UserInfo user;
             for (String username : users) {
                 if (Constants.APIM_RESERVED_USER.equals(username) || Constants.RESERVED_USER.equals(username) ||
-                        Constants.SCOPE_PUBLISH_RESERVED_USER.equals(username)) {
+                        io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants.IDN_REST_API_INVOKER_USER.equals(username)) {
                     continue;
                 }
                 user = new UserInfo();

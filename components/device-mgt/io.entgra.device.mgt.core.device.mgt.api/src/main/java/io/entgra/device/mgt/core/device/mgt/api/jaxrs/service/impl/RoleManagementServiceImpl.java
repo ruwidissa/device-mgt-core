@@ -17,22 +17,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
-import com.google.common.base.Strings;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.wso2.carbon.CarbonConstants;
-import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.RoleMgtLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraRoleMgtLoggerImpl;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
@@ -42,12 +29,19 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestV
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.SetReferenceTransformer;
-import org.wso2.carbon.user.api.*;
-import org.springframework.util.StringUtils;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.resource.services.utils.ChangeRolePermissionsUtil;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.RoleMgtLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraRoleMgtLoggerImpl;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserRealm;
@@ -75,12 +69,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Optional;
 
 import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIMARY_USER_STORE;
 
@@ -90,8 +85,8 @@ import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIM
 public class RoleManagementServiceImpl implements RoleManagementService {
 
     private static final String API_BASE_PATH = "/roles";
-    RoleMgtLogContext.Builder roleMgtContextBuilder = new RoleMgtLogContext.Builder();
     private static final EntgraLogger log = new EntgraRoleMgtLoggerImpl(RoleManagementServiceImpl.class);
+    RoleMgtLogContext.Builder roleMgtContextBuilder = new RoleMgtLogContext.Builder();
 
     @GET
     @Override
@@ -101,7 +96,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
-        if (limit == 0){
+        if (limit == 0) {
             limit = Constants.DEFAULT_PAGE_LIMIT;
         }
         List<String> filteredRoles;
@@ -142,7 +137,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             @QueryParam("domain") String domain,
             @PathParam("metaKey") String metaKey) {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
-        if (limit == 0){
+        if (limit == 0) {
             limit = Constants.DEFAULT_PAGE_LIMIT;
         }
         if (!Strings.isNullOrEmpty(domain)) {
@@ -153,7 +148,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         RoleList visibleRoleList = new RoleList();
         try {
             boolean decision = false;
-            if(DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey) != null){
+            if (DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey) != null) {
                 metadata = DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey);
                 String metaValue = metadata.getMetaValue();
                 JSONParser parser = new JSONParser();
@@ -161,14 +156,15 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 decision = (boolean) jsonObject.get(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
             }
             if (decision) {
-                if (Strings.isNullOrEmpty(userStore)){
+                if (Strings.isNullOrEmpty(userStore)) {
                     userStore = PRIMARY_USER_STORE;
                 }
                 try {
                     visibleRoles = getRolesFromUserStore(filter, userStore);
                     visibleRoleList.setList(visibleRoles);
 
-                    visibleRoles = FilteringUtil.getFilteredList(getRolesFromUserStore(filter, userStore), offset, limit);
+                    visibleRoles = FilteringUtil.getFilteredList(getRolesFromUserStore(filter, userStore), offset,
+                            limit);
                     visibleRoleList.setList(visibleRoles);
 
                     return Response.status(Response.Status.OK).entity(visibleRoleList).build();
@@ -247,8 +243,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             finalRoleList = new ArrayList<String>();
 
             filteredRoles = FilteringUtil.getFilteredList(getRolesFromUserStore(filter, userStore), offset, limit);
-            for (String rolename : filteredRoles){
-                if (rolename.startsWith(prefix)){
+            for (String rolename : filteredRoles) {
+                if (rolename.startsWith(prefix)) {
                     finalRoleList.add(rolename);
                 }
             }
@@ -278,7 +274,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             if (!userRealm.getUserStoreManager().isExistingRole(roleName)) {
 
-                String msg = "No role exists with the name : " + roleName ;
+                String msg = "No role exists with the name : " + roleName;
                 return Response.status(404).entity(msg).build();
             }
 
@@ -308,10 +304,11 @@ public class RoleManagementServiceImpl implements RoleManagementService {
      *
      * @param rolePermissions All the permission paths
      * @param permissionPaths Permission paths that needs to filter
-     * @param permissions List of filtered permissions
+     * @param permissions     List of filtered permissions
      * @return {@link List<String>}
      */
-    private List<String> processAndFilterPermissions(UIPermissionNode[] rolePermissions, List<String> permissionPaths, List<String> permissions) {
+    private List<String> processAndFilterPermissions(UIPermissionNode[] rolePermissions, List<String> permissionPaths
+            , List<String> permissions) {
 
         for (UIPermissionNode rolePermission : rolePermissions) {
             if (permissionPaths.isEmpty()) {
@@ -334,8 +331,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     /**
      * Getting platform permissions
      *
-     * @param roleName Role Name
-     * @param userRealm {@link UserRealm}
+     * @param roleName    Role Name
+     * @param userRealm   {@link UserRealm}
      * @param permissions list of permissions
      * @return {@link List<String>}
      * @throws UserAdminException if error occurred when getting {@link UIPermissionNode}
@@ -343,7 +340,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     private String[] getPlatformUIPermissions(String roleName, UserRealm userRealm, String[] permissions)
             throws UserAdminException {
         UIPermissionNode uiPermissionNode = getUIPermissionNode(roleName, userRealm);
-        List<String> permissionsArray = processAndFilterPermissions(uiPermissionNode.getNodeList(), new ArrayList<>(Arrays.asList(permissions)),
+        List<String> permissionsArray = processAndFilterPermissions(uiPermissionNode.getNodeList(),
+                new ArrayList<>(Arrays.asList(permissions)),
                 new ArrayList<>());
         return permissionsArray.toArray(new String[0]);
     }
@@ -394,11 +392,11 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             final UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             if (!userStoreManager.isExistingRole(roleName)) {
-                String msg = "No role exists with the name : " + roleName ;
+                String msg = "No role exists with the name : " + roleName;
                 return Response.status(404).entity(msg).build();
             }
             roleInfo.setRoleName(roleName);
-            roleInfo.setUsers(userStoreManager.getUserListOfRole(roleName));
+            roleInfo.setUsers(getFilteredUsers(userStoreManager.getUserListOfRole(roleName)));
             // Get the permission nodes and hand picking only device management and login perms
             final UIPermissionNode rolePermissions = this.getUIPermissionNode(roleName, userRealm);
             List<String> permList = new ArrayList<>();
@@ -440,7 +438,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
 
         try {
             String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
-            String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String tenantDomain =
+                    String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             if (log.isDebugEnabled()) {
@@ -481,7 +480,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                             .build()
             );
             //TODO fix what's returned in the entity
-            return Response.created(new URI(API_BASE_PATH + "/" + URLEncoder.encode(roleInfo.getRoleName(), "UTF-8"))).
+            return Response.created(new URI(API_BASE_PATH + "/" + URLEncoder.encode(roleInfo.getRoleName(), StandardCharsets.UTF_8))).
                     entity("Role '" + roleInfo.getRoleName() + "' has " + "successfully been"
                             + " added").build();
         } catch (UserStoreException e) {
@@ -503,10 +502,6 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         } catch (URISyntaxException e) {
             String msg = "Error occurred while composing the URI at which the information of the newly created role " +
                     "can be retrieved";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Error occurred while encoding role name";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -546,7 +541,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             userStoreManager.addRole(roleName, new String[0], permissions);
 
             //TODO fix what's returned in the entity
-            return Response.created(new URI(API_BASE_PATH + "/" + URLEncoder.encode(roleName, "UTF-8"))).
+            return Response.created(new URI(API_BASE_PATH + "/" + URLEncoder.encode(roleName, StandardCharsets.UTF_8))).
                     entity("Role '" + roleName + "' has " + "successfully been"
                             + " added").build();
         } catch (UserAdminException e) {
@@ -565,11 +560,6 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Error occurred while encoding role name";
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
     }
 
@@ -585,7 +575,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         RequestValidationUtil.validateRoleDetails(roleInfo);
         try {
             String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
-            String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String tenantDomain =
+                    String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
             String[] stringUserList;
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
@@ -680,13 +671,14 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         }
         RequestValidationUtil.validateRoleName(roleName);
         try {
-            String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String tenantDomain =
+                    String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             if (!userStoreManager.isExistingRole(roleName)) {
-                String msg = "No role exists with the name : " + roleName ;
+                String msg = "No role exists with the name : " + roleName;
                 return Response.status(404).entity(msg).build();
             }
 
@@ -694,7 +686,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             if (log.isDebugEnabled()) {
                 log.debug("Deleting the role in user store");
             }
-            DeviceMgtAPIUtils.getGroupManagementProviderService().deleteRoleAndRoleGroupMapping(roleName, roleToDelete, tenantId, userStoreManager, authorizationManager);
+            DeviceMgtAPIUtils.getGroupManagementProviderService().deleteRoleAndRoleGroupMapping(roleName,
+                    roleToDelete, tenantId, userStoreManager, authorizationManager);
             String role;
             String[] roles = roleName.split("/");
 
@@ -782,9 +775,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             roles = userStoreManager.getRoleNames(userStore + "/" + filter, -1, true, true, true);
         }
         List<String> filteredRoles = new ArrayList<>();
-        for (String role : roles) {
-            filteredRoles.add(role);
-        }
+        Collections.addAll(filteredRoles, roles);
         return filteredRoles;
     }
 
@@ -819,8 +810,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     /**
      * Update the role's permissions. This will function in the fire and forget pattern and run on a new thread.
      *
-     * @param roleName Role Name
-     * @param roleInfo {@link RoleInfo}
+     * @param roleName  Role Name
+     * @param roleInfo  {@link RoleInfo}
      * @param userRealm {@link UserRealm}
      */
     private void updatePermissions(String roleName, RoleInfo roleInfo, UserRealm userRealm) {
@@ -833,7 +824,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                     DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleName,
                             RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
-                                    roleInfo.getPermissions()), RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
+                                    roleInfo.getPermissions()),
+                            RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
                                     roleInfo.getRemovedPermissions()));
                 } catch (APIManagerPublisherException | UserAdminException e) {
                     log.error("Error Occurred while updating role scope mapping. ", e);
@@ -843,5 +835,23 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             }
         });
         thread.start();
+    }
+
+    /**
+     * Get filtered usernames from an array of usernames.
+     *
+     * @param usernames Array of usernames.
+     * @return Filtered username array.
+     */
+    private String[] getFilteredUsers(String[] usernames) {
+        List<String> filteredUsernames = new ArrayList<>();
+        for (String username : usernames) {
+            if (Constants.APIM_RESERVED_USER.equals(username) || Constants.RESERVED_USER.equals(username) ||
+                    io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants.IDN_REST_API_INVOKER_USER.equals(username)) {
+                continue;
+            }
+            filteredUsernames.add(username);
+        }
+        return filteredUsernames.toArray(new String[filteredUsernames.size()]);
     }
 }
