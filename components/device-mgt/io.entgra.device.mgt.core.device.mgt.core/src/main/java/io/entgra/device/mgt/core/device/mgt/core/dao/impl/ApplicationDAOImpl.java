@@ -289,6 +289,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         "APP_PROPERTIES, " +
                         "MEMORY_USAGE, " +
                         "IS_ACTIVE, " +
+                        "IS_SYSTEM_APP, " +
                         "TENANT_ID " +
                     "FROM DM_APPLICATION " +
                     "WHERE PLATFORM = ? AND " +
