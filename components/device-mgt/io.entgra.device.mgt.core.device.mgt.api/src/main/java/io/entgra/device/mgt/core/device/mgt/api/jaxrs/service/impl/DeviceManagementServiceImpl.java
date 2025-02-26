@@ -1737,23 +1737,17 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             Operation operation = DeviceMgtAPIUtils.validateOperationStatusBean(operationStatusBean);
             operation.setId(operationStatusBean.getOperationId());
             operation.setCode(operationStatusBean.getOperationCode());
+            DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(device, operation);
 
-            switch (operation.getCode()) {
-                case MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION:
-                case MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION:
-                case MDMAppConstants.WindowsConstants.INSTALL_ENTERPRISE_APPLICATION:
-                case MDMAppConstants.WindowsConstants.UNINSTALL_ENTERPRISE_APPLICATION:
-                case MDMAppConstants.WindowsConstants.INSTALL_STORE_APPLICATION:
-                case MDMAppConstants.WindowsConstants.UNINSTALL_STORE_APPLICATION:
-                    DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(device, operation);
-                    DeviceMgtAPIUtils.getApplicationManager().updateSubsStatus(
-                            device.getId(), operation.getId(), operation.getStatus().toString()
-                    );
-                    break;
-                default:
-                    String msg = "Unsupported operation code: " + operation.getCode();
-                    log.error(msg);
-                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            if (MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION.equals(operation.getCode()) ||
+                    MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION.equals(operation.getCode()) ||
+                    MDMAppConstants.WindowsConstants.INSTALL_ENTERPRISE_APPLICATION.equals(operation.getCode()) ||
+                    MDMAppConstants.WindowsConstants.UNINSTALL_ENTERPRISE_APPLICATION.equals(operation.getCode()) ||
+                    MDMAppConstants.WindowsConstants.INSTALL_STORE_APPLICATION.equals(operation.getCode()) ||
+                    MDMAppConstants.WindowsConstants.UNINSTALL_STORE_APPLICATION.equals(operation.getCode())){
+                DeviceMgtAPIUtils.getApplicationManager().updateSubsStatus(
+                        device.getId(), operation.getId(), operation.getStatus().toString()
+                );
             }
             return Response.status(Response.Status.OK).entity("OperationStatus updated successfully.").build();
         } catch (BadRequestException e) {
@@ -1775,6 +1769,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
+
 
     @GET
     @Path("/filters")
