@@ -19,7 +19,7 @@
 package io.entgra.device.mgt.core.apimgt.application.extension.bean;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.constants.ApiApplicationConstants;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * This holds api application consumer key and secret.
