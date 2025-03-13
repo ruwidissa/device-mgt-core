@@ -58,4 +58,20 @@ public interface TenantManager {
      */
     void deleteTenantDeviceData(int tenantId) throws TenantMgtException;
 
+    /**
+     * Publishes scopes to the specified tenant.
+     *
+     * @param tenantDomain The domain of the tenant to which the scopes should be published.
+     * @throws TenantMgtException If an error occurs while publishing the scopes.
+     */
+    void publishScopesToTenant(String tenantDomain) throws TenantMgtException;
+
+    /**
+     * Retrieves the tenant domain associated with the given tenant ID.
+     *
+     * @param tenantId The ID of the tenant.
+     * @return The domain name of the tenant.
+     * @throws TenantMgtException If there is an issue retrieving the tenant domain.
+     */
+    String getTenantDomain(int tenantId) throws TenantMgtException;
 }

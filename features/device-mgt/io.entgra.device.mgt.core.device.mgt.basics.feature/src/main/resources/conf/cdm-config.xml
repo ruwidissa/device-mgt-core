@@ -246,10 +246,10 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-all-device-menu</Name>
+            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-dashboard-menu</Name>
             <MappedScopeDetails>
-                <Name>Hide All Device Menu from the sider</Name>
-                <Key>dm:hide:all:device</Key>
+                <Name>Hide Dashboard Menu from the sider</Name>
+                <Key>dm:hide:dashboard</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
         </DefaultPermission>
