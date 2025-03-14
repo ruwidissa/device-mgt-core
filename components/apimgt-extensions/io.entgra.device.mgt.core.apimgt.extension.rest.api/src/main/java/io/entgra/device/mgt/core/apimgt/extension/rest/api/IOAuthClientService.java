@@ -47,5 +47,5 @@ public interface IOAuthClientService {
      * @return {@link IDNApplicationKeys}
      * @throws OAuthClientException Throws when error encountered while IDN client creation
      */
-    IDNApplicationKeys getIdnApplicationKeys(String clientName) throws OAuthClientException;
+    IDNApplicationKeys getIdnApplicationKeys(String clientName, String grantTypes) throws OAuthClientException;
 }

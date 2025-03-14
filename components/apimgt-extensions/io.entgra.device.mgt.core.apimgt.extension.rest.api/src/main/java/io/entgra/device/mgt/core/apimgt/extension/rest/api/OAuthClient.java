@@ -149,14 +149,15 @@ public class OAuthClient implements IOAuthClientService {
      * Create and retrieve identity server side service provider applications
      *
      * @param clientName IDN client name
+     * @param grantTypes Grant types
      * @return {@link IDNApplicationKeys}
      * @throws OAuthClientException Throws when error encountered while IDN client creation
      */
     @Override
-    public IDNApplicationKeys getIdnApplicationKeys(String clientName) throws OAuthClientException {
+    public IDNApplicationKeys getIdnApplicationKeys(String clientName, String grantTypes) throws OAuthClientException {
         try {
             Keys keys =
-                    idnDynamicClientRegistration(clientName);
+                    idnDynamicClientRegistration(clientName, grantTypes);
             return new IDNApplicationKeys(keys.consumerKey, keys.consumerSecret);
         } catch (IOException e) {
             String msg = "IO exception encountered while registering DCR client for OPAQUE token generation";
@@ -169,20 +170,21 @@ public class OAuthClient implements IOAuthClientService {
      * Dynamic client registration will be handled through here. These clients can be located under carbon console's
      * service provider section in respective tenants.
      *
+     * @param tenantAwareClientName Tenant aware client name
+     * @param grantTypes Grant types
      * @return Instance of {@link Keys} containing the dcr client's credentials
      * @throws IOException          Throws when error encountered while executing dcr request
      * @throws OAuthClientException Throws when failed to register dcr client
      */
-    private Keys idnDynamicClientRegistration(String tenantAwareClientName) throws IOException, OAuthClientException {
+    private Keys idnDynamicClientRegistration(String tenantAwareClientName, String grantTypes) throws IOException, OAuthClientException {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         createRestClientInvokerUserIfNotExists(tenantDomain);
 
-        List<String> grantTypes = Arrays.asList(Constants.PASSWORD_GRANT_TYPE, Constants.REFRESH_TOKEN_GRANT_TYPE);
         String dcrRequestJsonStr = (new JSONObject())
                 .put("clientName", tenantAwareClientName)
                 .put("owner", Constants.IDN_REST_API_INVOKER_USER + "@" + tenantDomain)
                 .put("saasApp", true)
-                .put("grantType", String.join(Constants.SPACE, grantTypes))
+                .put("grantType", grantTypes)
                 .put("tokenType", "Default")
                 .toString();
 
@@ -204,6 +206,20 @@ public class OAuthClient implements IOAuthClientService {
         String msg = "Error encountered while processing DCR request. Tried client : [ " + tenantAwareClientName + " ]";
         log.error(msg);
         throw new OAuthClientException(msg);
+    }
+
+    /**
+     * Dynamic client registration will be handled through here. These clients can be located under carbon console's
+     * service provider section in respective tenants.
+     *
+     * @param tenantAwareClientName Tenant aware client name
+     * @return Instance of {@link Keys} containing the dcr client's credentials
+     * @throws IOException          Throws when error encountered while executing dcr request
+     * @throws OAuthClientException Throws when failed to register dcr client
+     */
+    private Keys idnDynamicClientRegistration(String tenantAwareClientName) throws OAuthClientException, IOException {
+        return idnDynamicClientRegistration(tenantAwareClientName, String.join(Constants.SPACE,
+                Arrays.asList(Constants.PASSWORD_GRANT_TYPE, Constants.REFRESH_TOKEN_GRANT_TYPE)));
     }
 
     /**

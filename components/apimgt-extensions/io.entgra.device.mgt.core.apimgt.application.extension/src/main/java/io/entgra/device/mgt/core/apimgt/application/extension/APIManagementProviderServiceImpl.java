@@ -112,11 +112,15 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 requestBody.put("redirect_uri", tokenCreationProfile.getCallbackUrl());
                 break;
             }
+            case "client_credentials": {
+                break;
+            }
             default: {
-                requestBody.put("grant_type", tokenCreationProfile.getGrantType());
+                throw new IllegalArgumentException("Unsupported grant type : [" + tokenCreationProfile.getGrantType() + "]");
             }
         }
 
+        requestBody.put("grant_type", tokenCreationProfile.getGrantType());
         requestBody.put("scope", tokenCreationProfile.getScope());
         return requestBody;
     }
@@ -175,13 +179,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
      * After that map the IDN DCR's client credentials and secret with the created API application.
      *
      * @param application API application
+     * @param grantTypes Grant types
      * @return {@link ApplicationKey}
      * @throws APIManagerException         Throws when error encountered while API application creation
      * @throws BadRequestException         Throws when API application profile contains an invalid properties
      * @throws UnexpectedResponseException Throws when unexpected error encountered while invoking REST services
      * @throws APIServicesException        Throws when error encountered while executing REST API invocations
      */
-    private static ApiApplicationKey mapApiApplicationWithIdnDCRClient(Application application) throws APIManagerException,
+    private static ApiApplicationKey mapApiApplicationWithIdnDCRClient(Application application, String grantTypes) throws APIManagerException,
             BadRequestException, UnexpectedResponseException, APIServicesException {
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
@@ -192,7 +197,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         try {
             idnApplicationKeys =
                     ioAuthClientService.getIdnApplicationKeys("opaque_token_issuer_for" + application.getApplicationId() +
-                            "_" + ApiApplicationConstants.DEFAULT_TOKEN_TYPE);
+                            "_" + ApiApplicationConstants.DEFAULT_TOKEN_TYPE, grantTypes);
         } catch (OAuthClientException e) {
             String msg = "Error encountered while registering IDN DCR client for generating OPAQUE token for API " +
                     "application [ " + application.getName() + " ]";
@@ -307,7 +312,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         consumerRESTAPIServices.createSubscriptions(subscriptions);
 
         if (Objects.equals(apiApplicationProfile.getTokenType(), ApiApplicationProfile.TOKEN_TYPE.DEFAULT)) {
-            return mapApiApplicationWithIdnDCRClient(application);
+            return mapApiApplicationWithIdnDCRClient(application, apiApplicationProfile.getGrantTypes());
         }
 
         return generateApplicationKeys(application.getApplicationId(), apiApplicationProfile.getGrantTypes(),
