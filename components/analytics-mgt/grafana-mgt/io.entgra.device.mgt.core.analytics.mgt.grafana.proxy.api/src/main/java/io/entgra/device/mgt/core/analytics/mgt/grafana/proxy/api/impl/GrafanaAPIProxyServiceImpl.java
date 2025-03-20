@@ -134,6 +134,24 @@ public class GrafanaAPIProxyServiceImpl implements GrafanaAPIProxyService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-lokiexplore-app/settings")
+    @Override
+    public Response loadLokiExploreAppSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-pyroscope-app/settings")
+    @Override
+    public Response loadGrafanaPyroscopeSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/alerts/states-for-dashboard")
     @Override
     public Response getAlertStateForDashboards(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {

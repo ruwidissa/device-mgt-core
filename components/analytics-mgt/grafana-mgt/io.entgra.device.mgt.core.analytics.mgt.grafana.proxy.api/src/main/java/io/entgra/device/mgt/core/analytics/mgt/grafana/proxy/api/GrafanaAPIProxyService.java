@@ -192,4 +192,40 @@ public interface GrafanaAPIProxyService {
             }
     )
     Response getAlertStateForDashboards(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-lokiexplore-app/settings")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Retrieve Grafana Loki Explore App settings",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response loadLokiExploreAppSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo)
+            throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-pyroscope-app/settings")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Retrieve Grafana Pyroscope App settings",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response loadGrafanaPyroscopeSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo)
+            throws ClassNotFoundException;
 }
