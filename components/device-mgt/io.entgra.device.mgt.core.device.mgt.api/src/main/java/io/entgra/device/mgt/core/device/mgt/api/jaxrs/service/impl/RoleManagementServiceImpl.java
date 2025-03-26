@@ -364,7 +364,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                             Constants.Permission.DEVICE_MGT.equals(node.getResourcePath()) ||
                             Constants.Permission.APP_MGT.equals(node.getResourcePath()) ||
                             Constants.Permission.TENANT.equals(node.getResourcePath()) ||
-                            Constants.Permission.DEFAULT.equals(node.getResourcePath())) {
+                            Constants.Permission.UI_VISIBILITY.equals(node.getResourcePath())) {
                         deviceMgtPermissionsList.add(node);
                     }
                 }

@@ -460,6 +460,9 @@
         <Scope>dm:hide:config:certificates</Scope>
         <Scope>dm:hide:config:platform:config</Scope>
         <Scope>dm:hide:device:tracker</Scope>
+        <Scope>dm:hide:endpoint:mgt</Scope>
+        <Scope>dm:hide:app:publisher</Scope>
+        <Scope>dm:hide:app:store</Scope>
         <Scope>am:admin:lc:app:create</Scope>
         <Scope>am:admin:lc:app:review</Scope>
         <Scope>am:admin:lc:app:approve</Scope>
