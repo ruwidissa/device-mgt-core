@@ -71,8 +71,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.json-simple.wso2</groupId>
-            <artifactId>json-simple</artifactId>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -136,6 +136,7 @@
                         <Private-Package>io.entgra.device.mgt.core.apimgt.application.extension.internal</Private-Package>
                         <Import-Package>
                             com.google.gson;version="${google.gson.version}",
+                            org.json;version="[3.0,4)",
                             io.entgra.device.mgt.core.apimgt.extension.rest.api;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.dto;version="${io.entgra.device.mgt.core.version.range}",
@@ -149,7 +150,6 @@
                             okhttp3,
                             org.apache.commons.lang;version="[2.6,3)",
                             org.apache.commons.logging;version="[1.2,2)",
-                            org.json.simple;version="[1.1,2)",
                             org.osgi.framework;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.component;version="${imp.package.version.osgi.service}",
                             org.wso2.carbon.apimgt.api;version="[9.28,10)",
