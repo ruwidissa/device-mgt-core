@@ -1327,13 +1327,23 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /**
+     * Update subscription status.
+     *
+     * @param deviceId         Device id.
+     * @param subId            Subscription id.
+     * @param status           Subscription status.
+     * @param deviceIdentifier Device identifier.
+     * @throws SubscriptionManagementException Throws when error encountered while updating the subscription status.
+     */
     @Override
-    public void updateSubscriptionStatus(int deviceId, int subId, String status)
+    public void updateSubscriptionStatus(int deviceId, int subId, String status, String deviceIdentifier)
             throws SubscriptionManagementException {
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
             List<Integer> operationIds =  getOperationIdsForSubId(subId, tenantId);
             APIUtil.getApplicationManager().updateSubStatus(deviceId, operationIds, status);
+            updateOperationStatus(deviceIdentifier, operationIds, status);
         } catch (DBConnectionException e) {
             String msg = "Error occurred while observing the database connection to get operation Ids for " + subId;
             log.error(msg, e);
@@ -1345,6 +1355,46 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             throw new SubscriptionManagementException(msg, e);
         }
     }
+
+    /**
+     * Update operation status of the subscription.
+     *
+     * @param deviceIdentifier Device Identifier of the device.
+     * @param operationIds     List of operation ids.
+     * @param status           Operation status.
+     * @throws SubscriptionManagementException Throws when error encountered while updating operation status.
+     */
+    private void updateOperationStatus(String deviceIdentifier, List<Integer> operationIds, String status) throws SubscriptionManagementException {
+        DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
+        try {
+            Device device = deviceManagementProviderService.getDevice(deviceIdentifier, false);
+            OperationDTO operationDTO;
+            Operation operation;
+            for (Integer operationId : operationIds) {
+                operationDTO = deviceManagementProviderService.getOperationDetailsById(operationId);
+                if (operationDTO != null) {
+                    operation = new Operation();
+                    operation.setStatus(Operation.Status.valueOf(status));
+                    operation.setCode(operationDTO.getOperationCode());
+                    operation.setId(operationDTO.getOperationId());
+                    deviceManagementProviderService.updateOperation(device, operation);
+                } else {
+                    String msg = "Failed to load operation for operation id: " + operationId;
+                    log.error(msg);
+                    throw new SubscriptionManagementException(msg);
+                }
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while updating subscription status";
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } catch (OperationManagementException e) {
+            String msg = "Error encountered while updating operation status";
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        }
+    }
+
 
     private List<Integer> getOperationIdsForSubId(int subId, int tenantId) throws SubscriptionManagementException {
         try {

@@ -50,16 +50,6 @@ import java.util.Properties;
 public interface SubscriptionManager {
 
     /**
-     * Use to update status of a subscription
-     *
-     * @param deviceId Id of the device
-     * @param subId subscription id
-     * @param status status to be changed
-     */
-    void updateSubscriptionStatus(int deviceId, int subId, String status)
-            throws SubscriptionManagementException;
-
-    /**
      * Performs bulk subscription operation for a given application and a subscriber list.
      * @param applicationUUID UUID of the application to subscribe/unsubscribe
      * @param params          list of subscribers.
@@ -169,6 +159,18 @@ public interface SubscriptionManager {
      */
     void installAppsForDevice(DeviceIdentifier deviceIdentifier, List<App> apps)
             throws ApplicationManagementException;
+
+    /**
+     * Update subscription status.
+     *
+     * @param deviceId         Device id.
+     * @param subId            Subscription id.
+     * @param status           Subscription status.
+     * @param deviceIdentifier Device identifier.
+     * @throws SubscriptionManagementException Throws when error encountered while updating the subscription status.
+     */
+    void updateSubscriptionStatus(int deviceId, int subId, String status, String deviceIdentifier)
+            throws SubscriptionManagementException;
 
     /***
      * This method used to get the app id ,device ids and pass them to DM service method.
