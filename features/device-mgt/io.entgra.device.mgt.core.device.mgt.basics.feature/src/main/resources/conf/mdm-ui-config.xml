@@ -463,6 +463,7 @@
         <Scope>dm:hide:endpoint:mgt</Scope>
         <Scope>dm:hide:app:publisher</Scope>
         <Scope>dm:hide:app:store</Scope>
+        <Scope>dm:hide:analytics</Scope>
         <Scope>am:admin:lc:app:create</Scope>
         <Scope>am:admin:lc:app:review</Scope>
         <Scope>am:admin:lc:app:approve</Scope>

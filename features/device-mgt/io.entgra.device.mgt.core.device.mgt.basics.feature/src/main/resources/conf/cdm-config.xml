@@ -381,6 +381,14 @@
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
         </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/ui-visibility-permissions/hide-analytics</Name>
+            <MappedScopeDetails>
+                <Name>Hide Analytics Menu from the sider</Name>
+                <Key>dm:hide:analytics</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
     </DefaultPermissions>
 </DeviceMgtConfiguration>
 
