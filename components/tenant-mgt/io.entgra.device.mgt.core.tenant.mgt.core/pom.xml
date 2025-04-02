@@ -47,6 +47,7 @@
                             io.entgra.device.mgt.core.application.mgt.common.exception;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.common.services;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.application.mgt.core.config;version="${io.entgra.device.mgt.core.version.range}",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.*;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.common.exceptions;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.common.metadata.mgt;version="${io.entgra.device.mgt.core.version.range}",
                             io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="${io.entgra.device.mgt.core.version.range}",
@@ -66,9 +67,11 @@
                             org.wso2.carbon.stratos.common.beans;version="[4.9,5)",
                             org.wso2.carbon.stratos.common.exception;version="[4.9,5)",
                             org.wso2.carbon.stratos.common.listeners;version="[4.9,5)",
+                            org.wso2.carbon.tenant.mgt.exception,
                             org.wso2.carbon.tenant.mgt.services,
                             org.wso2.carbon.user.api;version="[1.0,2)",
-                            org.wso2.carbon.user.core.service;version="[4.8,5)"
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.wso2.carbon.user.core.tenant;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.tenant.mgt.core.internal,
@@ -135,6 +138,10 @@
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -238,7 +238,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/hide-unauthorized-functions</Name>
+            <Name>/permission/admin/ui-visibility-permissions/hide-unauthorized-functions</Name>
             <MappedScopeDetails>
                 <Name>Hide unauthorized functions</Name>
                 <Key>dm:hide:unauthorized:functions</Key>
@@ -246,15 +246,15 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-all-device-menu</Name>
+            <Name>/permission/admin/ui-visibility-permissions/endpoints/hide-dashboard-menu</Name>
             <MappedScopeDetails>
-                <Name>Hide All Device Menu from the sider</Name>
-                <Key>dm:hide:all:device</Key>
+                <Name>Hide Dashboard Menu from the sider</Name>
+                <Key>dm:hide:dashboard</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-enroll-device</Name>
+            <Name>/permission/admin/ui-visibility-permissions/endpoints/hide-enroll-device</Name>
             <MappedScopeDetails>
                 <Name>Hide Enroll Device Menu from the sider</Name>
                 <Key>dm:hide:enroll:device</Key>
@@ -262,7 +262,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-abm-device</Name>
+            <Name>/permission/admin/ui-visibility-permissions/endpoints/hide-abm-device</Name>
             <MappedScopeDetails>
                 <Name>Hide ABM Device Menu from the sider</Name>
                 <Key>dm:hide:abm:device</Key>
@@ -270,7 +270,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/endpoints/hide-abm-profile</Name>
+            <Name>/permission/admin/ui-visibility-permissions/endpoints/hide-abm-profile</Name>
             <MappedScopeDetails>
                 <Name>Hide ABM Profile Menu from the sider</Name>
                 <Key>dm:hide:abm:profile</Key>
@@ -278,7 +278,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/hide-policies</Name>
+            <Name>/permission/admin/ui-visibility-permissions/hide-policies</Name>
             <MappedScopeDetails>
                 <Name>Hide Policies Menu from the sider</Name>
                 <Key>dm:hide:policies</Key>
@@ -286,7 +286,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/hide-geo-fences</Name>
+            <Name>/permission/admin/ui-visibility-permissions/hide-geo-fences</Name>
             <MappedScopeDetails>
                 <Name>Hide Geo Fences Menu from the sider</Name>
                 <Key>dm:hide:geo:fences</Key>
@@ -294,7 +294,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/hide-device-locations</Name>
+            <Name>/permission/admin/ui-visibility-permissions/hide-device-locations</Name>
             <MappedScopeDetails>
                 <Name>Hide Device Locations Menu from the sider</Name>
                 <Key>dm:hide:device:locations</Key>
@@ -302,7 +302,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/config/hide-configurations</Name>
+            <Name>/permission/admin/ui-visibility-permissions/config/hide-configurations</Name>
             <MappedScopeDetails>
                 <Name>Hide Configurations Menu from the sider</Name>
                 <Key>dm:hide:config:configurations</Key>
@@ -310,7 +310,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/config/hide-users</Name>
+            <Name>/permission/admin/ui-visibility-permissions/config/hide-users</Name>
             <MappedScopeDetails>
                 <Name>Hide Users Menu of the Configurations from the sider</Name>
                 <Key>dm:hide:config:users</Key>
@@ -318,7 +318,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/config/hide-roles</Name>
+            <Name>/permission/admin/ui-visibility-permissions/config/hide-roles</Name>
             <MappedScopeDetails>
                 <Name>Hide Roles Menu of the Configurations from the sider</Name>
                 <Key>dm:hide:config:roles</Key>
@@ -326,7 +326,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/config/hide-groups</Name>
+            <Name>/permission/admin/ui-visibility-permissions/config/hide-groups</Name>
             <MappedScopeDetails>
                 <Name>Hide Groups Menu of the Configurations from the sider</Name>
                 <Key>dm:hide:config:groups</Key>
@@ -334,7 +334,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/config/hide-certificates</Name>
+            <Name>/permission/admin/ui-visibility-permissions/config/hide-certificates</Name>
             <MappedScopeDetails>
                 <Name>Hide Certificates Menu of the Configurations from the sider</Name>
                 <Key>dm:hide:config:certificates</Key>
@@ -342,7 +342,7 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/config/hide-platform-config</Name>
+            <Name>/permission/admin/ui-visibility-permissions/config/hide-platform-config</Name>
             <MappedScopeDetails>
                 <Name>Hide Platform Configuration Menu of the Configurations from the sider</Name>
                 <Key>dm:hide:config:platform:config</Key>
@@ -350,10 +350,42 @@
             </MappedScopeDetails>
         </DefaultPermission>
         <DefaultPermission>
-            <Name>/permission/admin/default-scope/ui-permissions/hide-device-tracker</Name>
+            <Name>/permission/admin/ui-visibility-permissions/hide-device-tracker</Name>
             <MappedScopeDetails>
                 <Name>Hide Device Tracker Menu of the Configurations from the sider</Name>
                 <Key>dm:hide:device:tracker</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/ui-visibility-permissions/hide-endpoint-mgt</Name>
+            <MappedScopeDetails>
+                <Name>Hide Endpoint Mgt Menu from the sider</Name>
+                <Key>dm:hide:endpoint:mgt</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/ui-visibility-permissions/hide-app-publisher</Name>
+            <MappedScopeDetails>
+                <Name>Hide App Publisher Menu from the sider</Name>
+                <Key>dm:hide:app:publisher</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/ui-visibility-permissions/hide-app-store</Name>
+            <MappedScopeDetails>
+                <Name>Hide App Store Menu from the sider</Name>
+                <Key>dm:hide:app:store</Key>
+                <DefaultRoles>Internal/ui-executer</DefaultRoles>
+            </MappedScopeDetails>
+        </DefaultPermission>
+        <DefaultPermission>
+            <Name>/permission/admin/ui-visibility-permissions/hide-analytics</Name>
+            <MappedScopeDetails>
+                <Name>Hide Analytics Menu from the sider</Name>
+                <Key>dm:hide:analytics</Key>
                 <DefaultRoles>Internal/ui-executer</DefaultRoles>
             </MappedScopeDetails>
         </DefaultPermission>
