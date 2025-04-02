@@ -31,6 +31,15 @@
     <description>Entgra Device Management - Task Management Common</description>
     <url>https://entgra.io</url>
 
+    <dependencies>
+        <!--nTask dependencies-->
+        <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.ntask.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -47,8 +56,7 @@
                             io.entgra.device.mgt.core.task.mgt.common.*
                         </Export-Package>
                         <Import-Package>
-                            io.entgra.device.mgt.core.task.mgt.common.bean,
-                            io.entgra.device.mgt.core.task.mgt.common.exception
+                            org.wso2.carbon.ntask.core;version="[4.9,5)"
                         </Import-Package>
                     </instructions>
                 </configuration>

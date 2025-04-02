@@ -43,15 +43,16 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
         int taskId = -1;
         try {
             Connection conn = TaskManagementDAOFactory.getConnection();
-            String sql = "INSERT INTO DYNAMIC_TASK(CRON, NAME, IS_ENABLED, TASK_CLASS_NAME, TENANT_ID) " +
-                    "VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO DYNAMIC_TASK(INTERVALS, CRON, NAME, IS_ENABLED, TASK_CLASS_NAME, TENANT_ID) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
 
             stmt = conn.prepareStatement(sql, new String[]{"DYNAMIC_TASK_ID"});
-            stmt.setString(1, dynamicTask.getCronExpression());
-            stmt.setString(2, dynamicTask.getName());
-            stmt.setBoolean(3, dynamicTask.isEnabled());
-            stmt.setString(4, dynamicTask.getTaskClassName());
-            stmt.setInt(5, tenantId);
+            stmt.setLong(1, dynamicTask.getIntervalMillis());
+            stmt.setString(2, dynamicTask.getCronExpression());
+            stmt.setString(3, dynamicTask.getName());
+            stmt.setBoolean(4, dynamicTask.isEnabled());
+            stmt.setString(5, dynamicTask.getTaskClassName());
+            stmt.setInt(6, tenantId);
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
@@ -75,12 +76,15 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
         int rows;
         try {
             Connection conn = TaskManagementDAOFactory.getConnection();
-            String sql = "UPDATE DYNAMIC_TASK SET CRON = ?,IS_ENABLED = ? WHERE DYNAMIC_TASK_ID = ? AND TENANT_ID = ?";
+            String sql = "UPDATE DYNAMIC_TASK SET INTERVALS = ?, CRON = ?,IS_ENABLED = ? WHERE DYNAMIC_TASK_ID = ? " +
+                    "AND TENANT_ID = ?";
+
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, dynamicTask.getCronExpression());
-            stmt.setBoolean(2, dynamicTask.isEnabled());
-            stmt.setInt(3, dynamicTask.getDynamicTaskId());
-            stmt.setInt(4, tenantId);
+            stmt.setLong(1, dynamicTask.getIntervalMillis());
+            stmt.setString(2, dynamicTask.getCronExpression());
+            stmt.setBoolean(3, dynamicTask.isEnabled());
+            stmt.setInt(4, dynamicTask.getDynamicTaskId());
+            stmt.setInt(5, tenantId);
             rows = stmt.executeUpdate();
             return (rows > 0);
         } catch (SQLException e) {

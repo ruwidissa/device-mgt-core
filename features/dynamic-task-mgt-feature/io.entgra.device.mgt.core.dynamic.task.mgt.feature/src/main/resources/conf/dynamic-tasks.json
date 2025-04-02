@@ -1,0 +1,92 @@
+{
+  "categorizedDynamicTasks" : [
+    {
+      "name" : "Device Info",
+      "categoryCode" : "DEVICE_INFO_CATEGORY",
+      "operationCodes" : [
+        {
+          "operationCode" : "DEVICE_INFO",
+          "recurrentTime" : 1,
+          "supportingDeviceTypes" : ["android", "windows", "ios"]
+        }
+      ],
+      "frequency" : 60000,
+      "enable" : true
+    },
+    {
+      "name" : "Device Location",
+      "categoryCode" : "DEVICE_LOCATION_CATEGORY",
+      "operationCodes" : [
+        {
+          "operationCode" : "DEVICE_LOCATION",
+          "recurrentTime" : 1,
+          "supportingDeviceTypes" : ["android", "windows", "ios"]
+        }
+      ],
+      "frequency" : 60000,
+      "enable" : true
+    },
+    {
+      "name" : "Application List",
+      "categoryCode" : "APPLICATION_LIST_CATEGORY",
+      "operationCodes" : [
+        {
+          "operationCode" : "APPLICATION_LIST",
+          "recurrentTime" : 5,
+          "supportingDeviceTypes" : ["android", "ios"]
+        },
+        {
+          "operationCode" : "APPLICATION_STORE_LIST",
+          "recurrentTime" : 5,
+          "supportingDeviceTypes" : ["windows"]
+        }
+      ],
+      "frequency" : 60000,
+      "enable" : true
+    },
+    {
+      "name" : "OS Updates",
+      "categoryCode" : "OS_UPDATES_CATEGORY",
+      "operationCodes" : [
+        {
+          "operationCode" : "AVAILABLE_OS_UPDATES",
+          "recurrentTime" : 1440,
+          "supportingDeviceTypes" : ["windows"]
+        },
+        {
+          "operationCode" : "OS_UPDATE_INFO",
+          "recurrentTime" : 10080,
+          "supportingDeviceTypes" : ["ios"]
+        }
+      ],
+      "frequency" : 60000,
+      "enable" : true
+    },
+    {
+      "name" : "Security Info",
+      "categoryCode" : "SECURITY_INFO_CATEGORY",
+      "operationCodes" : [
+        {
+          "operationCode" : "SECURITY_INFO",
+          "recurrentTime" : 1,
+          "supportingDeviceTypes" : ["windows", "ios"]
+        }
+      ],
+      "frequency" : 60000,
+      "enable" : true
+    },
+    {
+      "name" : "Firewall Info",
+      "categoryCode" : "FIREWALL_INFO_CATEGORY",
+      "operationCodes" : [
+        {
+          "operationCode" : "FIREWALL_INFO",
+          "recurrentTime" : 1,
+          "supportingDeviceTypes" : ["windows"]
+        }
+      ],
+      "frequency" : 60000,
+      "enable" : true
+    }
+  ]
+}

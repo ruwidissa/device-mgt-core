@@ -26,8 +26,6 @@ import java.util.Map;
 
 public interface TaskManagementService {
 
-    void init() throws TaskManagementException;
-
     void createTask(DynamicTask dynamicTask) throws TaskManagementException;
 
     void updateTask(int dynamicTaskId, DynamicTask dynamicTask) throws TaskManagementException, TaskNotFoundException;

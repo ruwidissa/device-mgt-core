@@ -53,7 +53,6 @@ public class TaskManagerServiceComponent {
             TaskManagementDAOFactory.init(dataSourceConfig);
             BundleContext bundleContext = ctx.getBundleContext();
             TaskManagementService taskManagementService = new TaskManagementServiceImpl();
-            taskManagementService.init();
             TaskManagerDataHolder.getInstance().setTaskManagementService(taskManagementService);
             bundleContext.registerService(TaskManagementService.class.getName()
                     , taskManagementService, null);

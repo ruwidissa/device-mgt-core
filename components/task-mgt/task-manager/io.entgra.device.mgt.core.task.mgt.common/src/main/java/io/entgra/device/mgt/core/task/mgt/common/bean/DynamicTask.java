@@ -17,13 +17,17 @@
  */
 package io.entgra.device.mgt.core.task.mgt.common.bean;
 
+import org.wso2.carbon.ntask.core.TaskInfo;
+
 import java.util.Map;
+import java.util.Objects;
 
 public class DynamicTask {
 
     private int dynamicTaskId;
     private String name;
     private String cronExpression;
+    private long intervalMillis;
     private boolean isEnabled;
     private int tenantId;
     private String taskClassName;
@@ -51,6 +55,14 @@ public class DynamicTask {
 
     public void setCronExpression(String cronExpression) {
         this.cronExpression = cronExpression;
+    }
+
+    public long getIntervalMillis() {
+        return intervalMillis;
+    }
+
+    public void setIntervalMillis(long intervalMillis) {
+        this.intervalMillis = intervalMillis;
     }
 
     public boolean isEnabled() {
@@ -83,6 +95,42 @@ public class DynamicTask {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
+    }
+
+    /**
+     * Generate nTask trigger info.
+     *
+     * @return {@link TaskInfo.TriggerInfo}
+     */
+    public TaskInfo.TriggerInfo getTriggerInfo() {
+        TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
+        // Millisecond intervals are more precision than the cron. Hence, giving priority to millisecond intervals
+        if (intervalMillis > 0) {
+            triggerInfo.setIntervalMillis(intervalMillis);
+            triggerInfo.setRepeatCount(-1);
+            return triggerInfo;
+        }
+
+        triggerInfo.setCronExpression(cronExpression);
+        return triggerInfo;
+    }
+
+    /**
+     * Check if the trigger information are equal or not.
+     *
+     * @param thatInfo {@link TaskInfo.TriggerInfo} to compare.
+     * @return True if equals otherwise False.
+     */
+    public boolean isTriggerInfoEquals(TaskInfo.TriggerInfo thatInfo) {
+        if (intervalMillis > 0 && thatInfo.getIntervalMillis() > 0) {
+            return Objects.equals(intervalMillis, thatInfo.getIntervalMillis());
+        }
+
+        if (cronExpression != null && thatInfo.getCronExpression() != null) {
+            return Objects.equals(cronExpression, thatInfo.getCronExpression());
+        }
+
+        return false;
     }
 
 }

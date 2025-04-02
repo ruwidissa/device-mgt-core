@@ -93,6 +93,7 @@ public class TaskManagementDAOUtil {
         dynamicTask.setDynamicTaskId(rs.getInt("DYNAMIC_TASK_ID"));
         dynamicTask.setName(rs.getString("NAME"));
         dynamicTask.setCronExpression(rs.getString("CRON"));
+        dynamicTask.setIntervalMillis(rs.getLong("INTERVALS"));
         dynamicTask.setTaskClassName(rs.getString("TASK_CLASS_NAME"));
         dynamicTask.setEnabled(rs.getBoolean("IS_ENABLED"));
         dynamicTask.setTenantId(rs.getInt("TENANT_ID"));

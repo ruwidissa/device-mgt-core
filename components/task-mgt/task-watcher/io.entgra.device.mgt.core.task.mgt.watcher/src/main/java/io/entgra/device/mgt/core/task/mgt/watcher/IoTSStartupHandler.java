@@ -198,9 +198,8 @@ public class IoTSStartupHandler implements ServerStartupObserver {
                         }
 
                         isExist = true;
-                        if (!triggerInfo.getCronExpression().equals(dt.getCronExpression())) {
-                            triggerInfo.setCronExpression(dt.getCronExpression());
-                            taskInfo.setTriggerInfo(triggerInfo);
+                        if (!dt.isTriggerInfoEquals(triggerInfo)) {
+                            taskInfo.setTriggerInfo(dt.getTriggerInfo());
                             taskInfo.setProperties(TaskManagementUtil
                                     .populateNTaskProperties(dt, taskInfo.getName(), serverHashIdx));
                             taskManager.registerTask(taskInfo);
@@ -229,14 +228,19 @@ public class IoTSStartupHandler implements ServerStartupObserver {
                     }
                 }
                 if (!isExist) {
-                    TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-                    triggerInfo.setCronExpression(dt.getCronExpression());
                     TaskInfo taskInfo = new TaskInfo(nTaskName, dt.getTaskClassName(), TaskManagementUtil
-                            .populateNTaskProperties(dt, nTaskName, serverHashIdx), triggerInfo);
+                            .populateNTaskProperties(dt, nTaskName, serverHashIdx), dt.getTriggerInfo());
                     taskManager.registerTask(taskInfo);
                     taskManager.scheduleTask(nTaskName);
                     if (log.isDebugEnabled()) {
                         log.debug("New task -'" + nTaskName + "' created according to the dynamic task table.");
+                    }
+
+                    if (!dt.isEnabled()) {
+                        taskManager.pauseTask(nTaskName);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Task - '" + nTaskName + "' disabled according to the dynamic task table.");
+                        }
                     }
                 }
             }

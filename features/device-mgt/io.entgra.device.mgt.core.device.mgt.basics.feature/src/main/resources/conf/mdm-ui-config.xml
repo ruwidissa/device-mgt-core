@@ -401,6 +401,8 @@
         <Scope>win:ops:os-updates-install</Scope>
         <Scope>win:ops:admx-ingestion</Scope>
         <Scope>admin:tenant:view</Scope>
+        <Scope>admin:dynamic-task-configurations:view</Scope>
+        <Scope>admin:dynamic-task-configurations:modify</Scope>
         <Scope>dm:admin:devices:usage:view</Scope>
         <Scope>and:ops:clear-app</Scope>
         <Scope>and:ops:suspend-package</Scope>

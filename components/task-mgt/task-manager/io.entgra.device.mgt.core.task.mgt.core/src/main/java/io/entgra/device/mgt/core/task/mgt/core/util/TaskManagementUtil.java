@@ -89,6 +89,9 @@ public class TaskManagementUtil {
     public static Map<String, String> populateNTaskProperties(DynamicTask dynamicTask,
                                                               String nTaskName, int serverHashIdx) {
         Map<String, String> taskProperties = new HashMap<>();
+        for (String propertyKey : dynamicTask.getProperties().keySet()) {
+            taskProperties.put(propertyKey, dynamicTask.getProperties().get(propertyKey));
+        }
         taskProperties.put(TaskMgtConstants.Task.DYNAMIC_TASK_ID, String.valueOf(dynamicTask.getDynamicTaskId()));
         taskProperties.put(TaskMgtConstants.Task.LOCAL_TASK_NAME, nTaskName);
         taskProperties.put(TaskMgtConstants.Task.LOCAL_HASH_INDEX, String.valueOf(serverHashIdx));
