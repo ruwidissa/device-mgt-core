@@ -302,20 +302,21 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
         try {
             ApplicationFilter applicationFilter = new Gson().fromJson(request.getFilter(), ApplicationFilter.class);
+            boolean isPackageFilterProvided = false;
+            if (null != applicationFilter.getPackageName()) {
+                sql = sql.substring(0, sql.lastIndexOf(")"));
+                sql = sql + " AND APP_IDENTIFIER LIKE ?) AND APP_IDENTIFIER LIKE ? ";
+                applicationFilter.setPackageName(Constants.QUERY_WILDCARD.concat(applicationFilter.getPackageName())
+                        .concat(Constants.QUERY_WILDCARD));
+                isPackageFilterProvided = true;
+            }
+
             boolean isAppNameFilterProvided = false;
             if (null != applicationFilter.getAppName()) {
                 sql = sql + "AND NAME LIKE ? ";
                 applicationFilter.setAppName(Constants.QUERY_WILDCARD.concat(applicationFilter.getAppName())
                         .concat(Constants.QUERY_WILDCARD));
                 isAppNameFilterProvided = true;
-            }
-
-            boolean isPackageFilterProvided = false;
-            if (null != applicationFilter.getPackageName()) {
-                sql = sql + "AND APP_IDENTIFIER LIKE ? ";
-                applicationFilter.setPackageName(Constants.QUERY_WILDCARD.concat(applicationFilter.getPackageName())
-                        .concat(Constants.QUERY_WILDCARD));
-                isPackageFilterProvided = true;
             }
 
             boolean isLimitPresent = false;
@@ -330,11 +331,12 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setInt(paramIdx++, tenantId);
                 stmt.setString(paramIdx++, request.getDeviceType());
                 stmt.setInt(paramIdx++, tenantId);
-                if (isAppNameFilterProvided){
-                    stmt.setString(paramIdx++, applicationFilter.getAppName());
-                }
                 if (isPackageFilterProvided){
                     stmt.setString(paramIdx++, applicationFilter.getPackageName());
+                    stmt.setString(paramIdx++, applicationFilter.getPackageName());
+                }
+                if (isAppNameFilterProvided){
+                    stmt.setString(paramIdx++, applicationFilter.getAppName());
                 }
                 if (isLimitPresent) {
                     stmt.setInt(paramIdx++, request.getRowCount());
