@@ -126,7 +126,7 @@ public class DynamicTaskSchedulerUtil {
         dynamicTask.setName(DynamicTaskManagementUtil.generateTenantAwareNTaskName(taskOwnTenantDomain,
                 categorizedDynamicTask.getCategoryCode()));
         dynamicTask.setTaskClassName(Constants.TASK_PROPERTY.CATEGORIZED_DYNAMIC_TASK_CLAZZ);
-        dynamicTask.setIntervalMillis(dynamicTask.getIntervalMillis());
+        dynamicTask.setIntervalMillis(categorizedDynamicTask.getFrequency());
         Map<String, String> properties = new HashMap<>();
         properties.put(Constants.TASK_PROPERTY.CATEGORIZED_DYNAMIC_TASK,
                 DynamicTaskManagementExtensionServiceDataHolder.getGson().toJson(categorizedDynamicTask));
