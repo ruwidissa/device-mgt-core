@@ -85,7 +85,7 @@ public class GenericPolicyDAOImpl extends AbstractPolicyDAOImpl {
                 isDeviceTypeProvided = true;
             }
 
-            query += "ORDER BY P.ID LIMIT ?,?";
+            query += "ORDER BY P.PRIORITY ASC, P.ID LIMIT ?,?";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int paramIdx = 1;

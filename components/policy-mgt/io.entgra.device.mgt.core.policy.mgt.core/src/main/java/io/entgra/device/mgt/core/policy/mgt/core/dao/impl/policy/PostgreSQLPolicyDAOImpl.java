@@ -84,7 +84,7 @@ public class PostgreSQLPolicyDAOImpl extends AbstractPolicyDAOImpl {
                 isDeviceTypeProvided = true;
             }
 
-            query += "ORDER BY P.ID LIMIT ? OFFSET ?";
+            query += "ORDER BY P.PRIORITY ASC, P.ID LIMIT ? OFFSET ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int paramIdx = 1;

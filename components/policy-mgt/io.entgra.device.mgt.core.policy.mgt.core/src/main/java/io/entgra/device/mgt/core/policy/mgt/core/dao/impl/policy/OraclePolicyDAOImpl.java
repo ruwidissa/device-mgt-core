@@ -84,7 +84,7 @@ public class OraclePolicyDAOImpl extends AbstractPolicyDAOImpl {
                 isDeviceTypeProvided = true;
             }
 
-            query += "ORDER BY P.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            query += "ORDER BY P.PRIORITY ASC, P.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int paramIdx = 1;
