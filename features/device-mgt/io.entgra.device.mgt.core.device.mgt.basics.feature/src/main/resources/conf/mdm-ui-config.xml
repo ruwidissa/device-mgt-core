@@ -327,8 +327,10 @@
         <Scope>cm:cert:add</Scope>
         <Scope>cm:cert:verify</Scope>
         <Scope>dm:admin</Scope>
+        <Scope>dm:device-type:event:create</Scope>
         <Scope>dm:device-type:event:modify</Scope>
         <Scope>dm:device-type:event:view</Scope>
+        <Scope>dm:device-type:event:delete</Scope>
         <Scope>dm:admin:device-type:modify</Scope>
         <Scope>dm:admin:device-type:view</Scope>
         <Scope>dm:admin:device-type:conf:add</Scope>

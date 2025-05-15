@@ -17,27 +17,16 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
-import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.authorization.GroupAccessAuthorizationServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderServiceImpl;
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.ServerStartupObserver;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfigurationProviderService;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoLocationProviderService;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.NotificationManagementService;
@@ -54,6 +43,7 @@ import io.entgra.device.mgt.core.device.mgt.core.app.mgt.ApplicationManagerProvi
 import io.entgra.device.mgt.core.device.mgt.core.app.mgt.config.AppManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.app.mgt.config.AppManagementConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.authorization.DeviceAccessAuthorizationServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.authorization.GroupAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
@@ -67,6 +57,7 @@ import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceInform
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import io.entgra.device.mgt.core.device.mgt.core.event.config.EventConfigurationProviderServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
@@ -86,15 +77,31 @@ import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchManagerService
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.impl.SearchManagerServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceTypeEventManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceTypeEventManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManagerService;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
-import org.osgi.service.component.annotations.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -280,13 +287,13 @@ public class DeviceManagementServiceComponent {
         String defaultGroups =
                 DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getDefaultGroupsConfiguration();
         List<String> groups = this.parseDefaultGroups(defaultGroups);
-        for(String group : groups){
+        for (String group : groups) {
             try {
                 groupManagementProvider.createDefaultGroup(group);
             } catch (GroupManagementException e) {
                 // Error is ignored, because error could be group already exist exception. Therefore it does not require
                 // to print the error.
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.error("Error occurred while adding the group");
                 }
             }
@@ -295,7 +302,7 @@ public class DeviceManagementServiceComponent {
         DeviceManagementDataHolder.getInstance().setGroupManagementProviderService(groupManagementProvider);
         bundleContext.registerService(GroupManagementProviderService.class.getName(), groupManagementProvider, null);
 
-	    /* Registering Tenant Configuration Management Service */
+        /* Registering Tenant Configuration Management Service */
         PlatformConfigurationManagementService
                 tenantConfiguration = new PlatformConfigurationManagementServiceImpl();
         bundleContext.registerService(PlatformConfigurationManagementService.class.getName(), tenantConfiguration, null);
@@ -313,6 +320,10 @@ public class DeviceManagementServiceComponent {
         TagManagementProviderService tagManagementProviderService = new TagManagementProviderServiceImpl();
         bundleContext.registerService(TagManagementProviderService.class.getName(), tagManagementProviderService, null);
 
+        /* Registering Event Management Service */
+        DeviceTypeEventManagementProviderService deviceTypeEventManagementProviderService = new DeviceTypeEventManagementProviderServiceImpl();
+        bundleContext.registerService(DeviceTypeEventManagementProviderService.class.getName(), deviceTypeEventManagementProviderService, null);
+
         /* Registering DeviceAccessAuthorization Service */
         DeviceAccessAuthorizationService deviceAccessAuthorizationService = new DeviceAccessAuthorizationServiceImpl();
         DeviceManagementDataHolder.getInstance().setDeviceAccessAuthorizationService(deviceAccessAuthorizationService);
@@ -322,8 +333,8 @@ public class DeviceManagementServiceComponent {
         /* Registering GroupAccessAuthorization Service */
         GroupAccessAuthorizationService groupAccessAuthorizationService = new GroupAccessAuthorizationServiceImpl();
         DeviceManagementDataHolder.getInstance().setGroupAccessAuthorizationService(groupAccessAuthorizationService);
-            bundleContext.registerService(GroupAccessAuthorizationService.class.getName(),
-                    groupAccessAuthorizationService, null);
+        bundleContext.registerService(GroupAccessAuthorizationService.class.getName(),
+                groupAccessAuthorizationService, null);
 
         /* Registering Geo Service */
         GeoLocationProviderService geoService = new GeoLocationProviderServiceImpl();
@@ -413,7 +424,7 @@ public class DeviceManagementServiceComponent {
         if (defaultGroups != null && !defaultGroups.isEmpty()) {
             String gps[] = defaultGroups.split(",");
             if (gps.length != 0) {
-                for(String group : gps){
+                for (String group : gps) {
                     defaultGroupsList.add(group.trim());
                 }
             }

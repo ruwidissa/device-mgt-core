@@ -229,6 +229,7 @@
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+
 		<dependency>
 			<groupId>io.entgra.org.scannotation</groupId>
 			<artifactId>scannotation</artifactId>

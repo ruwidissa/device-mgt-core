@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics;
+package io.entgra.device.mgt.core.device.mgt.common.type.event.mgt;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,6 +30,7 @@ public class DeviceTypeEvent {
     private TransportType transport;
 
     private String eventTopicStructure;
+
     @ApiModelProperty(value = "Attributes related to device type event")
     @JsonProperty("eventAttributes")
     public EventAttributeList getEventAttributeList() {
