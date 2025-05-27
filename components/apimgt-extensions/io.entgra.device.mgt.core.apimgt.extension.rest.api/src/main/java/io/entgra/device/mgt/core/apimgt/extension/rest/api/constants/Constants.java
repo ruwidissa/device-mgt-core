@@ -34,6 +34,7 @@ public final class Constants {
     public static final String OAUTH_TOKEN_SCOPE = "scope";
     public static final String OAUTH_TOKEN_TYPE = "token_type";
     public static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
+    public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
     public static final String SCOPE_PARAM_NAME = "scope";
     public static final String SCOPES = "apim:api_create apim:api_view apim:shared_scope_manage apim:api_import_export " +
             "apim:api_publish apim:admin apim:api_key apim:app_import_export apim:app_manage apim:store_settings " +

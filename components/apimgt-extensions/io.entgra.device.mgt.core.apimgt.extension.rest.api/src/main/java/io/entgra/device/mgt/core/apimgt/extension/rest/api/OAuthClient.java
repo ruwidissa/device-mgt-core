@@ -219,7 +219,8 @@ public class OAuthClient implements IOAuthClientService {
      */
     private Keys idnDynamicClientRegistration(String tenantAwareClientName) throws OAuthClientException, IOException {
         return idnDynamicClientRegistration(tenantAwareClientName, String.join(Constants.SPACE,
-                Arrays.asList(Constants.PASSWORD_GRANT_TYPE, Constants.REFRESH_TOKEN_GRANT_TYPE)));
+                Arrays.asList(Constants.PASSWORD_GRANT_TYPE, Constants.REFRESH_TOKEN_GRANT_TYPE,
+                        Constants.CLIENT_CREDENTIALS_GRANT_TYPE)));
     }
 
     /**

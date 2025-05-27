@@ -256,7 +256,12 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         }
 
         ApplicationKey[] applicationKeys = consumerRESTAPIServices.getAllKeys(application.getApplicationId());
+
         if (applicationKeys.length == 0) {
+
+            if (apiApplicationProfile.getTokenType() == ApiApplicationProfile.TOKEN_TYPE.DEFAULT) {
+                return mapApiApplicationWithIdnDCRClient(application, apiApplicationProfile.getGrantTypes());
+            }
             return generateApplicationKeys(application.getApplicationId(), apiApplicationProfile.getGrantTypes(),
                     apiApplicationProfile.getCallbackUrl());
         }
@@ -311,7 +316,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
         consumerRESTAPIServices.createSubscriptions(subscriptions);
 
-        if (Objects.equals(apiApplicationProfile.getTokenType(), ApiApplicationProfile.TOKEN_TYPE.DEFAULT)) {
+        if (apiApplicationProfile.getTokenType() == ApiApplicationProfile.TOKEN_TYPE.DEFAULT) {
             return mapApiApplicationWithIdnDCRClient(application, apiApplicationProfile.getGrantTypes());
         }
 
