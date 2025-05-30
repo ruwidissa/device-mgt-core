@@ -228,4 +228,40 @@ public interface GrafanaAPIProxyService {
     )
     Response loadGrafanaPyroscopeSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo)
             throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-metricsdrilldown-app/settings")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Retrieve metrics drilldown app settings",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response loadMetricsDrilldownAppSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo)
+            throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-exploretraces-app/settings")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Retrieve explore traces app settings",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response loadExploreTracesAppSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo)
+            throws ClassNotFoundException;
 }

@@ -152,6 +152,24 @@ public class GrafanaAPIProxyServiceImpl implements GrafanaAPIProxyService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-metricsdrilldown-app/settings")
+    @Override
+    public Response loadMetricsDrilldownAppSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/plugins/grafana-exploretraces-app/settings")
+    @Override
+    public Response loadExploreTracesAppSettings(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/alerts/states-for-dashboard")
     @Override
     public Response getAlertStateForDashboards(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
