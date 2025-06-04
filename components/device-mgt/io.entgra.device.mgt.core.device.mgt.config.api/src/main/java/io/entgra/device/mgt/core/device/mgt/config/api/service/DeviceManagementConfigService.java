@@ -152,7 +152,13 @@ public interface DeviceManagementConfigService {
                     name = "withAccessToken",
                     value = "Whether to use access token or otp token for device configuration")
             @QueryParam("withAccessToken")
-                    boolean withAccessToken);
+                    boolean withAccessToken,
+            @ApiParam(
+                    name = "withGateways",
+                    value = "Whether to retrieve gateway properties or not")
+            @QueryParam("withGateways")
+                    boolean withGateways);
+
 
     @PUT
     @Path("/device/transfer")

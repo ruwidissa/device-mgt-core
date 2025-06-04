@@ -52,6 +52,15 @@ public class DeviceConfiguration {
     @ApiModelProperty(name = "deviceOwner", value = "Owner of the selected device", required = true)
     private String deviceOwner;
 
+    @ApiModelProperty(name = "mqttGateway", value = "Mqtt Gateway to communicate with the server")
+    private String mqttGateway;
+
+    @ApiModelProperty(name = "httpsGateway", value = "Https Gateway to communicate with the server")
+    private String httpsGateway;
+
+    @ApiModelProperty(name = "httpGateway", value = "Http Gateway to communicate with the server")
+    private String httpGateway;
+
     public String getDeviceId() {
         return deviceId;
     }
@@ -107,5 +116,29 @@ public class DeviceConfiguration {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public String getMqttGateway() {
+        return mqttGateway;
+    }
+
+    public void setMqttGateway(String mqttGateway) {
+        this.mqttGateway = mqttGateway;
+    }
+
+    public String getHttpsGateway() {
+        return httpsGateway;
+    }
+
+    public void setHttpsGateway(String httpsGateway) {
+        this.httpsGateway = httpsGateway;
+    }
+
+    public String getHttpGateway() {
+        return httpGateway;
+    }
+
+    public void setHttpGateway(String httpGateway) {
+        this.httpGateway = httpGateway;
     }
 }
