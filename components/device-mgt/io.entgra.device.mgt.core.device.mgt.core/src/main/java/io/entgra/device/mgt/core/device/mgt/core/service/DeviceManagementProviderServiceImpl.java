@@ -5812,4 +5812,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
     }
+
+    @Override
+    public DeviceManagementConfig getDeviceManagementConfig() {
+        return DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+    }
 }

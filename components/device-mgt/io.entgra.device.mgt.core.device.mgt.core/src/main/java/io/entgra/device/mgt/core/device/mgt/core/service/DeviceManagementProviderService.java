@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ConflictException;
 import io.entgra.device.mgt.core.device.mgt.core.cache.DeviceCacheKey;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
@@ -1184,4 +1185,13 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException if any service level or DAO level error occurs.
      */
     List<Integer> getDeviceIdsByStatus(List<String> statuses) throws DeviceManagementException;
+
+    /**
+     * Retrieves the current device management configuration.
+     *
+     * @return an instance of {@link DeviceManagementConfig} containing the configuration details
+     *         required for managing devices, such as enrollment settings, platform-specific configs,
+     *         and general management properties.
+     */
+    DeviceManagementConfig getDeviceManagementConfig();
 }
