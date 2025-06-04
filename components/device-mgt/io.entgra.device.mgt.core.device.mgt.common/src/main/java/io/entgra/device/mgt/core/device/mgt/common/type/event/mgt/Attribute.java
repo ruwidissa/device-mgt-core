@@ -20,6 +20,8 @@ package io.entgra.device.mgt.core.device.mgt.common.type.event.mgt;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Objects;
+
 /**
  * Each attribute definition
  * Attributes : name, type
@@ -55,6 +57,20 @@ public class Attribute {
 
     public void setType(AttributeType type) {
         this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Attribute)) return false;
+        Attribute that = (Attribute) o;
+        return Objects.equals(name, that.name) &&
+                type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type);
     }
 }
 

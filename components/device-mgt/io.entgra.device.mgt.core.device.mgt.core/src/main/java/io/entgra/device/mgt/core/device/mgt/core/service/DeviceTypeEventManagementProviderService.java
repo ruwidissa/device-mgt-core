@@ -20,6 +20,8 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.type.event.mgt.DeviceTypeEvent;
+import io.entgra.device.mgt.core.device.mgt.common.type.event.mgt.DeviceTypeEventUpdateResult;
+
 import java.util.List;
 
 /**
@@ -84,4 +86,24 @@ public interface DeviceTypeEventManagementProviderService {
      * @throws DeviceManagementException If an error occurs during the deletion process.
      */
     boolean deleteDeviceTypeEventDefinitions(String deviceType) throws DeviceManagementException;
+
+    /**
+     * Computes the updated and merged device type event definitions for the given device type.
+     * <p>
+     * This method compares the incoming list of {@link DeviceTypeEvent} definitions with the existing ones
+     * for the specified device type. It identifies:
+     * <ul>
+     *     <li>Events that are new or modified ({@code updatedEvents})</li>
+     *     <li>Events that are unchanged or retained ({@code mergedEvents}, includes both updated and unchanged)</li>
+     * </ul>
+     * This is typically used to determine whether an update operation is needed and to construct the
+     * final event definition set to be persisted.
+     *
+     * @param deviceType      the name of the device type whose events are being updated
+     * @param incomingEvents  the list of incoming event definitions from the request
+     * @return a {@link DeviceTypeEventUpdateResult} containing lists of updated and merged events
+     * @throws DeviceManagementException if there is an error retrieving existing event definitions
+     */
+    DeviceTypeEventUpdateResult computeUpdatedDeviceTypeEvents(String deviceType, List<DeviceTypeEvent> incomingEvents)
+            throws DeviceManagementException;
 }

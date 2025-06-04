@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.type.event.mgt.DeviceTypeEvent;
+import io.entgra.device.mgt.core.device.mgt.common.type.event.mgt.DeviceTypeEventUpdateResult;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceTypeEventDAO;
@@ -29,7 +30,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DeviceTypeEventManagementProviderServiceImpl implements DeviceTypeEventManagementProviderService {
 
@@ -175,5 +179,45 @@ public class DeviceTypeEventManagementProviderServiceImpl implements DeviceTypeE
         }
     }
 
+    @Override
+    public DeviceTypeEventUpdateResult computeUpdatedDeviceTypeEvents(String deviceType, List<DeviceTypeEvent> incomingEvents)
+            throws DeviceManagementException {
+        List<DeviceTypeEvent> existingEvents = getDeviceTypeEventDefinitions(deviceType);
+        Map<String, DeviceTypeEvent> existingEventMap = mapByName(existingEvents);
+        Map<String, DeviceTypeEvent> incomingEventMap = mapByName(incomingEvents);
+
+        List<DeviceTypeEvent> updatedEvents = new ArrayList<>();
+        List<DeviceTypeEvent> unchangedEvents = new ArrayList<>();
+
+        for (DeviceTypeEvent incoming : incomingEvents) {
+            DeviceTypeEvent existing = existingEventMap.get(incoming.getEventName());
+            if (existing == null || !incoming.equals(existing)) {
+                updatedEvents.add(incoming);
+            }
+        }
+
+        for (DeviceTypeEvent existing : existingEvents) {
+            DeviceTypeEvent incoming = incomingEventMap.get(existing.getEventName());
+            if (incoming == null || existing.equals(incoming)) {
+                unchangedEvents.add(existing);
+            }
+        }
+
+        List<DeviceTypeEvent> mergedEvents = new ArrayList<>();
+        mergedEvents.addAll(updatedEvents);
+        mergedEvents.addAll(unchangedEvents);
+
+        return new DeviceTypeEventUpdateResult(updatedEvents, mergedEvents);
+    }
+
+    /**
+     * Creates a map of event names to {@link DeviceTypeEvent} objects from a given list.
+     *
+     * @param events the list of {@link DeviceTypeEvent} to map
+     * @return a map where the key is the event name and the value is the event object
+     */
+    private Map<String, DeviceTypeEvent> mapByName(List<DeviceTypeEvent> events) {
+        return events.stream().collect(Collectors.toMap(DeviceTypeEvent::getEventName, e -> e, (a, b) -> b));
+    }
 
 }

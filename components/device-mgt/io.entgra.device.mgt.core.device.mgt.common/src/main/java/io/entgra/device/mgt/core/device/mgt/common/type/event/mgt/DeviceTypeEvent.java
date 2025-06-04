@@ -19,9 +19,10 @@ package io.entgra.device.mgt.core.device.mgt.common.type.event.mgt;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Objects;
 
 /**
- * This hold stats data record
+ * This hold device type event data record
  */
 public class DeviceTypeEvent {
 
@@ -70,6 +71,22 @@ public class DeviceTypeEvent {
 
     public void setEventName(String eventName) {
         this.eventName = eventName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DeviceTypeEvent)) return false;
+        DeviceTypeEvent that = (DeviceTypeEvent) o;
+        return Objects.equals(eventName, that.eventName) &&
+                Objects.equals(eventAttributes, that.eventAttributes) &&
+                transport == that.transport &&
+                Objects.equals(eventTopicStructure, that.eventTopicStructure);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eventName, eventAttributes, transport, eventTopicStructure);
     }
 }
 
