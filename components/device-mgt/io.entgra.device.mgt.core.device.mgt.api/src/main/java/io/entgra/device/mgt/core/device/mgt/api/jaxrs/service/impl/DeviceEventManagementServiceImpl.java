@@ -215,27 +215,31 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
                                                      @Valid List<DeviceTypeEvent> deviceTypeEvents) {
         try {
             // Check if any devices are enrolled for this device type
-            if (checkDeviceEnrollment(deviceType)) {
-                DeviceTypeEventUpdateResult result = DeviceMgtAPIUtils.getDeviceTypeEventManagementProviderService()
-                        .computeUpdatedDeviceTypeEvents(deviceType, deviceTypeEvents);
+            if (DeviceMgtAPIUtils.getDeviceTypeEventManagementProviderService().isDeviceTypeMetaExist(deviceType)) {
+                if (checkDeviceEnrollment(deviceType)) {
+                    DeviceTypeEventUpdateResult result = DeviceMgtAPIUtils.getDeviceTypeEventManagementProviderService()
+                            .computeUpdatedDeviceTypeEvents(deviceType, deviceTypeEvents);
 
-                List<DeviceTypeEvent> updatedEvents = result.getUpdatedEvents();
-                List<DeviceTypeEvent> mergedEvents = result.getMergedEvents();
-                // Proceed only if something changed
-                if (!updatedEvents.isEmpty()) {
-                    removeDeviceTypeEventFiles(deviceType, updatedEvents);
-                    persistEvents(deviceType, mergedEvents);
+                    List<DeviceTypeEvent> updatedEvents = result.getUpdatedEvents();
+                    List<DeviceTypeEvent> mergedEvents = result.getMergedEvents();
+                    // Proceed only if something changed
+                    if (!updatedEvents.isEmpty()) {
+                        removeDeviceTypeEventFiles(deviceType, updatedEvents);
+                        persistEvents(deviceType, mergedEvents);
+                    } else {
+                        log.info("No new or updated event definitions found. Skipping update.");
+                    }
                 } else {
-                    log.info("No new or updated event definitions found. Skipping update.");
+                    // No devices enrolled — accept and persist everything (even renamed events)
+                    removeDeviceTypeEventFiles(deviceType);
+                    if (DeviceMgtAPIUtils.getDeviceTypeEventManagementProviderService()
+                            .updateDeviceTypeMetaWithEvents(deviceType, deviceTypeEvents)) {
+                        log.info("All device type events replaced as no devices are enrolled.");
+                        processDeviceTypeEventDefinitions(deviceType, skipPersist, isSharedWithAllTenants, deviceTypeEvents);
+                    }
                 }
             } else {
-                // No devices enrolled — accept and persist everything (even renamed events)
-                removeDeviceTypeEventFiles(deviceType);
-                if (DeviceMgtAPIUtils.getDeviceTypeEventManagementProviderService()
-                        .updateDeviceTypeMetaWithEvents(deviceType, deviceTypeEvents)) {
-                    log.info("All device type events replaced as no devices are enrolled.");
-                    processDeviceTypeEventDefinitions(deviceType, skipPersist, isSharedWithAllTenants, deviceTypeEvents);
-                }
+                deployDeviceTypeEventDefinitions(deviceType, skipPersist, isSharedWithAllTenants, deviceTypeEvents);
             }
             return Response.ok().entity("Device type event definitions updated and metadata updated successfully.").build();
         } catch (ConstraintViolationException e) {
